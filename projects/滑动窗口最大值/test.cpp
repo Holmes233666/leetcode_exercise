@@ -3,6 +3,7 @@
 #include<queue>
 #include<unordered_map>
 #include<algorithm>
+#include<deque>
 
 using namespace std;
 
@@ -37,6 +38,39 @@ public:
                 queue.pop();
             }
             res.push_back(queue.top().first);
+        }
+        return res;
+    }
+};
+
+// 单调队列
+class Solution3 {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        deque<int> dq;
+        vector<int> res;
+        // 未形成完整的窗口
+        for (int i = 0; i < k; i++) {
+            // 是否可以直接将队列清空？
+            while (!dq.empty() && nums[i] >= nums[dq.back()]) {
+                dq.pop_back();
+            }
+            dq.push_back(i);
+        }
+        res.push_back(nums[dq.front()]);
+        // 已经形成完整的窗口
+        for (int right = k; right < nums.size(); right++) {
+            // 队尾元素小于窗口右侧新元素，那么队列清空
+            while (!dq.empty() && nums[right] >= nums[dq.back()]) {
+                dq.pop_back();
+            }
+            dq.push_back(right);
+            // 如果队首的元素已经超过窗口，那么应该清除
+            while (!dq.empty() && dq.front() <= right - k) {
+                dq.pop_front();
+            }
+            // 队首元素是最大的元素
+            res.push_back(nums[dq.front()]);
         }
         return res;
     }

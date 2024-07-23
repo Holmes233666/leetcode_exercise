@@ -64,15 +64,11 @@ public:
 };
 ```
 
-## 双指针
-
-## 串
+## 前缀和
 
 ### 和为K的子数组
 
 ![image-20240722113658243](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240722113658243.png)
-
-#### 前缀和解法
 
 **前缀和**：对于nums[i]，其前缀和为从数组第一个元素nums[0]开始，以nums[i]结尾的子数组中所有元素的和。假设记做sums[i]。那么对于数组中从下标$i$到$j$的任意一段子数组，其和可以由下式计算：
 $$
@@ -139,3 +135,215 @@ public:
 
 ```
 
+## 滑动窗口
+
+### 最小覆盖子串
+
+![image-20240723193558399](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240723193558399.png)
+
+![image-20240723193618138](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240723193618138.png)
+
+#### 滑动窗口基础解法
+
+一个基本的想法是：
+
+- 将所有的字符作为key，字符在t中出现的次数作为value，先存储在哈希表umap中；
+- 设置两个指针，left和right，通过right指针不断向前，记录区间中出现的字符及其出现的次数（记录在副本哈希表umap_cpy中）
+- 如果副本哈希表中的每一个字符出现的次数都比umap中对应字符出现的次数要多，那么即完成匹配。
+
+而在完成匹配后如何移动窗口是一个重要的问题。
+
+如果要找到一个最小覆盖的子串，那么在完成一个匹配时，应该尝试将**窗口缩小**到最小，有两个问题：
+
+- 移动left还是移动right？一定是移动left，因为right处是刚好完成一个匹配的位置，少了就构不成匹配的串。
+- 如何移动left？
+  - 依次移动。对在map中的单词进行umap_cpy的递减处理
+  - 直接跳到下一个匹配的字符处。【使用队列】
+
+缩小到最小的窗口后，left再向前移动一个位置，因为易知，后面的更短的串肯定是不需要当前恰好构成一个窗口的s[left]的（不然他一定不是最小的覆盖），然后再从当前位置进行right递增的匹配。直到匹配到，再进行窗口的缩小。
+
+在上述过程中，不能每次都使用substr创建一个新的子串，否则会内存溢出！
+
+Note: 在记录子串时，最好都采用记录起始位置和长度的方式，避免出现爆内存的情况。
+
+这里给出上面两种基础的想法的代码：
+
+- 不使用队列
+
+```cpp
+// 滑动窗口 + umap： 去掉队列，left逐个移动，不进行快速定位下一个
+class Solution {
+public:
+    unordered_map<char, int> c_umap;
+    unordered_map<char, int> c_umap_cpy;
+
+    bool matches() {
+        for (const auto &p: c_umap) {
+            if (c_umap_cpy[p.first] < p.second) {
+                return false;
+            }
+        }
+        return true;
+    }
+    string minWindow(string s, string t) {
+        // 特殊情况处理
+        if (t.size() > s.size()) return "";
+
+        // 先把所有待匹配字母放进数组
+        for (char c : t) {
+            c_umap[c]++;
+        }
+        
+        int minLen = INT_MAX;
+        string str;
+        int start = 0;
+        for (int left = 0, right = left; right < s.size(); right++) {
+            // 是待匹配的字母
+            if (c_umap.count(s[right])) {
+                c_umap_cpy[s[right]]++;
+            }else{
+                continue;
+            }
+
+            // 如果是匹配的串
+            // 尝试收缩串，直到有字母不满足umap中的数值，此时，right++
+            while (matches()) {
+                // 如果是更短的子串
+                if (minLen > right - left + 1) {
+                    start = left;
+                    minLen = right - left + 1;
+                }
+                if (c_umap_cpy.count(s[left])) c_umap_cpy[s[left]]--;
+                left++;
+            }
+        }
+        return str = minLen == INT_MAX ? "" : s.substr(start, minLen);
+    }
+};
+```
+
+- 使用队列
+
+```cpp
+class Solution {
+public:
+    unordered_map<char, int> c_umap;
+    unordered_map<char, int> c_umap_cpy;
+    // 辅助函数来检查c_umap_cpy是否满足c_umap的
+    bool matches() {
+        for (const auto &p: c_umap) {
+            if (c_umap_cpy[p.first] < p.second) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    string minWindow(string s, string t) {
+        // 特殊情况处理
+        if (t.size() > s.size())
+            return "";
+        // 一般情况处理
+        queue<pair<char, int>> q;
+
+        // 先把所有待匹配字母放进数组
+        for (char c : t) {
+            c_umap[c]++;
+        }
+        string str;
+        int minLen = INT_MAX;
+        for (int left = 0, right = left; right < s.size(); right++) {
+            // 是待匹配的字母
+            if (c_umap.count(s[right])) {
+                c_umap_cpy[s[right]]++;
+                q.push(make_pair(s[right], right));
+                left = q.front().second;
+            }else{
+                continue;
+            }
+
+            // 如果是匹配的串
+            // 尝试收缩串，直到有字母不满足umap中的数值，此时，right++
+            while (matches()) {
+                // 如果是更短的子串
+                if (minLen > right - left + 1) {
+                    str = s.substr(left, right - left + 1);
+                    minLen = right - left + 1;
+                }
+                c_umap_cpy[q.front().first]--;
+                q.pop();
+                left = q.front().second;
+            }
+        }
+        return str;
+    }
+};
+```
+
+#### 优化
+
+优化这个问题的关键在于哈希表的比较，每次都需要遍历整个哈希表，得到这窗口中的串是不是满足条件的串，这是复杂的。我们可以直接维护一个cnt计数器，记录此时满足匹配数量的字母的数量。如果cnt的大小和umap一样大，那么一定是匹配上了，否则没有。
+
+- 使用队列的优化：
+
+```cpp
+class Solution3 {
+public:
+    unordered_map<char, int> c_umap;
+    unordered_map<char, int> c_umap_cpy;
+
+    string minWindow(string s, string t) {
+        // 特殊情况处理
+        if (t.size() > s.size())
+            return "";
+        // 一般情况处理
+        queue<pair<char, int>> q;
+
+        // 先把所有待匹配字母放进数组
+        for (char c : t) {
+            c_umap[c]++;
+        }
+
+        string str;
+        int minLen = INT_MAX;
+        int cnt = 0;
+        int start = 0;
+
+        for (int left = 0, right = left; right < s.size(); right++) {
+            // 是待匹配的字母
+            if (c_umap.count(s[right])) {
+                c_umap_cpy[s[right]]++;
+                q.emplace(s[right], right);
+                left = q.front().second;
+                if (c_umap_cpy[s[right]] == c_umap[s[right]]) cnt++;
+            }else{
+                continue;
+            }
+
+            // 如果是匹配的串
+            // 尝试收缩串，直到有字母不满足umap中的数值，此时，right++
+            while (cnt == c_umap.size()) {
+                // 如果是更短的子串
+                if (minLen > right - left + 1) {
+                    start = left;
+                    minLen = right - left + 1;
+                }
+                c_umap_cpy[q.front().first]--;
+                if (c_umap_cpy[q.front().first] < c_umap[q.front().first]) {
+                    cnt--;
+                }
+                q.pop();
+                left = q.front().second;
+            }
+        }
+        return str = minLen == INT_MAX ? "" : s.substr(start, minLen);
+    }
+};
+```
+
+- 不使用队列的优化
+
+```cpp
+```
+
+## 动态规划

@@ -1,0 +1,5 @@
+/Users/sunyunqi/Documents/c++ code/projects/cmake-build-debug/CMakeFiles/projects.dir
+/Users/sunyunqi/Documents/c++ code/projects/cmake-build-debug/CMakeFiles/maxcontiseq.dir
+/Users/sunyunqi/Documents/c++ code/projects/cmake-build-debug/CMakeFiles/test.dir
+/Users/sunyunqi/Documents/c++ code/projects/cmake-build-debug/CMakeFiles/edit_cache.dir
+/Users/sunyunqi/Documents/c++ code/projects/cmake-build-debug/CMakeFiles/rebuild_cache.dir

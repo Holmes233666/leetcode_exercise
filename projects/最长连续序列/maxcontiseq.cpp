@@ -51,7 +51,7 @@ public:
     }
 };
 
-class Solution {
+class Solution2 {
 public:
     int longestConsecutive(vector<int>& nums) {
         int longestStreak = 0;
@@ -79,7 +79,7 @@ public:
 
 int main() {
     vector<int> nums = {0,1,2,4,8,5,6,7,9,3,55,88,77,99};
-    Solution solution;
+    Solution2 solution;
     int len = solution.longestConsecutive(nums);
     cout << len << endl;
     return 0;
