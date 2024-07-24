@@ -347,3 +347,178 @@ public:
 ```
 
 ## 动态规划
+
+## 单调栈/队列
+
+### 滑动窗口的最大值
+
+![image-20240724142022836](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240724142022836.png)
+
+**优先队列**：找一个区间内的最大值，每次对这个区间只有两个数字的变化：增加一个数字，减少一个数字，不难想到，使用堆每次只调整堆中两个元素，且能够方便地得到堆中的最大值，这似乎是一个可行的方法。分析下时间复杂度：
+
+- 在堆中增加一个元素，堆调整的时间复杂度：$O(\log(n))$
+- 在堆中删除一个元素：删除需要先找到这个元素，然后删除并调整堆，综合需要的时间复杂度为$O(n)$
+
+如果我们每次在窗口移动时，都进行元素的插入和删除的话，总的时间复杂度为$O(n)$。因此，对于整个数组而言，需要的时间复杂度为$O(n^2)$。
+
+【关键思想：延迟删除】减少时间复杂度需要只能在删除元素处进行调整，如果仅仅是删除堆顶的元素，那么时间复杂度就可以降低到$O(\log n)$：不妨推迟数的删除，我们在堆中存的不仅是数，还包括该数对应的下标，如果堆顶元素（最大值）是窗口外的元素，那么才把这个元素删除。那么就可以减少一些操作。最坏情况下假设每次都要删除，那么对于一个窗口而言，增加元素+删除元素的综合的时间复杂度为$O(\log n)$。对于所有的元素而言，整体的时间复杂度为$O(n\log n)$。
+
+代码如下：
+
+```cpp
+// 大顶堆：关键在于不急于移出离开滑动窗口的元素，延迟移出，直到这个元素到堆顶，移除的时间复杂度由O(n)降低到O(1)
+class Solution2 {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        priority_queue<pair<int, int>> queue; 
+        for (int i = 0; i < k; i++) {
+            queue.emplace(nums[i], i);
+        }
+        vector<int> res;
+        res.push_back(queue.top().first);
+        for (int left = 1, right = k; left < nums.size(), right < nums.size(); left++, right++) {
+            queue.emplace(nums[right], right);
+            while (queue.top().second < left) {
+                // 弹出堆顶元素
+                queue.pop();
+            }
+            res.push_back(queue.top().first);
+        }
+        return res;
+    }
+};
+```
+
+**单调递减队列**：在窗口的滑动过程中，注意到这样一个事实：如果$j>i$，且$nums[j] > nums[i]$那么$nums[i]$在后续的窗口滑动中都不会成为最大的元素，是冗余的元素。我们将每个窗口看做一个队列，这样在下标增长的过程中，如果新进入窗口的数据比队首的元素大，那么队列需要清空：因为队列中的所有元素一定都比新进入窗口的元素要小，后续不再可能成为窗口中最大的元素；如果新进入窗口的数据比队首的元素小，那么该元素插入队尾，因为该元素可能会随着窗口的移动成为窗口中最大的元素；再这样的过程中，不难发现每个窗口中最大的元素一定是队首的元素：因为如果不是最大的元素，那么一定存在某个元素进入窗口时，该元素被清除。进一步地，可以得出队列中的元素是单调递减的。
+
+在上述过程中，需要在队列两端插入删除元素，可以使用双端队列：deque。（内部使用双向链表实现，在两端插入和删除的时间复杂度都是$O(1)$）。
+
+因此，分析最差情况，假设每个元素都恰好被放入一次队列，且最多被弹出一次队列，因此时间复杂度为$O(n)$.
+
+代码实现如下：
+
+```cpp
+class Solution3 {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        deque<int> dq;
+        vector<int> res;
+        // 未形成完整的窗口
+        for (int i = 0; i < k; i++) {
+            // 是否可以直接将队列清空？
+            while (!dq.empty() && nums[i] >= nums[dq.back()]) {
+                dq.pop_back();
+            }
+            dq.push_back(i);
+        }
+        res.push_back(nums[dq.front()]);
+        // 已经形成完整的窗口
+        for (int right = k; right < nums.size(); right++) {
+            // 队尾元素小于窗口右侧新元素，那么队列清空
+            while (!dq.empty() && nums[right] >= nums[dq.back()]) {
+                dq.pop_back();
+            }
+            dq.push_back(right);
+            // 如果队首的元素已经超过窗口，那么应该清除
+            while (!dq.empty() && dq.front() <= right - k) {
+                dq.pop_front();
+            }
+            // 队首元素是最大的元素
+            res.push_back(nums[dq.front()]);
+        }
+        return res;
+    }
+};
+```
+
+### 接雨水
+
+![image-20240724162316693](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240724162316693.png)
+
+## 数组的处理
+
+### 合并区间
+
+区间合并的关键在于首先对于所有区间进行按照start元素大小进行的排序。按照从小到大的原则完成排序之后，依次扫描区间，进行区间合并。
+
+区间有序后，这种扫描+合并的过程是O(n)的：每个区间要么被合并到一个区间中，要么新建了一个区间。
+
+合并可以通过扫描到的区间start元素和当前目标区间的end元素比较得到。当前目标区间是会不断更新的，初始设置为首元素最小区间的start和end，扫描到的区间的start元素如果小于目标区间的end，那么可以合并，并进行必要的end更新；否则，扫描到的区间不在当前目标区间内，那么后续的区间也不会在当前区间内了，即完成了上一个区间的合并，应该push目标区间到结果中，并新建一个目标区间。
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> merge(vector<vector<int>>& intervals) {
+        sort(intervals.begin(), intervals.end(), [](const std::vector<int>& a, const std::vector<int>& b) {
+            return a[0] < b[0];
+        });
+        vector<vector<int>> res;
+        for (int i = 0; i < intervals.size();) {
+            int end = intervals[i][1];
+            int k = i + 1;
+            while(k < intervals.size() && end >= intervals[k][0]) {
+                if (end < intervals[k][1]) {
+                    end = intervals[k][1];
+                }
+                k++;
+            }
+            res.push_back({intervals[i][0], end});
+            i = k;
+        }
+        return res;
+    }
+};
+```
+
+### 轮转数组
+
+**使用额外空间**：使用额外空间能直接将数组元素放到目标位置上。代码如下：
+
+```cpp
+// 我的做法
+class Solution {
+public:
+    void rotate(vector<int>& nums, int k) {
+        k = k % nums.size();
+        vector<int> res(nums.size(), 0);
+        for (int i = nums.size()-1, rote_num = 0; rote_num < k; i--) {
+            res[k-rote_num-1] = nums[i];
+            rote_num++;
+        }
+        for (int i = 0; i <= nums.size() - k - 1; i++) {
+            res[i+k] = nums[i];
+        }
+        nums = res;
+    }
+};
+
+// 力扣题解，直接将所有的元素都放到： (i + k) mod n的位置
+class Solution2 {
+public:
+    void rotate(vector<int>& nums, int k) {
+        vector<int> res(nums.size(), 0);
+        int n = nums.size();
+        for (int i = 0; i < n; i++) {
+            res[(i + k) % n] = nums[i];
+        }
+        nums = res;
+    }
+};
+```
+
+**不使用额外空间**：原地操作使用翻转可以实现，一共要进行三次翻转。依次翻转整个数组，第二次分别对k前和k后的元素进行翻转，代码如下：
+
+```cpp
+class Solution {
+public:
+    void rotate(vector<int>& nums, int k) {
+        int n = nums.size();
+        reverse(nums.begin(), nums.end());
+        reverse(nums.begin(), nums.begin() + k % n);
+        reverse(nums.begin() + k % n, nums.end());
+    }
+};
+```
+

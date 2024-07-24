@@ -44,7 +44,7 @@ public:
             // 是待匹配的字母
             if (c_umap.count(s[right])) {
                 c_umap_cpy[s[right]]++;
-                q.push(make_pair(s[right], right));
+                q.emplace(s[right], right);
                 left = q.front().second;
             }else{
                 continue;
