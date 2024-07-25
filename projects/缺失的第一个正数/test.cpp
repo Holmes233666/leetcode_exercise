@@ -21,9 +21,30 @@ public:
     }
 };
 
+// 原地操作
+class Solution2 {
+public:
+    int firstMissingPositive(vector<int>& nums) {
+        // 更改不在区间内的数
+        for (int i = 0; i < nums.size(); i++) {
+            nums[i] = (nums[i] > nums.size() or nums[i] < 1)? nums.size() + 1 : nums[i];
+        }
+        // 模拟哈希表
+        for (int i = 0; i < nums.size(); i++) {
+            if (nums[i] == nums.size() + 1 or (nums[i] < 0 and nums[i] < -nums.size()) or nums[abs(nums[i]) - 1] < 0) continue;
+            // 扫到一个数，如果是不是n+1且是一个正数，那么要翻转，如果是一个负数，但是其绝对值在[1,n]内，那么也要翻转，其余不用管。
+            nums[abs(nums[i]) - 1] = -nums[abs(nums[i])-1];
+        }
+        for (int i = 0; i < nums.size(); i++) {
+            if(nums[i] >= 0) return i+1;
+        }
+        return nums.size() + 1;
+    }
+};
+
 int main() {
-    vector<int> nums = {1,2,0};
-    Solution solution;
+    vector<int> nums = {3,4,-1,1};
+    Solution2 solution;
     int num = solution.firstMissingPositive(nums);
     cout << num << endl;
     return 0;

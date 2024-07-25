@@ -116,6 +116,12 @@ build CMakeFiles/maxcontiseq.dir/缺失的第一个正数/test.cpp.o: CXX_COMPIL
   OBJECT_DIR = CMakeFiles/maxcontiseq.dir
   OBJECT_FILE_DIR = CMakeFiles/maxcontiseq.dir/缺失的第一个正数
 
+build CMakeFiles/maxcontiseq.dir/矩阵置零/test.cpp.o: CXX_COMPILER__maxcontiseq_unscanned_Debug /Users/sunyunqi/Documents/c++$ code/projects/矩阵置零/test.cpp || cmake_object_order_depends_target_maxcontiseq
+  DEP_FILE = CMakeFiles/maxcontiseq.dir/矩阵置零/test.cpp.o.d
+  FLAGS = -g -std=gnu++11 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -fcolor-diagnostics
+  OBJECT_DIR = CMakeFiles/maxcontiseq.dir
+  OBJECT_FILE_DIR = CMakeFiles/maxcontiseq.dir/矩阵置零
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target maxcontiseq
@@ -124,7 +130,7 @@ build CMakeFiles/maxcontiseq.dir/缺失的第一个正数/test.cpp.o: CXX_COMPIL
 #############################################
 # Link the executable maxcontiseq
 
-build maxcontiseq: CXX_EXECUTABLE_LINKER__maxcontiseq_Debug CMakeFiles/maxcontiseq.dir/最长连续序列/maxcontiseq.cpp.o CMakeFiles/maxcontiseq.dir/最大子数组和/test.cpp.o CMakeFiles/maxcontiseq.dir/合并区间/test.cpp.o CMakeFiles/maxcontiseq.dir/轮转数组/test.cpp.o CMakeFiles/maxcontiseq.dir/除自身以外数组的乘积/test.cpp.o CMakeFiles/maxcontiseq.dir/缺失的第一个正数/test.cpp.o
+build maxcontiseq: CXX_EXECUTABLE_LINKER__maxcontiseq_Debug CMakeFiles/maxcontiseq.dir/最长连续序列/maxcontiseq.cpp.o CMakeFiles/maxcontiseq.dir/最大子数组和/test.cpp.o CMakeFiles/maxcontiseq.dir/合并区间/test.cpp.o CMakeFiles/maxcontiseq.dir/轮转数组/test.cpp.o CMakeFiles/maxcontiseq.dir/除自身以外数组的乘积/test.cpp.o CMakeFiles/maxcontiseq.dir/缺失的第一个正数/test.cpp.o CMakeFiles/maxcontiseq.dir/矩阵置零/test.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk
   OBJECT_DIR = CMakeFiles/maxcontiseq.dir
   POST_BUILD = :
