@@ -694,3 +694,52 @@ public:
 
 Note：注意，在有关vector图像的题目中，正序遍历数组比逆序遍历速度更快。
 
+### 搜索二维矩阵
+
+![image-20240727003825360](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240727003825360.png)
+
+**二分查找**：对每一行做一次二分查找，时间复杂度是$m\log n$
+
+```cpp
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        for (int i = 0; i < matrix.size(); i++) {
+            auto it = lower_bound(matrix[i].begin(), matrix[i].end(), target);
+            if (it != matrix.end() && *it == target) {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+```
+
+**Z字型查找**：以$matrix[0][n-1]$为起点进行查找，规则：
+
+- 如果$matrix[i][j] == target$，那么找到了，返回
+- 如果$matrix[i][j] > target$，那么以第j列以及大于j的列都不会有target，j--
+- 如果$matrix[i][j] < target$，那么i++
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        int start_i = 0, start_j = matrix[0].size()-1;
+        int currI = start_i, currJ = start_j;
+        while (currI < matrix.size() && currJ >= 0) {
+            int temp = matrix[currI][currJ];
+            if (temp == target) return true;
+            if (temp > target) {
+                currJ--;
+            }else {
+                currI++;
+            }
+        }
+        return false;
+    }
+};
+```
+
