@@ -24,7 +24,7 @@
 			{
 				"command" : 0,
 				"file" : 0,
-				"line" : 15,
+				"line" : 18,
 				"parent" : 0
 			}
 		]
@@ -91,7 +91,7 @@
 		{
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
-			"path" : "\u7f3a\u5931\u7684\u7b2c\u4e00\u4e2a\u6b63\u6570/test.cpp",
+			"path" : "\u87ba\u65cb\u77e9\u9635/test.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

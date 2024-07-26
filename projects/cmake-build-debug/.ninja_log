@@ -1,14 +1,16 @@
 # ninja log v6
+3	449	1721911427180202902	CMakeFiles/test.dir/矩阵置零/test.cpp.o	70af0f8e8446650c
 1	288	1721720274617913999	CMakeFiles/projects.dir/无重复字符最长子串/test.cpp.o	b6cc0b025e4e616d
-3	91	1721720512035896357	projects	3eaf2b78f287a723
+4	252	1721832982654020557	CMakeFiles/test.dir/除自身以外数组的乘积/test.cpp.o	8b86c2dac90a4902
 1	270	1721720614368182321	CMakeFiles/test.dir/盛水最多的容器/test.cpp.o	3b6d5548404bbbcd
 5	219	1721720296463021276	CMakeFiles/projects.dir/盛水最多的容器/test.cpp.o	fbf4eb9b98491433
 259	342	1721720708362296863	maxcontiseq	f953c610f76e672a
 1	259	1721720708103723727	CMakeFiles/maxcontiseq.dir/最长连续序列/maxcontiseq.cpp.o	df04c20a40c86d14
-266	289	1721891222438358866	test	a3f3dbe3ef7d02b0
+328	352	1721911916245248273	test	25c3f144cb03eaa0
 1	225	1721820668118572541	CMakeFiles/test.dir/合并区间/test.cpp.o	6068ad1f0f78c817
 4	266	1721828738032966837	CMakeFiles/test.dir/轮转数组/test.cpp.o	1c63498ecd013017
 4	314	1721722221853587565	CMakeFiles/test.dir/最小覆盖子串/test.cpp.o	5d0dc51d1deaa9c6
-4	252	1721832982654020557	CMakeFiles/test.dir/除自身以外数组的乘积/test.cpp.o	8b86c2dac90a4902
+3	91	1721720512035896357	projects	3eaf2b78f287a723
 0	233	1721720274617683582	CMakeFiles/projects.dir/main.cpp.o	f14c21ef0f866b5c
-2	266	1721891222174647100	CMakeFiles/test.dir/缺失的第一个正数/test.cpp.o	d3b5a603fe7a8ca5
+4	395	1721896060915173702	CMakeFiles/test.dir/缺失的第一个正数/test.cpp.o	d3b5a603fe7a8ca5
+3	328	1721911915919822139	CMakeFiles/test.dir/螺旋矩阵/test.cpp.o	fe9c81001bb4d652

@@ -55,7 +55,10 @@
 				3,
 				4,
 				5,
-				6
+				6,
+				7,
+				8,
+				9
 			]
 		}
 	],
@@ -94,7 +97,10 @@
 				3,
 				4,
 				5,
-				6
+				6,
+				7,
+				8,
+				9
 			]
 		}
 	],
@@ -140,6 +146,24 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "\u77e9\u9635\u7f6e\u96f6/test.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u87ba\u65cb\u77e9\u9635/test.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u641c\u7d22\u4e8c\u7ef4\u77e9\u9635/\u641c\u7d22\u4e8c\u7ef4\u77e9\u9635.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u65cb\u8f6c\u56fe\u50cf/test.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

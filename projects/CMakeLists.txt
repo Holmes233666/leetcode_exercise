@@ -11,5 +11,8 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         轮转数组/test.cpp
         除自身以外数组的乘积/test.cpp
         缺失的第一个正数/test.cpp
-        矩阵置零/test.cpp)
-add_executable(test 缺失的第一个正数/test.cpp)
+        矩阵置零/test.cpp
+        螺旋矩阵/test.cpp
+        搜索二维矩阵/test.cpp
+        旋转图像/test.cpp)
+add_executable(test 螺旋矩阵/test.cpp)

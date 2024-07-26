@@ -588,9 +588,109 @@ public:
 };
 ```
 
+### 矩阵置零
+
+![image-20240725210248067](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240725210248067.png)
+
+**使用标记数组**：遍历两次，第一次遍历使用一个标记数组记录需要标记为0的行和列的下标。可以用两个数组来分别记录，也可以用一个map来记录，但是需要进行额外的处理区别行号/列号（使用一个数组也是一样的，需要做额外的处理）。第二次遍历时，扫描每个元素，判断他们的index是否在map中，在的话将该元素置零。代码如下：
+
+```cpp
+class Solution {
+public:
+    void setZeroes(vector<vector<int>>& matrix) {
+        unordered_map<int, int> umap;
+        for (int i = 0; i < matrix.size(); i++) {
+            for (int j = 0; j < matrix[i].size(); j++) {
+                if (matrix[i][j] == 0) {
+                    umap[-i-1] = 1;
+                    umap[j] = 1;
+                }
+            }
+        }
+
+        for (int i = 0; i < matrix.size(); i++) {
+            for (int j = 0; j < matrix[i].size(); j++) {
+                if (umap.count(-i-1) or umap.count(j)) {
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+    }
+};
+```
+
+### 螺旋矩阵
+
+![image-20240725211011198](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240725211011198.png)
+
+**记录路径**：解决的关键在于碰到边界之后向哪个方向走以及如何刻画由其他数构成的边界。
+
+- 碰到边界后转向：定义右下左上四个方向数组，在一轮循环中使用是按照这个方向行走的。
+- 如何定义边界：除了数组本身的边界外，碰到已经输出的数也应该转向，因此可以采取两种方案更新边界：
+  - 使用map记录已经输出的数的下标，每次打印一个数字前判断该数的索引是否在map中，在的话不进行输出，否则输出，并记录该数在map中
+  - 定义上下左右四个边界，输出完第一行，应该upper++；输出完最后一列，应该right--……
+
+后者的空间复杂度更小，而且不用查询，两种方式的代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        // 定义四个方向
+        vector<vector<int>> directions = {{0,1}, {1,0},{0,-1},{-1,0}};   // 右，下，左，上
+        unordered_set<string> uset;
+        int count = 0, term = 0, last_i = 0, last_j = 0;
+        int totNum = matrix.size() * matrix[0].size();
+        vector<int> res;
+        while(count < totNum) {
+            vector<int> currDire = directions[term % 4];
+            while (last_i >= 0 && last_i < matrix.size() && last_j >= 0 && last_j < matrix[0].size() && !uset.count(to_string(last_i) + "," + to_string(last_j))) {
+                uset.insert(to_string(last_i) + "," + to_string(last_j));
+                count++;
+                res.push_back(matrix[last_i][last_j]);
+                last_i += currDire[0];
+                last_j += currDire[1];
+            }
+            // 回退一步
+            last_i -= currDire[0];
+            last_j -= currDire[1];
+            // 改变方向
+            term++;
+            // 更新方向
+            last_i += directions[term % 4][0];
+            last_j += directions[term % 4][1];
+        }
+        return res;
+    }
+};
+```
 
 
 
+### 旋转图像
 
+![image-20240726190200451](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240726190200451.png)
 
+![image-20240726190214531](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240726190214531.png)
+
+与[轮转数组](###轮转数组)：移动k个某尾的数到数组头部的翻转的方法类似，这题也可以找到规律：先reverse，然后ij序号对换。代码如下：
+
+```cpp
+class Solution {
+public:
+    void rotate(vector<vector<int>>& matrix) {
+        reverse(matrix.begin(), matrix.end());
+        int n = matrix.size();
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < i ; j++) {
+                int temp = matrix[i][j];
+                matrix[i][j] = matrix[j][i];
+                matrix[j][i] = temp;
+            }
+        }
+    }
+};
+```
+
+Note：注意，在有关vector图像的题目中，正序遍历数组比逆序遍历速度更快。
 
