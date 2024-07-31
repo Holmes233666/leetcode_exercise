@@ -14,5 +14,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         矩阵置零/test.cpp
         螺旋矩阵/test.cpp
         搜索二维矩阵/test.cpp
-        旋转图像/test.cpp)
+        旋转图像/test.cpp
+        相交链表/test.cpp
+        反转链表/test.cpp
+        回文链表/test.cpp
+        环形链表/test.cpp)
 add_executable(test 螺旋矩阵/test.cpp)

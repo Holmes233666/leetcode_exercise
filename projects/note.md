@@ -64,6 +64,57 @@ public:
 };
 ```
 
+## 双指针
+
+### 移动零
+
+![image-20240731173142001](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240731173142001.png)
+
+**双指针**：设置一个零指针和非零指针，零指针始终指向序列中的第一个零，非零指针不断向右移动，将零与非零数进行位置交换，当非零指针移动到序列的末尾时，过程结束。代码如下：
+
+```cpp
+class Solution {
+public:
+    void moveZeroes(vector<int>& nums) {
+        int num_point = 0;
+        int zero_point = 0;
+        while (zero_point < nums.size() && nums[zero_point] != 0) {
+            zero_point++;
+        }
+        // 数组中没有0
+        if (zero_point == nums.size()) return;
+        num_point = zero_point;
+        while (num_point < nums.size()) {
+            // 如果数字指针指着零，那么直接右移
+            if (nums[num_point] == 0) {
+                num_point++; 
+                continue;
+            }
+            // 如果数字指针指着非零，那么需要跟零指针指着的0换一下数值
+            if (nums[num_point] != 0) {
+                nums[zero_point] = nums[num_point];
+                nums[num_point] = 0;
+                // 然后零指针右移，直到遇到第一个零或者越界
+                while(zero_point < nums.size() + 1 && nums[zero_point] != 0) {
+                    zero_point++;
+                }
+            }
+            // 数组里面的零已经被处理完了
+            if (zero_point == nums.size() + 1) {
+                break;
+            }
+            num_point++;
+        }
+    }
+};
+```
+
+### 盛水最多的容器
+
+![image-20240731174401300](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240731174401300.png)
+
+
+
 ## 前缀和
 
 ### 和为K的子数组
@@ -743,3 +794,8 @@ public:
 };
 ```
 
+## 链表的处理
+
+### 相交链表
+
+**双指针**：
