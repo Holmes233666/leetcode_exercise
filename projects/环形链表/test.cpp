@@ -27,6 +27,22 @@ public:
     }
 };
 
+// 快慢指针
+class Solution2 {
+public:
+    bool hasCycle(ListNode *head) {
+        ListNode *fast=head, *slow=head;
+        while (fast != slow) {
+            if (fast == nullptr) return false;
+            fast = fast->next;
+            if (fast == nullptr) return false;
+            fast = fast->next;
+            slow = slow->next;
+        }
+        return true;
+    }
+};
+
 int main() {
     return 0;
 }

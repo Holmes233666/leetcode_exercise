@@ -18,5 +18,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         相交链表/test.cpp
         反转链表/test.cpp
         回文链表/test.cpp
-        环形链表/test.cpp)
+        环形链表/test.cpp
+        环形链表II/test.cpp
+        合并两个有序链表/test.cpp)
 add_executable(test 螺旋矩阵/test.cpp)

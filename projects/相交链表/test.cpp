@@ -1,4 +1,5 @@
 #include<iostream>
+#include<unordered_map>
 
 using namespace std;
 
@@ -8,15 +9,7 @@ struct ListNode {
      ListNode(int x) : val(x), next(NULL) {}
 };
 
-/**
- * Definition for singly-linked list.
- * struct ListNode {
- *     int val;
- *     ListNode *next;
- *     ListNode(int x) : val(x), next(NULL) {}
- * };
- */
-
+// 方法1： 计算链表的长度，较长的链表先走|a-b|
 class Solution {
 public:
     ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
@@ -58,6 +51,39 @@ public:
         }
 
         if (p != nullptr && q != nullptr) return q;
+        return nullptr;
+    }
+};
+
+// 方法2： 双指针，每个指针走|a+b|，走的长度是相同的
+class Solution2 {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        ListNode *p = headA, *q = headB;
+        while (p != q) {
+            if (p==nullptr) p = headB;
+            if (q==nullptr) q = headA;
+            p = p->next;
+            q = q->next;
+        }
+        return p;
+    }
+};
+
+// 方法3： 哈希表
+class Solution3 {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        ListNode *p = headA, *q = headB;
+        unordered_map<ListNode*, int> umap;
+        while (p!=nullptr) {
+            umap[p]++;
+            p = p->next;
+        }
+        while (q!=nullptr) {
+            if (umap.count(q)) return q;
+            q = q->next;
+        }
         return nullptr;
     }
 };

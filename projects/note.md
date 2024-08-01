@@ -798,4 +798,264 @@ public:
 
 ### 相交链表
 
-**双指针**：
+![image-20240731190506184](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240731190506184.png)
+
+**双指针**：双指针是实现判断相交链表的一个高效手段，只要指向两个链表的指针在遍历到对应链表的尾部时，移动指针到另一个链表的表头即可，原理如图：
+
+<img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240801003726538.png" alt="image-20240801003726538" style="zoom:50%;" />
+
+实现的代码如下：
+
+```cpp
+class Solution {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        ListNode *p = headA, *q = headB;
+        while (p != q) {
+            if (p == nullptr && q != nullptr) {
+                p = headB;
+                q = q->next;
+                continue;
+            }
+            if (q == nullptr && p != nullptr) {
+                q = headA;
+                p = p->next;
+                continue;
+            }
+            p = p->next;
+            q = q->next;
+        }
+        return p;
+    }
+};
+```
+
+**记录链表长度**：首先分别记录两个链表的长度分别记做$|A|$和$|B|$，然后较长的链表先向前走$|A-B|$个节点，然后两个链表共同向前移动，遇到，代码如下：
+
+```cpp
+class Solution {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        // 若其中一个为空，直接返回null
+        if (headA == nullptr or headB == nullptr) return nullptr;
+
+        //首先记录两个链表的长度
+        int lenA = 1, lenB = 1;
+        ListNode* p = headA;
+        ListNode* q = headB;
+        ListNode *p2, *q2;
+
+        p2 = p, q2 = q;
+
+        while (p2->next != nullptr) {
+            lenA++;
+            p2 = p2->next;
+        }
+
+        while (q2->next != nullptr) {
+            lenB++;
+            q2=q2->next;
+        }
+
+        // 长度较长的链表先走几步
+        while (lenA > lenB) {
+            p = p->next;
+            lenA--;
+        }
+        while (lenB > lenA) {
+            q = q->next;
+            lenB--;
+        }
+
+        // 两个链表一起走，直到遇到相同的结点
+        while (p != nullptr && q != nullptr && q != p ) {
+            q = q->next;
+            p = p->next;
+        }
+
+        if (p != nullptr && q != nullptr) return q;
+        return nullptr;
+    }
+};
+```
+
+**哈希表**：判断有没有相交可以直接讲一个链表中的所有节点的**指针**，放入一个哈希表中，然后遍历另一个哈希表，判断有没有相同的值在哈希表中。代码如下：
+
+```cpp
+class Solution3 {
+public:
+    ListNode *getIntersectionNode(ListNode *headA, ListNode *headB) {
+        ListNode *p = headA, *q = headB;
+        unordered_map<ListNode*, int> umap;
+        while (p!=nullptr) {
+            umap[p]++;
+            p = p->next;
+        }
+        while (q!=nullptr) {
+            if (umap.count(q)) return q;
+            q = q->next;
+        }
+        return nullptr;
+    }
+};
+```
+
+### 反转链表
+
+![image-20240801141223695](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240801141223695.png)
+
+**三指针法**：使用一个指针记录当前的结点，一个记录前一个节点，一个记录后一个，三个指针辅助即可实现，代码如下：
+
+```cpp
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        ListNode *curr = head, *pre = nullptr;
+        while (curr != nullptr) {
+            ListNode* next = curr->next;
+            curr->next = pre;
+            pre = curr;
+            curr = next;
+        }
+        return pre;
+    }
+};
+```
+
+这是比较直接，也是执行起来速度较快的方法。下面这种写法一定要注意设置$pre$指针的next为nullptr，否则链表会成为一个环形链表：
+
+```cpp
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        if (head == nullptr) return nullptr;
+        ListNode *curr = head->next, *pre = head;
+        pre->next = nullptr;
+        while (curr != nullptr) {
+            ListNode* next = curr->next;
+            curr->next = pre;
+            pre = curr;
+            curr = next;
+        }
+        return pre;
+    }
+};
+```
+
+**栈**：使用栈也能翻转链表，但是速度较慢。另外注意一点，即**最后一个指针的next一定要设置为nullptr**。代码如下：
+
+```cpp
+// 方法1： 栈
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        if (head == nullptr) return nullptr;
+        stack<ListNode*> nodeStack; // 存储指针
+        ListNode* p = head;
+        // 放入栈
+        while(p != nullptr) {
+            nodeStack.push(p); // 存储指针
+            p = p->next;
+        }
+        // 从栈中取出节点
+        p = nodeStack.top();
+        ListNode* tempNode = p;
+        nodeStack.pop();
+        while (!nodeStack.empty()) {
+            ListNode* q = nodeStack.top();
+            nodeStack.pop();
+            p->next = q;
+            p = q;
+        }
+        p->next = nullptr; // 最后一个节点的 next 设为 nullptr
+        return tempNode;
+    }
+};
+```
+
+### 回文链表
+
+![image-20240801160739625](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240801160739625.png)
+
+**快慢指针+反转链表**：一种直接的写法是反转链表，栈，或者复制链表到数组中，进行双指针判断，但是这些方法的空间复杂度都是$O(n)$。空间复杂度为$O(1)$的方法可以使用**快慢指针+反转链表**：快指针一次走两步，慢指针一次走一步；快指针到达末尾时，慢指针正好到链表的一半，此时以慢指针为表头，翻转后半边的链表，然后从两头进行双指针比较即可。注意奇数节点和偶数结点的区别处理：奇数节点的中间节点应该算作前半部分的链表。代码如下：
+
+```cpp
+class Solution {
+public:
+    bool isPalindrome(ListNode* head) {
+        // 首先设置快慢指针
+        ListNode *fast = head, *slow = head;
+        while (fast->next != nullptr) {
+            fast = fast->next;
+            if (fast->next != nullptr) {
+                fast = fast->next;
+            }else {
+                break;
+            }
+            slow = slow->next;
+        }
+        // 以后面的slow指针为起点，翻转链表
+        ListNode *curr = slow->next, *pre = nullptr;
+        while (curr != nullptr) {
+            ListNode* nextNode = curr->next;
+            curr->next = pre;
+            pre = curr;
+            curr = nextNode;
+        }
+        // 反转后现在的pre是反转后链表的首节点
+        ListNode *leftHead = head, *p = pre;
+        while (p != nullptr) {
+            if (p->val != leftHead->val) return false;
+            p = p->next;
+            leftHead = leftHead->next;
+        }
+        return true;
+    }
+};
+```
+
+### 环形链表
+
+![image-20240801230800876](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240801230800876.png)
+
+**哈希表**：参考相交链表一节，哈希表是一个简单的方式，按照哈希表进行遍历，每个结点都加入哈希表，直到遇到nullptr或者是相同的结点：前者返回不含环，后者返回含环；代码如下：
+
+```cpp
+class Solution {
+public:
+    bool hasCycle(ListNode *head) {
+        ListNode* p = head;
+        unordered_map<ListNode*, int> umap;
+        while (p != nullptr) {
+            if (!umap.count(p)) {
+                umap[p]++;
+                p = p->next;
+            }else {
+                return true;
+            }
+        }
+        return false;
+    }
+};
+```
+
+**快慢指针**：相同的速度，如果有环，快指针一定会追上慢指针；另一方面如果快指针走到空了，那么也意味着链表不含有环。代码如下：
+
+```cpp
+class Solution {
+public:
+    bool hasCycle(ListNode *head) {
+        if (head == nullptr) return false;
+        ListNode *fast=head->next, *slow=head;
+        while (fast != slow) {
+            if (fast == nullptr) return false;
+            fast = fast->next;
+            if (fast == nullptr) return false;
+            fast = fast->next;
+            slow = slow->next;
+        }
+        return true;
+    }
+};
+```
+
