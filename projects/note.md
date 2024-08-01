@@ -1059,3 +1059,57 @@ public:
 };
 ```
 
+### 环形链表II
+
+![image-20240801235812175](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240801235812175.png)
+
+**哈希表**：一种方式是直接参考[环形链表](##环形链表)中哈希表的做法，方法简单，但是空间复杂度不是$O(1)$，方法如下：
+
+```cpp
+class Solution {
+public:
+    ListNode *detectCycle(ListNode *head) {
+        ListNode *p = head;
+        unordered_map<ListNode*, int> umap;
+        while (p!=nullptr) {
+            if (umap.count(p)) return p;
+            umap[p]++;
+            p = p->next;
+        }
+        return nullptr;
+    }
+};
+```
+
+
+
+### 合并两个有序链表
+
+![image-20240801235501510](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240801235501510.png)
+
+**归并排序法**：归并排序的方式+尾插法创建链表是一个直接的方法。注意与数组不同，这里对于遇到nullptr后另一个链表的处理不需要再像数组那样一个个的拷贝，直接**将newTail指针连接到非空的剩余链表即可**（line 17）。代码如下：
+
+```cpp
+class Solution {
+public:
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        ListNode *p = list1, *q = list2;
+        ListNode *newHead = new ListNode(0), *newTail = newHead;
+        while (p!=nullptr && q!= nullptr) {
+            if (p->val <= q->val) {
+                newTail->next = p;
+                newTail = p;
+                p = p->next;
+            }else {
+                newTail->next = q;
+                newTail = q;
+                q = q->next;
+            }
+        }
+        newTail->next = p == nullptr? q : p;
+        return newHead->next;
+    }
+};
+```
+
+**递归写法**：
