@@ -20,5 +20,8 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         回文链表/test.cpp
         环形链表/test.cpp
         环形链表II/test.cpp
-        合并两个有序链表/test.cpp)
+        合并两个有序链表/test.cpp
+        两数相加/test.cpp
+        删除链表的倒数第N个节点/test.cpp
+        两两交换链表中的结点/test.cpp)
 add_executable(test 螺旋矩阵/test.cpp)

@@ -412,7 +412,7 @@ public:
 
 如果我们每次在窗口移动时，都进行元素的插入和删除的话，总的时间复杂度为$O(n)$。因此，对于整个数组而言，需要的时间复杂度为$O(n^2)$。
 
-【关键思想：延迟删除】减少时间复杂度需要只能在删除元素处进行调整，如果仅仅是删除堆顶的元素，那么时间复杂度就可以降低到$O(\log n)$：不妨推迟数的删除，我们在堆中存的不仅是数，还包括该数对应的下标，如果堆顶元素（最大值）是窗口外的元素，那么才把这个元素删除。那么就可以减少一些操作。最坏情况下假设每次都要删除，那么对于一个窗口而言，增加元素+删除元素的综合的时间复杂度为$O(\log n)$。对于所有的元素而言，整体的时间复杂度为$O(n\log n)$。
+【关键思想：**延迟删除**】减少时间复杂度需要只能在删除元素处进行调整，如果仅仅是删除堆顶的元素，那么时间复杂度就可以降低到$O(\log n)$：不妨推迟数的删除，我们在堆中存的不仅是数，还包括该数对应的下标，如果堆顶元素（最大值）是窗口外的元素，那么才把这个元素删除。那么就可以减少一些操作。最坏情况下假设每次都要删除，那么对于一个窗口而言，增加元素+删除元素的综合的时间复杂度为$O(\log n)$。对于所有的元素而言，整体的时间复杂度为$O(n\log n)$。
 
 代码如下：
 
@@ -485,6 +485,8 @@ public:
 ### 接雨水
 
 ![image-20240724162316693](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240724162316693.png)
+
+
 
 ## 数组的处理
 
@@ -1112,4 +1114,106 @@ public:
 };
 ```
 
-**递归写法**：
+**递归写法**：迭代的写法需要新申请一个结点作为头结点，但是递归的写法能够直接从两个链表的节点中选择较小值的那个节点作为头结点，在递归的过程中自然而然地完成next关系的延续。另外，对于尾部的处理也可以比较简单地实现，代码如下：
+
+```cpp
+class Solution2 {
+public:
+    ListNode* mergeTwoLists(ListNode* list1, ListNode* list2) {
+        if (list1 == nullptr) {
+            return list2;
+        }else if (list2 == nullptr) {
+            return list1;
+        }else if (list1->val <= list2->val) {
+            list1->next = mergeTwoLists(list1->next, list2);
+            return list1;
+        }else {
+            list2->next = mergeTwoLists(list2->next, list1);
+            return list2;
+        }
+    }
+};
+```
+
+### 两数相加
+
+![image-20240802121547267](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240802121547267.png)
+
+思路很简单，两个链表都从开始加上进位相加即可，需要注意的是最后的进位。下面给出两种写法，第一种写法是将对尾部的处理单独用一个循环写，第二个写法表达上不如第一种直接，但是将尾部的处理融入，代码如下：
+
+```cpp
+class Solution {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode *head = new ListNode(0), *tail = head;
+        // 从头尾指针开始做加法，中间进位用l表示：
+        ListNode *p=l1, *q=l2;
+        int l = 0;
+        // 共同部分的增加；
+        while (p!=nullptr && q!=nullptr) {
+            int sum = p->val + q->val + l;
+            ListNode *nextNode = new ListNode(sum % 10);
+            l = sum / 10;
+            tail->next = nextNode;
+            tail = nextNode;
+            p = p->next;
+            q = q->next;
+        }
+        // 判断哪个链表进入了nullptr，取非null的链表的头
+        ListNode *resNode = p==nullptr? q:p;
+        while (resNode!=nullptr) {
+            int sum = resNode->val + l;
+            ListNode *nextNode = new ListNode(sum % 10);
+            resNode = resNode->next;
+            tail->next = nextNode;
+            tail = nextNode;
+            l = sum / 10;
+        }
+        if (l != 0) {
+            ListNode *nextNode = new ListNode(l);
+            tail->next = nextNode;
+        }
+        return head->next;
+    }
+};
+```
+
+第二种写法：更加精简，运行起来时间也更快。
+
+```cpp
+class Solution2 {
+public:
+    ListNode* addTwoNumbers(ListNode* l1, ListNode* l2) {
+        ListNode *head = new ListNode(0), *tail = head;
+        // 从头尾指针开始做加法，中间进位用l表示：
+        ListNode *p=l1, *q=l2;
+        int l = 0;
+        // 共同部分的增加；
+        while (p!=nullptr || q!=nullptr) {
+            int sum = 0;
+            if (p!=nullptr) {
+                sum += p->val;
+                p = p->next;
+            }
+            if (q!=nullptr) {
+                sum += q->val;
+                q = q->next;
+            }
+            sum += l;
+            ListNode *nextNode = new ListNode(sum % 10);
+            l = sum / 10;
+            tail->next = nextNode;
+            tail = nextNode;
+        }
+        if (l != 0) {
+            ListNode *nextNode = new ListNode(l);
+            tail->next = nextNode;
+        }
+        return head->next;
+    }
+};
+```
+
+### 删除链表的倒数第N个节点
+
+![image-20240802165022892](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240802165022892.png)
