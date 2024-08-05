@@ -1217,3 +1217,51 @@ public:
 ### 删除链表的倒数第N个节点
 
 ![image-20240802165022892](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240802165022892.png)
+
+**快慢指针+哑结点**：定位结点使用快慢指针，利用哑节点能够减少对临界条件的判断。代码如下：
+
+```cpp
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) return head;
+        ListNode *pre = new ListNode();
+        ListNode *res = head->next;
+        ListNode *p = head, *q = head->next;
+        while (p!=nullptr && q!= nullptr) {
+            p->next = q->next;
+            pre->next = q;
+            q->next = p;
+            pre = p;
+            p = p->next;
+            q = q->next;
+        }
+        return res;
+    }
+};
+```
+
+**快慢指针**：仅仅使用快慢指针，不使用哑节点也能完成：
+
+```cpp
+class Solution {
+public:
+    ListNode* removeNthFromEnd(ListNode* head, int n) {
+        ListNode *first = head, *second = head, *third = head;
+		// 首指针先走n步 
+		while(n--){
+			first = first->next;
+		} 
+     if(first == NULL){
+       return second->next;
+     }
+		while(first->next != NULL){
+			first = first->next;
+			second = second->next;
+		}
+		second->next = second->next->next;
+		return third;
+    }
+};
+```
+
