@@ -30,5 +30,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         合并k个升序链表/test.cpp
         LRU缓存/LRU.cpp
         二叉树的中序遍历/test.cpp
-        二叉树的最大深度/test.cpp)
+        二叉树的最大深度/test.cpp
+        翻转二叉树/test.cpp
+        对称二叉树/test.cpp)
 add_executable(test 二叉树的最大深度/test.cpp)
