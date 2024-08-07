@@ -26,5 +26,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         两两交换链表中的结点/test.cpp
         K个一组翻转链表/test.cpp
         随机链表的复制/test.cpp
-        排序链表/test.cpp)
-add_executable(test K个一组翻转链表/test.cpp)
+        排序链表/test.cpp
+        合并k个升序链表/test.cpp
+        LRU缓存/LRU.cpp
+        二叉树的中序遍历/test.cpp
+        二叉树的最大深度/test.cpp)
+add_executable(test 二叉树的最大深度/test.cpp)
