@@ -76,7 +76,8 @@
 				24,
 				25,
 				26,
-				27
+				27,
+				28
 			]
 		}
 	],
@@ -136,7 +137,8 @@
 				24,
 				25,
 				26,
-				27
+				27,
+				28
 			]
 		}
 	],
@@ -308,6 +310,12 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "\u5bf9\u79f0\u4e8c\u53c9\u6811/test.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u4e8c\u53c9\u6811\u7684\u76f4\u5f84/test.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],
