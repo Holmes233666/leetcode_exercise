@@ -52,6 +52,50 @@ public:
     }
 };
 
+
+class Solution2 {
+public:
+    // 返回新的头结点和尾结点
+    pair<ListNode*, ListNode*> reverseLinkNodeK(ListNode* head, ListNode* tail) {
+        ListNode *pre = new ListNode(), *currNode = head, *tailNext = tail->next;
+        pre->next = head;
+        while(currNode != tailNext) {
+            ListNode *nextNode = currNode->next;
+            currNode->next = pre;
+            pre = currNode;
+            currNode = nextNode;
+        }
+        return {tail, head};
+    }
+
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        ListNode *currTermHead = head, *currTermTail = head, *res = head;
+        ListNode *preTail = new ListNode();
+        for (int i = 0; ; i++) {
+            int term = k;
+            currTermTail = currTermHead;
+            while(currTermTail != nullptr && --term) {
+                currTermTail = currTermTail->next;
+            }
+            if (currTermTail == nullptr) {
+                // 不足k个或者刚好就是完整的一组的末尾
+                // 上一组的尾巴连上当前的头
+                preTail->next = currTermHead;
+                return res;
+            }
+            if (i == 0) res = currTermTail;
+            // 保存下一个头
+            ListNode *tempNode = currTermTail->next;
+            // 根据currTermHead和currTermTail以及k反转链表
+            auto [newHead, newTail] = reverseLinkNodeK(currTermHead, currTermTail);
+            // 重新连接新的头到上一个链表的尾
+            preTail->next = newHead;
+            preTail = newTail;
+            currTermHead = tempNode;
+        }
+    }
+};
+
 int main() {
     vector<int> vec = {1,2,3,4,5};
     int k = 2, num = 5, currNodeIndex = 0;

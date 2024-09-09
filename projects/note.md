@@ -1265,3 +1265,162 @@ public:
 };
 ```
 
+### 两两交换链表中的节点
+
+![image-20240809091908832](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240809091908832.png)
+
+**迭代法**：迭代解决链表的结点的交换问题是直接的思路，由于需要的是两两交换，这意味着在处理上一组交换结果和下一组待交换的结点时，需要记录前一组已经交换的结点的尾部节点，这里使用`pre`记录上一组的末尾节点，初始化为`nullptr`。那么一轮的交换过程可以很简单表示为：
+
+代码1：需要进行尾部处理（保证不会出现环，以及对奇数和偶数结点分开两种条件）：
+
+```cpp
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) return head;
+        ListNode *currNode = head, *nextNode, *pre = new ListNode(), *res = currNode->next;
+        // 如果是没有后续结点的单个节点就不用交换了， 因此终止条件设置为：
+        while(currNode != nullptr && currNode->next != nullptr) {
+            cout << currNode->val << " ";
+            // 准备好下一个带交换的一组的头
+            nextNode = currNode->next->next;
+            // 本轮交换
+            pre->next = currNode->next;
+            currNode->next->next = currNode;
+            pre = currNode;
+            currNode = nextNode;
+        }
+        if (currNode == nullptr) {
+            pre->next = nullptr;
+        }else{
+            pre->next = currNode;
+        }
+        return res;
+    }
+};
+```
+
+代码2：这种交换方法不用进行尾部处理，因为中间步骤不会产生环形链：
+
+```cpp
+class Solution {
+public:
+    ListNode* swapPairs(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) return head;
+        ListNode *pre = new ListNode();
+        ListNode *res = head->next;
+        ListNode *p = head, *q = head->next;
+        while (p!=nullptr && q!= nullptr) {
+            p->next = q->next;
+            pre->next = q;
+            q->next = p;
+            pre = p;
+            p = p->next;
+            if (p == nullptr) return res;
+            q = p->next;
+        }
+        return res;
+    }
+};
+```
+
+### K个一组翻转链表
+
+![image-20240809101855076](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240809101855076.png)
+
+![image-20240809102110797](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240809102110797.png)
+
+k个一组翻转链表可以基于反转链表[反转链表](##反转链表)一题进行处理：给定一个链表的head和tail，调用反转链表的处理，直到构不成完整的k个节点为止。每次调用反转链表后需要返回新的head和tail，以便连接：因为新的head需要和上一个链表的tail连接，新的tail需要等待待翻转的下一个链表的head，进行连接；但是注意对于尾部的特别处理实现代码如下。尾部特别处理见28 29行。
+
+```cpp
+class Solution2 {
+public:
+    // 返回新的头结点和尾结点
+    pair<ListNode*, ListNode*> reverseLinkNodeK(ListNode* head, ListNode* tail) {
+        ListNode *pre = new ListNode(), *currNode = head, *tailNext = tail->next;
+        pre->next = head;
+        while(currNode != tailNext) {
+            ListNode *nextNode = currNode->next;
+            currNode->next = pre;
+            pre = currNode;
+            currNode = nextNode;
+        }
+        return {tail, head};
+    }
+
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        ListNode *currTermHead = head, *currTermTail = head, *res = head;
+        ListNode *preTail = new ListNode();
+        for (int i = 0; ; i++) {
+            int term = k;
+            currTermTail = currTermHead;
+            while(currTermTail != nullptr && --term) {
+                currTermTail = currTermTail->next;
+            }
+            if (currTermTail == nullptr) {
+                // 不足k个或者刚好就是完整的一组的末尾
+                // 上一组的尾巴连上当前的头
+                preTail->next = currTermHead;
+                return res;
+            }
+            if (i == 0) res = currTermTail;
+            // 保存下一个头
+            ListNode *tempNode = currTermTail->next;
+            // 根据currTermHead和currTermTail以及k反转链表
+            auto [newHead, newTail] = reverseLinkNodeK(currTermHead, currTermTail);
+            // 重新连接新的头到上一个链表的尾
+            preTail->next = newHead;
+            preTail = newTail;
+            currTermHead = tempNode;
+        }
+    }
+};
+```
+
+上面的想法给出了一个直观的想法，下面给的代码是另一种思路：需要额外遍历链表记录要进行翻转的次数，反转链表函数每次返回的是尾部节点和尾部节点的下一个节点，然后在主函数中进行连接：（这种方法省一点循环的时间）
+
+```cpp
+class Solution {
+public:
+    // 返回尾结点和尾结点的下一个节点
+    vector<ListNode*> reverseLinkNodeK(ListNode* head, ListNode* pre, int k) {
+        vector<ListNode*> ListVec;
+        ListNode *currNode = head, *nextNode;
+        while(k--) {
+            nextNode = currNode->next;
+            currNode->next = pre;
+            pre = currNode;
+            currNode = nextNode;
+        }
+        ListVec.push_back(pre);
+        ListVec.push_back(nextNode);
+        return ListVec;
+    }
+
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        int len = 0;
+        ListNode *p = head, *res;
+        // 首先记录链表的长度和要返回的头
+        while (p!=nullptr) {
+            len++;
+            if (len == k) res = p;
+            p=p->next;
+        }
+        // 一共要进行几轮旋转
+        int term = len / k;
+        // 初始化辅助指针pre
+        ListNode *currHead = head, *pre = new ListNode();
+        while (term--) {
+            vector<ListNode*> vec = reverseLinkNodeK(currHead, pre, k);
+            pre->next = vec[0];
+            pre = currHead;
+            currHead->next = vec[1];
+            currHead = currHead->next;
+        }
+        return res;
+    }
+};
+```
+
+
+

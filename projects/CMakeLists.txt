@@ -33,5 +33,12 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         二叉树的最大深度/test.cpp
         翻转二叉树/test.cpp
         对称二叉树/test.cpp
-        二叉树的直径/test.cpp)
-add_executable(test 二叉树的最大深度/test.cpp)
+        二叉树的直径/test.cpp
+        二叉树的层序遍历/test.cpp
+        将有序数组转换为二叉搜索树/test.cpp
+        验证二叉搜索树/test.cpp
+        二叉搜索树中第K小的元素/test.cpp
+        二叉树的右视图/test.cpp
+        二叉树展开为链表/test.cpp
+)
+add_executable(test 两两交换链表中的结点/test.cpp)
