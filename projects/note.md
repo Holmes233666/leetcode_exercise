@@ -1519,5 +1519,32 @@ public:
 };
 ```
 
+### 二叉树的最近公共祖先
 
+![image-20240910210742517](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240910210742517.png)
+
+如何找二叉树的最近公共祖先：遍历每个子树，当左右子树返回的都不是空节点时，那么这个结点是最近的公共祖先。
+
+- 先判断在不在左子树
+- 再判断在不在右子树
+
+返回的是自下往上第一个满足组右子树都满足非空的结点（一定一个是p，一个是q），所以该结点一定是LCA
+
+```cpp
+class Solution {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        return LCA(root, p, q);
+    }
+
+    TreeNode* LCA(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (root == nullptr || root == p || root == q) return root;
+        TreeNode* leftNode = LCA(root->left, p, q);
+        TreeNode* rightNode = LCA(root->right, p, q);
+        if (leftNode == nullptr) return rightNode;
+        if (rightNode == nullptr) return leftNode;
+        return root;
+    }
+};
+```
 
