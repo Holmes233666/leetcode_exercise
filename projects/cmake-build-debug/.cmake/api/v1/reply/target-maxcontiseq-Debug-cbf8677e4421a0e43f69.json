@@ -85,7 +85,8 @@
 				33,
 				34,
 				35,
-				36
+				36,
+				37
 			]
 		}
 	],
@@ -154,7 +155,8 @@
 				33,
 				34,
 				35,
-				36
+				36,
+				37
 			]
 		}
 	],
@@ -380,6 +382,12 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "\u8def\u5f84\u603b\u548c/test.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u4e8c\u53c9\u6811\u6700\u8fd1\u516c\u5171\u7956\u5148/test.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],
