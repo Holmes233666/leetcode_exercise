@@ -161,7 +161,9 @@ public:
 };
 ```
 
-但是上面的解法中，对于k=0的情况，会将$sums[i] = sums[i]-k$这种情况算入最终的答案（即nums={1,2,3},k=0时结果返回值为3，结果应该为0），即答案错误地中包含了为空的子数组。但是由于哈希表中无法缓存前缀和的序号（可以实现但是很麻烦），我们不妨模仿两数之和的做法，边遍历边放入哈希表，并在将自身放入哈希表之前查找哈希表，这样就可以避免将自身作为待减去的前缀和的情况。代码如下：
+但是上面的解法中，对于k=0的情况，会将$sums[i] = sums[i]-k$这种情况算入最终的答案（即nums={1,2,3},k=0时结果返回值为3，结果应该为0），即答案错误地中包含了为空的子数组。还存在另外一种情况，如果sums[i] = -2, sums[j] = -5，假如j>i,且target=3，那么错误的区间[j,i]也会被计算进去，造成错误。所以前缀和的使用应该在一轮遍历中进行，不能预先计算完所有的前缀和。
+
+我们模仿两数之和的做法，边遍历边放入哈希表，并在将自身放入哈希表之前查找哈希表，这样就可以避免上述两种情况：
 
 ```cpp
 // 前缀和+哈希表
@@ -184,6 +186,58 @@ public:
     }
 };
 
+```
+
+### 路径总和III
+
+![image-20240910190149443](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240910190149443.png)
+
+法1：不难想到可以对每个结点进行一次深搜，每个结点作为输入，搜索这个结点往下的子树是否存在满足条件的路径，并记录。但是这种方法毫无疑问，时间复杂会比较高：$O(n^2)$
+
+需要熟悉前缀和的方法：（1）使用哈希表记录<前缀和-出现次数>；（2）使用前缀和的关系：`ump.find(tempSum-target)!=umap.end()`；
+
+这种在数组中扫描一次，用tempSum记录的优势在深搜的树中优势表现得更加明显：每个结点结尾的前缀和只会考虑一次，不会造成重复，直到到达路径的叶子节点后，依次弹栈，tempSum依次减去当前值，然后在分支处考虑别的结点。时间复杂度为$O(n)$，代码实现如下：
+
+```cpp
+class Solution {
+public:
+    unordered_map<long, int> ump;
+    int pathSum(TreeNode* root, int targetSum) {
+        if (!root) return 0;
+        // long表示和，int表示有该和的路径的个数
+        ump[0] = 1;
+        int res = 0;
+        long tempSum = 0;
+        DFS(root, targetSum, tempSum, res);
+        return res;
+
+    }
+
+    void DFS(TreeNode* root, long target, long& tempSum, int& res) {
+        if (root != nullptr) {
+            tempSum += root->val;
+            // umap中有该值
+            if (ump.find(tempSum-target) != ump.end()) {
+                res += ump[tempSum-target];
+            }
+            ump[tempSum]++;
+            // 分别对左右节点进行深搜
+            // 左节点进行深搜
+            DFS(root->left, target, tempSum, res);
+            // 深搜结束，从umap中去掉tempSum-root->val的值的频次
+            if (root->left != nullptr) {
+                ump[tempSum]--;
+                tempSum -= root->left->val;
+            }
+            // 右节点进行深搜
+            DFS(root->right, target, tempSum, res);
+            if (root->right != nullptr) {
+                ump[tempSum]--;
+                tempSum -= root->right->val;
+            }
+        }
+    }
+};
 ```
 
 ## 滑动窗口
@@ -1418,6 +1472,49 @@ public:
             currHead = currHead->next;
         }
         return res;
+    }
+};
+```
+
+## 树的处理（递归）
+
+### 从前序与中序遍历构造二叉树
+
+![image-20240910190241409](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240910190241409.png)
+
+从前序和中序构造关键在于**根据root节点划分左右子树**，然后**左右子树递归构造**即可：每次构造的时候先判断子树的root节点（依据前序，前序的第一个即为子树的root），创建root节点。然后根据root的下标（这时候为了快速根据前序的值判断中序的下标，需要使用**哈希表**），划分为左右子树。递归调用，分别传入左右子树的下标范围以及对应的前序的第一个位置：对于左子树来说，他的前序的第一个位置即为当前的root在pre+1，对于右子树来说，他的前序位置为当前root在pre中位置+左子树的节点数量（左边界到root的距离）。具体代码如下：
+
+```cpp
+class Solution {
+public:
+    unordered_map<int, int> ump;
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        if (preorder.size() == 0) return nullptr;
+        TreeNode* rootFather = new TreeNode(-1);
+        // 将所有中序的元素放入哈希表: 值：下标
+        for (int i = 0; i < inorder.size(); i++) {
+            ump.emplace(inorder[i], i);
+        }
+        createBasedInorder(preorder, inorder, rootFather->left, 0, inorder.size()-1, 0);
+        return rootFather->left;
+    }
+
+    // 基于中序，然后查询前序去构造二叉树
+    void createBasedInorder(vector<int>& preorder, vector<int>& inorder, TreeNode* &newNode,
+        int startInorder, int endInorder, int startPre) {
+        // 如果end >= start，那么递归继续，否则递归终止
+        if (endInorder >= startInorder) {
+            // 先根据前序找到root结点的值和位置
+            int rootVal = preorder[startPre];
+            int rootIndex = ump[rootVal];
+            int leftLength = rootIndex-startInorder;
+            newNode = new TreeNode(rootVal);
+            // 然后构造左右子树
+            createBasedInorder(preorder, inorder, newNode->left, startInorder, rootIndex-1,
+                startPre+1);
+            createBasedInorder(preorder, inorder, newNode->right, rootIndex+1, endInorder,
+                startPre+leftLength+1);
+        }
     }
 };
 ```
