@@ -345,11 +345,11 @@ build maxcontiseq: CXX_EXECUTABLE_LINKER__maxcontiseq_Debug CMakeFiles/maxcontis
 
 build cmake_object_order_depends_target_test: phony || CMakeFiles/test.dir
 
-build CMakeFiles/test.dir/两两交换链表中的结点/test.cpp.o: CXX_COMPILER__test_unscanned_Debug /Users/sunyunqi/Documents/c++$ code/projects/两两交换链表中的结点/test.cpp || cmake_object_order_depends_target_test
-  DEP_FILE = CMakeFiles/test.dir/两两交换链表中的结点/test.cpp.o.d
+build CMakeFiles/test.dir/腐烂的橘子/test.cpp.o: CXX_COMPILER__test_unscanned_Debug /Users/sunyunqi/Documents/c++$ code/projects/腐烂的橘子/test.cpp || cmake_object_order_depends_target_test
+  DEP_FILE = CMakeFiles/test.dir/腐烂的橘子/test.cpp.o.d
   FLAGS = -g -std=gnu++11 -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk -fcolor-diagnostics
   OBJECT_DIR = CMakeFiles/test.dir
-  OBJECT_FILE_DIR = CMakeFiles/test.dir/两两交换链表中的结点
+  OBJECT_FILE_DIR = CMakeFiles/test.dir/腐烂的橘子
 
 
 # =============================================================================
@@ -359,7 +359,7 @@ build CMakeFiles/test.dir/两两交换链表中的结点/test.cpp.o: CXX_COMPILE
 #############################################
 # Link the executable test
 
-build test: CXX_EXECUTABLE_LINKER__test_Debug CMakeFiles/test.dir/两两交换链表中的结点/test.cpp.o
+build test: CXX_EXECUTABLE_LINKER__test_Debug CMakeFiles/test.dir/腐烂的橘子/test.cpp.o
   FLAGS = -g -arch arm64 -isysroot /Library/Developer/CommandLineTools/SDKs/MacOSX14.4.sdk
   OBJECT_DIR = CMakeFiles/test.dir
   POST_BUILD = :

@@ -71,9 +71,12 @@ public:
             }
         }
         // 进行广度优先搜索
-        while (!q.empty() && currLastOrange > 0) {
-            auto [currI, currJ] = q.front();
-            if (times[currI][currJ] != t) t++;
+        while (!q.empty()) {
+            pair<int, int> p = q.front();
+            int currI = p.first, currJ = p.second;
+            if (times[currI][currJ] != t) {
+                t++;
+            }
             for (int i = 0; i < directions.size(); i++) {
                 int nextI = currI + directions[i][0], nextJ = currJ + directions[i][1];
                 if (nextI < grid.size() && nextI >=0 && nextJ < grid[0].size() && nextJ >= 0 && grid[nextI][nextJ] == 1) {
@@ -90,9 +93,50 @@ public:
     }
 };
 
+class Solution3 {
+public:
+    int orangesRotting(vector<vector<int>>& grid) {
+        int currLastOrange = 0, preLastOrange = 1, t = 0;
+        queue<pair<int, int>> q;
+        vector<vector<int>> times = vector<vector<int>>(grid.size(), vector<int>(grid[0].size(), -INT_MAX));
+        vector<vector<int>> directions = {{0,1}, {1,0}, {0,-1}, {-1,0}};
+        // 记录一共有多少个好橘子，将坏橘子放进队列中
+        for (int i = 0; i < grid.size(); i++) {
+            for (int j = 0; j < grid[0].size(); j++) {
+                if (grid[i][j] == 1) currLastOrange++;
+                if (grid[i][j] == 2) {
+                    q.emplace(i,j);
+                    times[i][j] = 0;
+                }
+            }
+        }
+        // 进行广度优先搜索
+        while (!q.empty()) {
+            pair<int, int> p = q.front();
+            int currI = p.first, currJ = p.second;
+            if (times[currI][currJ] != t) {
+                t++;
+                if (currLastOrange == 0) break;
+            }
+            for (int i = 0; i < directions.size(); i++) {
+                int nextI = currI + directions[i][0], nextJ = currJ + directions[i][1];
+                if (nextI < grid.size() && nextI >=0 && nextJ < grid[0].size() && nextJ >= 0 && grid[nextI][nextJ] == 1) {
+                    q.emplace(nextI, nextJ);
+                    grid[nextI][nextJ] = 2;
+                    times[nextI][nextJ] = t+1;
+                    currLastOrange--;
+                }
+            }
+            q.pop();
+        }
+        return currLastOrange == 0 ? t : -1;
+    }
+};
+
 int main() {
     vector<vector<int>> res = {{2,1,1},{1,1,0},{0,1,1}};
     Solution2 s;
-    cout << "Final Result is" <<s.orangesRotting(res) << endl;
+    cout << "Final Result is " <<s.orangesRotting(res) << endl;
+    return 0;
 }
 
