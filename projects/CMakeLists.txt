@@ -43,5 +43,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         从前序和中序遍历构造二叉树/test.cpp
         路径总和/test.cpp
         二叉树最近公共祖先/test.cpp
+        岛屿数量/test.cpp
+        腐烂的橘子/test.cpp
 )
 add_executable(test 两两交换链表中的结点/test.cpp)

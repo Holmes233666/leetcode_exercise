@@ -86,7 +86,9 @@
 				34,
 				35,
 				36,
-				37
+				37,
+				38,
+				39
 			]
 		}
 	],
@@ -156,7 +158,9 @@
 				34,
 				35,
 				36,
-				37
+				37,
+				38,
+				39
 			]
 		}
 	],
@@ -388,6 +392,18 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "\u4e8c\u53c9\u6811\u6700\u8fd1\u516c\u5171\u7956\u5148/test.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u5c9b\u5c7f\u6570\u91cf/test.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u8150\u70c2\u7684\u6a58\u5b50/test.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],
