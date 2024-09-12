@@ -45,5 +45,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         二叉树最近公共祖先/test.cpp
         岛屿数量/test.cpp
         腐烂的橘子/test.cpp
+        课程表/test.cpp
+        实现前缀树/test.cpp
 )
 add_executable(test 腐烂的橘子/test.cpp)

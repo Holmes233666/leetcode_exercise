@@ -1548,3 +1548,197 @@ public:
 };
 ```
 
+## 图论算法
+
+### 拓扑排序和环检测
+
+拓扑排序的前提是图中没有环。
+
+#### 环检测
+
+环检测的实例：编译器的包依赖关系
+
+关键：除了一般的`visited`数组外，增加一个`onpath`数组：记录目前正在递归栈中的元素，如果正在递归栈中的元素再次被访问到了：那说明含环；而在深搜中`visited`数组起的作用是防止重复深搜（深搜针对的对象是【结点】，针对结点扫描邻接节点），这么看的话，不考虑时间限制的话，其实可以不用`visited`。
+
+![image-20240912194516913](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240912194516913.png)
+
+```cpp
+class Solution {
+public:
+    // 数组实现邻接表
+    vector<vector<int>> grid;
+    vector<int> visted;
+    vector<int> onpath;
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        grid = vector<vector<int>> (numCourses, vector<int>());
+        visted = vector<int> (numCourses, 0);
+        onpath = vector<int> (numCourses, 0);
+        bool flag = true;
+        // 创建邻接表
+        for (int i = 0; i < prerequisites.size(); i++) {
+            int sour = prerequisites[i][1], to = prerequisites[i][0];
+            grid[sour].push_back(to);
+        }
+        // 遍历所有的结点，进行深搜
+        for (int i = 0; i < numCourses; i++) {
+            if (visted[i] == 0) flag = DFS(i);
+            if (flag) return (!flag);
+        }
+        return (!flag);
+    }
+
+    // 深度优先搜索
+    bool DFS(int currNode) {
+        onpath[currNode] = 1;
+        visted[currNode] = 1;
+        bool flag = false;  // 默认不含环
+        for (int i = 0; i < grid[currNode].size(); i++) {
+            int to = grid[currNode][i];
+            if (onpath[to] == 1) {
+                return true;    // 含有环
+            }
+            if (visted[to] == 1) {   // 访问过，不用继续深搜这个路线返回true
+                continue;
+            }else if (visted[to] == 0) {   // 没访问过，需要继续深搜
+                flag = DFS(to);
+                if (flag) break;
+            }
+        }
+        onpath[currNode] = 0;
+        return flag;
+    }
+};
+```
+
+### 前缀树
+
+![image-20240912202047055](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240912202047055.png)
+
+一个直观的方法是使用哈希表实现，哈希表中存入已经插入的单词，然后再判断有无该前缀的时候遍历哈希表，依次判断是否存在该前缀。但是该方法时间复杂度很高。代码如下：
+
+```cpp
+class Trie {
+public:
+    vector<Trie*> child;
+    bool isEnd;
+    Trie() {
+        child = vector<Trie*>(26);
+        isEnd = false;
+    }
+
+    void insert(string word) {
+        Trie* t = this;
+        int index = 0;
+        while (index < word.length()) {
+            int i = word[index++] - 'a';
+            if (t->child[i] == nullptr) {
+                t->child[i] = new Trie();
+            }
+            t = t->child[i];
+        }
+        t->isEnd = true;
+    }
+
+    bool search(string word) {
+        // 从首字母开始依次向下搜索
+        int index = 0;
+        Trie* t = this;
+        while (index < word.length()) {
+            int i = word[index] - 'a';
+            if (t->child[i] == nullptr) return false;
+            t = t->child[i];
+            index++;
+        }
+        if (t->isEnd == false) return false;
+        return true;
+    }
+
+    bool startsWith(string prefix) {
+        // 从首字母开始依次向下搜索
+        int index = 0;
+        Trie* t = this;
+        while (index < prefix.length()) {
+            int i = prefix[index] - 'a';
+            if (t->child[i] == nullptr) return false;
+            t = t->child[i];
+            index++;
+        }
+        return true;
+    }
+};
+```
+
+另一个方式是使用指针数组：`vector<Tire*> child`，该数组初始化时即拥有26个位置，分别对应26个小写字母，该位置是否为空表示是否有字母存在。每个指针数组可以当做`Tire`类的属性，可使用循环迭代创建。同时，由于会有很多前缀单词，所以使用`isEnd`布尔量表征是否到达了单词末尾：在搜索时，如果到达了单词末尾，那么就成功匹配了；否则找到的是一个前缀。代码如下：
+
+```cpp
+class Trie {
+public:
+    vector<Trie*> child;
+    bool isEnd;
+    Trie() {
+        child = vector<Trie*>(26);
+        isEnd = false;
+    }
+
+    void insert(string word) {
+        Trie* t = this;
+        int index = 0;
+        while (index < word.length()) {
+            int i = word[index++] - 'a';
+            if (t->child[i] == nullptr) {
+                t->child[i] = new Trie();
+            }
+            t = t->child[i];
+        }
+        t->isEnd = true;
+    }
+
+    bool search(string word) {
+        // 从首字母开始依次向下搜索
+        int index = 0;
+        Trie* t = this;
+        while (index < word.length()) {
+            int i = word[index] - 'a';
+            if (t->child[i] == nullptr) return false;
+            t = t->child[i];
+            index++;
+        }
+        if (t->isEnd == false) return false;
+        return true;
+    }
+
+    bool startsWith(string prefix) {
+        // 从首字母开始依次向下搜索
+        int index = 0;
+        Trie* t = this;
+        while (index < prefix.length()) {
+            int i = prefix[index] - 'a';
+            if (t->child[i] == nullptr) return false;
+            t = t->child[i];
+            index++;
+        }
+        return true;
+    }
+};
+```
+
+
+
+如果不将指针数组定义为`vector<Tire*> child`，定义为其他数据结构，比如``vector<LinkNode*> child``应该也是可以的。（尝试下）
+
+```cpp
+struct LinkNode{
+  bool isEnd;
+  vector<LinkNode*> child;
+}
+```
+
+实现的代码：
+
+```cpp
+```
+
+
+
+
+
