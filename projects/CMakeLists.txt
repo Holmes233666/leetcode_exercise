@@ -47,5 +47,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         腐烂的橘子/test.cpp
         课程表/test.cpp
         实现前缀树/test.cpp
+        全排列/test.cpp
+        子集/test.cpp
 )
-add_executable(test 腐烂的橘子/test.cpp)
+add_executable(test 子集/test.cpp)

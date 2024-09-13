@@ -1738,6 +1738,113 @@ struct LinkNode{
 ```cpp
 ```
 
+## 回溯
+
+### 全排列
+
+![image-20240913134147103](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240913134147103.png)
+
+全排列问题每个数字都需要出现在结果中，且不同顺序的数字组合是不同的结果。一种直观的方法是DFS暴力搜索，不难发现，递归的终止条件是当前的结果数组中包含了所有的数字。可以使用一个栈保存目前正在递归中的所有的元素，所有元素都访问完后进行弹栈，代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> res;
+    vector<vector<int>> permute(vector<int>& nums) {
+        unordered_map<int, int> umap;
+        for (int i = 0; i < nums.size(); i++) {
+            // 求解以每个数字为首的全排列
+            vector<int> resi;
+            DFS(nums, resi, umap, i);
+            umap.clear();
+        }
+        return res;
+    }
+
+    // 每次遍历不在栈中的元素，栈使用一个哈希表维护
+    void DFS(vector<int>& nums, vector<int> resi, unordered_map<int, int> umap, int currIndex) {
+        umap[nums[currIndex]]++;
+        resi.push_back(nums[currIndex]);
+        // 形成全排列
+        if (umap.size() == nums.size()) {
+            res.push_back(resi);
+            return;
+        }
+        for (int i = 0; i < nums.size(); i++) {
+            if (i != currIndex && umap.find(nums[i]) == umap.end()) {
+                DFS(nums, resi, umap, i);
+            }
+        }
+    }
+};
+```
+
+上面的代码存在的一个比较大的问题是使用的传值，而不是传引用，虽然传值直接减少了显式地去写回溯的操作，但是，传值开销较大。
+
+实际上`vector`也提供了回溯的方法：**`pop_back()`弹出数组的最后一个元素**。另外，对于记录元素是否访问过，直接使用`visited`数组+下标即可，不需要使用哈希表。更新后的代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> res;
+    vector<vector<int>> permute(vector<int>& nums) {
+        vector<bool> visited = vector<bool> (nums.size(), false);
+        vector<int> resi;
+        DFS(nums, resi, visited);
+        return res;
+    }
+
+    // 每次遍历不在栈中的元素，栈使用一个哈希表维护
+    void DFS(vector<int>& nums, vector<int>& resi, vector<bool>& visited) {
+        // 形成全排列
+        if (resi.size() == nums.size()) {
+            res.push_back(resi);
+            return;
+        }
+        for (int i = 0; i < nums.size(); i++) {
+            if (visited[i] == false) {
+                visited[i] = true;
+                resi.push_back(nums[i]);
+                DFS(nums, resi, visited);
+                resi.pop_back();
+                visited[i] = false;
+            }
+        }
+    }
+};
+```
+
+### 子集
+
+![image-20240913160937075](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240913160937075.png)
+
+子集问题和全排列不一样，每个元素可以在集合中中也可以不在集合中，且集合是无序的，不同于全排序。所以在进行子集判断时，需要依次对数组中的每个后续元素进行放入和不放入的判断，而不存在全排列中的`for`循环的过程，否则会造成结果的重复。代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> subsets(vector<int>& nums) {
+        vector<vector<int>> res;
+        vector<int> currRes;
+        DFS(-1, nums, currRes, res);
+        return res;
+    }
+
+    void DFS(int currIndex, vector<int>& nums, vector<int>& currRes, vector<vector<int>>& res) {
+        if (currIndex == nums.size()-1) {
+            // 最后一个数了，不需要向后枚举
+            res.push_back(currRes);
+            return;
+        }
+        // 对于之后的每一个数，都有放入集合和不放入集合两种选择
+        currRes.push_back(nums[currIndex+1]);
+        DFS(currIndex+1, nums, currRes, res);
+        currRes.pop_back();
+        DFS(currIndex+1, nums, currRes, res);
+    }
+};
+```
+
 
 
 
