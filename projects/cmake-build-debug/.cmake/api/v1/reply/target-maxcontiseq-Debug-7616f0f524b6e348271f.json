@@ -92,7 +92,10 @@
 				40,
 				41,
 				42,
-				43
+				43,
+				44,
+				45,
+				46
 			]
 		}
 	],
@@ -168,7 +171,10 @@
 				40,
 				41,
 				42,
-				43
+				43,
+				44,
+				45,
+				46
 			]
 		}
 	],
@@ -436,6 +442,24 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "\u5b50\u96c6/test.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u4e8c\u53c9\u6811\u4e2d\u7684\u6700\u5927\u8def\u5f84\u548c/test.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u7535\u8bdd\u53f7\u7801\u7684\u5b57\u6bcd\u7ec4\u5408/test.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u7ec4\u5408\u7efc\u5408/test.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],

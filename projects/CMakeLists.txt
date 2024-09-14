@@ -49,5 +49,8 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         实现前缀树/test.cpp
         全排列/test.cpp
         子集/test.cpp
+        二叉树中的最大路径和/test.cpp
+        电话号码的字母组合/test.cpp
+        组合总和/test.cpp
 )
 add_executable(test 子集/test.cpp)
