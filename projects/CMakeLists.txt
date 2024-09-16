@@ -52,5 +52,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         二叉树中的最大路径和/test.cpp
         电话号码的字母组合/test.cpp
         组合总和/test.cpp
+        单词搜索/test.cpp
 )
-add_executable(test 子集/test.cpp)
+
+add_executable(test 括号生成/test.cpp)
