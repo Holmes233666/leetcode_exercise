@@ -1738,6 +1738,156 @@ struct LinkNode{
 ```cpp
 ```
 
+### 多源广度优先算法
+
+#### 腐烂的橘子
+
+![image-20240916170746815](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240916170746815.png)
+
+直观的方法：直接模拟上述腐烂的过程，每一轮依次扫描矩阵，对于每个本轮没有访问过的腐烂的橘子（本轮没有访问过是为了保证新腐烂的橘子不会作为源点）进行对四个方向的腐蚀操作。另外，需要使用一个变量记录剩下的好的橘子的数量，这样的腐烂过程持续到所有的橘子都腐烂了，或者连续两轮剩余的好的橘子数量不变。代码如下：
+
+```cpp
+class Solution {
+public:
+    int orangesRotting(vector<vector<int>>& grid) {
+        int currLastOrange = 0, preLastOrange = 1, t = 0;
+        // 记录一共有多少个橘子
+        for (int i = 0; i < grid.size(); i++) {
+            for (int j = 0; j < grid[0].size(); j++) {
+                if (grid[i][j] == 1) currLastOrange++;
+            }
+        }
+        // 访问记录数组，防止本轮被传染的句子传染别的橘子
+        vector<vector<int>> visted = vector<vector<int>>(grid.size(), vector<int>(grid[0].size(),0));
+
+        preLastOrange = currLastOrange + 1;
+        while((preLastOrange != currLastOrange)) {
+            if (currLastOrange == 0) break;
+            preLastOrange = currLastOrange;
+            for (int i = 0; i < grid.size(); i++) {
+                for (int j = 0; j < grid[i].size(); j++) {
+                    // 是个坏橘子，且没被访问过
+                    if (grid[i][j] == 2 && visted[i][j] == 0) {
+                        currLastOrange = searchFourDir(grid, visted, i, j, currLastOrange);
+                    }
+                }
+            }
+            // 重置visted;
+            visted = vector<vector<int>>(grid.size(), vector<int>(grid[0].size(),0));
+            t++;
+        }
+        if (currLastOrange != 0) return -1;
+        return t;
+    }
+
+    int searchFourDir(vector<vector<int>>& grid, vector<vector<int>>& visted, int currI, int currJ, int currLastOrange) {
+        visted[currI][currJ] = 1;
+        vector<vector<int>> directions = {{0,1}, {1,0}, {0,-1}, {-1,0}};
+        for (int i = 0; i < directions.size(); i++) {
+            int nextI = currI + directions[i][0], nextJ = currJ + directions[i][1];
+            if (nextI >= 0 && nextJ >= 0 && nextI < grid.size() && nextJ < grid[0].size() && grid[nextI][nextJ] == 1) {
+                currLastOrange--;
+                grid[nextI][nextJ] = 2;
+                visted[nextI][nextJ] = 1;
+            }
+        }
+        return currLastOrange;
+    }
+};
+```
+
+上述方法在枚举每个腐烂橘子的时候时间复杂度较高。如果能够提前获取这些腐烂的橘子，进行广度优先搜索，那么将不会浪费遍历的过程。
+
+**多源广度优先搜索算法**：该方法假设有一个超级源点橘子，在第0轮的时候感染了那些题中的初始的坏橘子，将他们放入感染队列中，那么对该队列进行广度优先搜索，并记录搜索的层数，那么就能够完成题目的要求。记录搜索的层数可以将在队列中存储的元素换为`pair<pair<int,int>,int>`，也可以初始化一个初始值为`-INT_MAX`的时间数组`times[][]`，用来记录每个单元格被腐蚀的时间，如果当前被腐蚀的时间与上一层腐蚀的时间不同，那么说明已经到了新的一轮。代码如下：
+
+```cpp
+class Solution3 {
+public:
+    int orangesRotting(vector<vector<int>>& grid) {
+        int currLastOrange = 0, preLastOrange = 1, t = 0;
+        queue<pair<int, int>> q;
+        vector<vector<int>> times = vector<vector<int>>(grid.size(), vector<int>(grid[0].size(), -INT_MAX));
+        vector<vector<int>> directions = {{0,1}, {1,0}, {0,-1}, {-1,0}};
+        // 记录一共有多少个好橘子，将坏橘子放进队列中
+        for (int i = 0; i < grid.size(); i++) {
+            for (int j = 0; j < grid[0].size(); j++) {
+                if (grid[i][j] == 1) currLastOrange++;
+                if (grid[i][j] == 2) {
+                    q.emplace(i,j);
+                    times[i][j] = 0;
+                }
+            }
+        }
+        // 进行广度优先搜索
+        while (!q.empty()) {
+            pair<int, int> p = q.front();
+            int currI = p.first, currJ = p.second;
+            if (times[currI][currJ] != t) {
+                t++;
+                if (currLastOrange == 0) break;
+            }
+            for (int i = 0; i < directions.size(); i++) {
+                int nextI = currI + directions[i][0], nextJ = currJ + directions[i][1];
+                if (nextI < grid.size() && nextI >=0 && nextJ < grid[0].size() && nextJ >= 0 && grid[nextI][nextJ] == 1) {
+                    q.emplace(nextI, nextJ);
+                    grid[nextI][nextJ] = 2;
+                    times[nextI][nextJ] = t+1;
+                    currLastOrange--;
+                }
+            }
+            q.pop();
+        }
+        return currLastOrange == 0 ? t : -1;
+    }
+};
+```
+
+### 深度优先搜索
+
+#### 岛屿的数量
+
+![image-20240916172907055](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240916172907055.png)
+
+对于每个为1的没有访问的点，进行深度优先搜索即可，记录这样的源点的数量即可，代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> direction = {{0,1},{1,0}, {0,-1}, {-1,0}};  // 右-下-左-上
+    int numIslands(vector<vector<char>>& grid) {
+        vector<vector<char>> visted = grid;
+        int res = 0;
+        for (int i = 0; i < grid.size(); i++) {
+            for (int j = 0; j < grid[i].size(); j++) {
+                if (grid[i][j] == '1') {
+                    DFS(grid, visted, i, j);
+                    res++;
+                }
+            }
+        }
+        return res;
+    }
+
+    void DFS(vector<vector<char>>& grid, vector<vector<char>>& visted, int currI, int currJ) {
+        // 将当前位置标记为已经搜索
+        visted[currI][currJ] = '0';
+        for (int dirIndx = 0; dirIndx < direction.size(); dirIndx++) {
+            int newI = currI + direction[dirIndx][0], newJ = currJ + direction[dirIndx][1];
+            // 位置正确，且值是1，那么需要深搜。
+            if (ifValidPos(grid, newI, newJ) && visted[newI][newJ] == '1') {
+                DFS(grid, visted, newI, newJ);
+            }
+        }
+
+    }
+    bool ifValidPos(vector<vector<char>>& grid, int i, int j) {
+        if (i >= 0 && i <= grid.size() && j >= 0 && j <= grid[0].size()-1) return true;
+        return false;
+    }
+
+};
+```
+
 ## 回溯
 
 ### 全排列
@@ -1845,7 +1995,99 @@ public:
 };
 ```
 
+### 分割回文串
 
+![image-20240916212950109](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240916212950109.png)
+
+该题是典型的分治，不难发现要想得到一个满足条件的串集合需要进行的：对于一个完整的串，首先判断得到一个回文串`currStr = s[0...i]`，然后对于后面的`s[i+1,...end]`进行递归判断得到后面的回文串，依次加入`currVec`，直到`i+1`超过串的末尾。要获得所有满足条件的串集合则需要进行回溯：对于每一轮递归寻找过程，当找到了满足条件的`currStr = s[i...j]`还不够，我们还需要进一步判断`s[i...j+1]`……是不是回文串，因此，等到递归结束时，还需要对当前的串`currStr`继续加上后面的字符，继续递归处理。当然，如果一个串不是回文串，那么不能进行递归处理，需要一直添加字符，直到是回文串为止。代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<string>> res;
+    vector<vector<string>> partition(string s) {
+        vector<string> currRes;
+        int start = 0;
+        DFS(currRes, start, s);
+        return res;
+    }
+
+    void DFS(vector<string>& currRes, int start, string& s) {
+        // 到最后一个字符了
+        if (start == s.size()) {
+            res.push_back(currRes);
+            return;
+        }
+        if (start <= s.size()-1) {
+            string tempString = "";
+            for (int i = start; i < s.size(); i++) {
+                tempString.push_back(s[i]);
+                if (!judge(tempString)) continue;
+                currRes.push_back(tempString);
+                DFS(currRes, i+1, s);
+                currRes.pop_back();
+            }
+        }
+    }
+
+    bool judge(string& s) {
+        // 判断是不是回文串
+        int left = 0, right = s.size()-1;
+        while (left < right) {
+            if (s[left] != s[right]) return false;
+            left++;
+            right--;
+        }
+        return true;
+    }
+};
+
+```
+
+对于这一题，其实特别需要注意的是**重复的回文串判定过程**，正常的回文串判定过程就像上面的`judge()`函数所示，但是每次这样判断需要大量的时间，而对于一个串`s`的任意子串`s[i...j]`，判断是不是回文串有下面的状态转移方程：
+$$
+f(i,j)=\begin{cases}\text{True,}&\quad i\geq j\\f(i+1,j-1)\wedge(s[i]=s[j]),&\quad\text{otherwise}&\end{cases}
+$$
+因此，可以在正式递归处理之前对回文串进行预处理。完整的代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<string>> res;
+    vector<vector<bool>> f;
+    vector<vector<string>> partition(string s) {
+        vector<string> currRes;
+        f = vector<vector<bool>> (s.size(), vector<bool>(s.size(), true));
+        // 回文串的预判断，注意边界条件
+        for (int i = s.size()-2; i >= 0; i--) {
+            for (int j = i + 1; j < s.size(); j++) {
+                f[i][j] = f[i+1][j-1] && (s[i] == s[j]);
+            }
+        }
+        int start = 0;
+        DFS(currRes, start, s);
+        return res;
+    }
+
+    void DFS(vector<string>& currRes, int start, string& s) {
+        // 到最后一个字符了
+        if (start == s.size()) {
+            res.push_back(currRes);
+            return;
+        }
+        if (start <= s.size()-1) {
+            string tempString = "";
+            for (int i = start; i < s.size(); i++) {
+                tempString.push_back(s[i]);
+                if (!f[start][i]) continue;
+                currRes.push_back(tempString);
+                DFS(currRes, i+1, s);
+                currRes.pop_back();
+            }
+        }
+    }
+};
+```
 
 
 

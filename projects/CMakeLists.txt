@@ -53,6 +53,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         电话号码的字母组合/test.cpp
         组合总和/test.cpp
         单词搜索/test.cpp
+        分割回文串/test.cpp
 )
 
 add_executable(test 括号生成/test.cpp)

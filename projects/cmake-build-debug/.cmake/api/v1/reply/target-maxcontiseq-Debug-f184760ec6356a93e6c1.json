@@ -96,7 +96,8 @@
 				44,
 				45,
 				46,
-				47
+				47,
+				48
 			]
 		}
 	],
@@ -176,7 +177,8 @@
 				44,
 				45,
 				46,
-				47
+				47,
+				48
 			]
 		}
 	],
@@ -468,6 +470,12 @@
 			"backtrace" : 1,
 			"compileGroupIndex" : 0,
 			"path" : "\u5355\u8bcd\u641c\u7d22/test.cpp",
+			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"compileGroupIndex" : 0,
+			"path" : "\u5206\u5272\u56de\u6587\u4e32/test.cpp",
 			"sourceGroupIndex" : 0
 		}
 	],
