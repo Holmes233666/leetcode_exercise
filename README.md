@@ -801,7 +801,7 @@ public:
 
 Note：注意，在有关vector图像的题目中，正序遍历数组比逆序遍历速度更快。
 
-### 搜索二维矩阵
+### 搜索二维矩阵II
 
 ![image-20240727003825360](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240727003825360.png)
 
@@ -2089,5 +2089,48 @@ public:
 };
 ```
 
+## 二分查找
 
+### 搜索二维矩阵
+
+![image-20240917171404087](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240917171404087.png)
+
+与搜索二维矩阵II不同，这里多了一个条件：每一行的第一个整数大于前一行的最后一个整数——这使得我们不需要再进行z字型查找。只需要进行两次二分查找：
+
+- 第一次对第一列进行二分查找，确定小于等于target的行
+- 第二次对该行进行二分查找，确定该数
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    bool searchMatrix(vector<vector<int>>& matrix, int target) {
+        // 首先对列进行二分查找
+        vector<int> col;
+        for (int i = 0; i < matrix.size(); i++) {
+            col.push_back(matrix[i][0]);
+        }
+        int rowIdx = binarySearch(target, 0, col.size()-1, col);
+        if (rowIdx < 0 || rowIdx >= matrix.size()) return false;
+        // 对第colIdx行进行检索
+        int colIdx = binarySearch(target, 0, matrix[rowIdx].size()-1, matrix[rowIdx]);
+        if (colIdx < 0) return false;
+        if (matrix[rowIdx][colIdx] == target) return true;
+        return false;
+    }
+    int binarySearch(int target, int start, int end, vector<int>& nums) {
+        if (start == end) {
+            if (nums[start] <= target) return start;
+            if (nums[start] > target) return start-1;
+        }
+        
+        int mid = (start + end) / 2;
+        if (nums[mid] == target) return mid;
+        if (nums[mid] > target) return binarySearch(target, start, mid, nums);
+        return binarySearch(target, mid+1, end, nums);
+        
+    }
+};
+```
 

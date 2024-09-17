@@ -13,7 +13,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         缺失的第一个正数/test.cpp
         矩阵置零/test.cpp
         螺旋矩阵/test.cpp
-        搜索二维矩阵/test.cpp
+        搜索二维矩阵II/test.cpp
         旋转图像/test.cpp
         相交链表/test.cpp
         反转链表/test.cpp
@@ -54,6 +54,10 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         组合总和/test.cpp
         单词搜索/test.cpp
         分割回文串/test.cpp
+        N皇后/test.cpp
+        搜索插入位置/test.cpp
+        搜索二维矩阵I/test.cpp
+        在排序数组中查找元素的第一个和最后一个位置/test.cpp
 )
 
 add_executable(test 括号生成/test.cpp)
