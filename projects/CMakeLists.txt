@@ -58,6 +58,8 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         搜索插入位置/test.cpp
         搜索二维矩阵I/test.cpp
         在排序数组中查找元素的第一个和最后一个位置/test.cpp
+        搜索旋转排序数组/test.cpp
+        寻找旋转排序数组中的最小值/test.cpp
 )
 
 add_executable(test 括号生成/test.cpp)

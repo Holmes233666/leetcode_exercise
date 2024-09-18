@@ -30,20 +30,20 @@ public:
         int rowIdx = binarySearch(target, 0, col.size()-1, col);
         if (rowIdx < 0 || rowIdx >= matrix.size()) return false;
         // 对第colIdx行进行检索
-        int colIndex = binarySearch(target, 0, matrix[rowIdx].size()-1, matrix[rowIdx]);
-        if (colIndex < 0) return false;
-        if (matrix[rowIdx][colIndex] == target) return true;
+        int colIdx = binarySearch(target, 0, matrix[rowIdx].size()-1, matrix[rowIdx]);
+        if (colIdx < 0) return false;
+        if (matrix[rowIdx][colIdx] == target) return true;
         return false;
     }
     int binarySearch(int target, int start, int end, vector<int>& nums) {
-        if (start == end) {
+        if (start > end) {
             if (nums[start] <= target) return start;
             if (nums[start] > target) return start-1;
         }
 
         int mid = (start + end) / 2;
         if (nums[mid] == target) return mid;
-        if (nums[mid] > target) return binarySearch(target, start, mid, nums);
+        if (nums[mid] > target) return binarySearch(target, start, mid-1, nums);
         return binarySearch(target, mid+1, end, nums);
 
     }

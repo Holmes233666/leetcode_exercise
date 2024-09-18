@@ -2120,17 +2120,20 @@ public:
         return false;
     }
     int binarySearch(int target, int start, int end, vector<int>& nums) {
-        if (start == end) {
+        if (start > end) {
             if (nums[start] <= target) return start;
             if (nums[start] > target) return start-1;
         }
         
         int mid = (start + end) / 2;
         if (nums[mid] == target) return mid;
-        if (nums[mid] > target) return binarySearch(target, start, mid, nums);
+        if (nums[mid] > target) return binarySearch(target, start, mid-1, nums);
         return binarySearch(target, mid+1, end, nums);
         
     }
 };
 ```
 
+### 搜索旋转排序数组
+
+![image-20240918163414065](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240918163414065.png)
