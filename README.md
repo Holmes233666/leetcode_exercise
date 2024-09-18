@@ -2095,6 +2095,8 @@ public:
 
 ![image-20240917171404087](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240917171404087.png)
 
+
+
 与搜索二维矩阵II不同，这里多了一个条件：每一行的第一个整数大于前一行的最后一个整数——这使得我们不需要再进行z字型查找。只需要进行两次二分查找：
 
 - 第一次对第一列进行二分查找，确定小于等于target的行
@@ -2134,6 +2136,249 @@ public:
 };
 ```
 
-### 搜索旋转排序数组
+### lowerbound与upperbound的实现
+
+![image-20240918165540195](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240918165540195.png)
+
+这题其实就是C++的STL中的`upperbound`和`lowerbound`的一种实现（并不完全一样，这两个函数找不到时不是返回-1）。这里二分查找的过程的关键在于对相等情况的处理：具体来说，对于`lowerbound`，对`=`部分的处理和`>`部分相同，应该在区间`[start, mid-1]`区间内进行递归；对于`upperbound`来说，对`=`部分的处理和`<`部分相同，应该在区间`[mid+1, end]`区间内进行递归。（反向思考一下，如果正好相反，那么会找不到相应的边界，或者先想一下两种情况下对于等于怎么处理，即单独拎出来等于的情况，然后和大于和等于的哪种相同，进行合并，这种想法会直观些）。
+
+另一个关键点在于最后没找到的话怎么办？原先的代码给出了下面的处理方式（感觉比较难以理解）：
+
+```cpp
+class Solution {
+public:
+    vector<int> searchRange(vector<int>& nums, int target) {
+        if (nums.size() == 0) return {-1,-1};
+        int lb = getLowerBound(target, 0, nums.size()-1, nums);
+        if (lb == -1) return {-1,-1};
+        int ub = getUpperBound(target, 0, nums.size()-1, nums);
+        return {lb,ub};
+    }
+
+    int getLowerBound(int target, int start, int end, vector<int>& nums) {
+        if (start > end) {
+            return -1;
+        }
+        int mid = (start + end) / 2;
+        if (nums[mid] < target) return getLowerBound(target, mid + 1, end, nums);
+        int res =  getLowerBound(target, start, mid-1, nums);
+        if (res == -1) {
+            // 如果没找到，那么看看mid
+            if (nums[mid] == target) return mid;
+            return -1;
+        }
+        return res;
+    }
+
+    int getUpperBound(int target, int start, int end, vector<int>& nums) {
+        if (start > end) {
+            return -1;
+        }
+        int mid = (start + end) / 2;
+
+        if (nums[mid] > target) {
+            return getUpperBound(target, start, mid-1, nums);  // 递归左半部分
+        }
+        int res =  getUpperBound(target, mid+1, end, nums);
+        if (res == -1) {
+            // 如果没找到，那么看看mid
+            if (nums[mid] == target) return mid;
+            return -1;
+        }
+        return res;
+    }
+};
+```
+
+在理解了[搜索旋转排序数组](###搜索旋转排序数组)一节对pivot的记录方法后，想到了另一种直接的写法，其实本质上和第一种方式一样，只是直接用引用，避免了复杂的return判断过程。以及这种逼近的思想能够很容易地写出相应的递归部分的代码。代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<int> searchRange(vector<int>& nums, int target) {
+        if (nums.size() == 0) return {-1,-1};
+        int lb = -1;
+        getLowerBound(target, 0, nums.size()-1, nums, lb);
+        if (lb == -1) return {-1,-1};
+        int ub = -1;
+        getUpperBound(target, 0, nums.size()-1, nums, ub);
+        return {lb,ub};
+    }
+
+    void getLowerBound(int target, int start, int end, vector<int>& nums, int& lb) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] >= target) {
+                if (nums[mid] == target) lb = mid;
+                getLowerBound(target, start, mid-1, nums, lb);
+            }
+            if (nums[mid] < target) getLowerBound(target, mid + 1, end, nums, lb);
+        }
+    }
+
+    void getUpperBound(int target, int start, int end, vector<int>& nums, int& ub) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] <= target) {
+                if (nums[mid] == target) ub = mid;
+                getUpperBound(target, mid + 1, end, nums, ub);
+            }
+            if (nums[mid] > target) getUpperBound(target, start, mid-1, nums, ub);
+        }
+    }
+};
+```
+
+### 部分有序数组的二分
+
+#### 搜索旋转排序数组
 
 ![image-20240918163414065](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240918163414065.png)
+
+首先给出一种直观的想法：如果我们知道数组中原本的**第一个元素的位置`pivotIndex`**，那么根据该位置，可以将数组**划分为两个有序部分**，每个部分进行一次二分查找即可实现对目标`target`的寻找。但是如何在`O(logn)`时间内找到该下标是关键。
+
+可以利用**二分的过程找到`pivot`**。如下图所示，我们以nums[0]为参考点，pivot及其右侧的元素都小于nums[0]，而pivot左侧（除了nums[0]）的元素都大于nums[0]，那么二分查找的过程可以即为：
+
+- 当`nums[mid]>nums[0]`时（参考index = q的情况），应该在区间[mid + 1, end]内进行二分查找，以逐渐逼近pivot
+- 当`nums[mid]<nums[0]`时（参考index = p的情况），应该在区间[start, mid-1]内进行二分查找，以逐渐逼近pivot；同时由于已经进入了后半区间，只是不知道是否是pivot，所以此时应该将mid记录
+
+查找pivot的二分的终止过程与一般二分的终止过程相同：`start > end`即终止递归。
+
+![image-20240918164039144](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240918164039144.png)
+
+找到`pivot`后分别对`pivot`两侧的有序数组进行二分查找即可。完整的实现代码如下：
+
+```cpp
+class Solution {
+public:
+    int search(vector<int>& nums, int target) {
+        // 首先二分寻找pivot
+        int start = 1, end = nums.size()-1, pivotIdx = -1;
+        searchPivot(nums, start, end, pivotIdx);
+        // 然后对pivot两边进行两次二分查找
+        int idxLeft = binarySearch(target, 0, pivotIdx, nums);
+        if (idxLeft == -1) {
+            int idxRight = binarySearch(target, pivotIdx + 1, end, nums);
+            return idxRight == -1 ? -1 : idxRight;
+        }
+        return idxLeft;
+    }
+
+    // 搜索比nums[0]小的最小的数
+    void searchPivot(vector<int>& nums, int start, int end, int& minIdx) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            // 没有等于的情况，每个数都是不同的
+            if (nums[0] > nums[mid]) {
+                minIdx = mid;   // mid比nums[0]小的时候，记录min的下标
+                searchPivot(nums, start, mid - 1, minIdx);
+            }
+            searchPivot(nums, mid + 1, end, minIdx);
+        }
+    }
+
+    int binarySearch(int target, int start, int end, vector<int>& nums) {
+        if (start > end) return -1;
+        int mid = (start + end) / 2;    // 不越界的写法：end + (start - end) / 2;
+        if (nums[mid] == target) return mid;
+        if (nums[mid] > target) return binarySearch(target, start, mid - 1, nums);
+        return binarySearch(target, mid + 1, end, nums);
+    }
+};
+```
+
+方法2是直接利用二分的过程求解，其思想可以概括为：
+
+- 将数组一分为二。（其中有一个一定是有序的；另一个则是有序或部分有序的）
+- 此时如果target在有序部分里，则用二分法查找。
+- 否则进入无序部分查找，返回1。
+
+其中，有序无序的判断可以根据子数组的首元素和末尾元素的大小判断。根据上述思想，实现的代码如下：
+
+```cpp
+class Solution {
+public:
+    int search(vector<int>& nums, int target) {
+        // 一个数组一定有有序和无序两个部分：
+        return whereTarget(nums, 0, nums.size()-1, target);
+    }
+
+    int whereTarget(vector<int>& nums, int start, int end, int target) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] == target) return mid;
+            // 先找到有序的那个部分，判断target在不在有序的那部分中
+            if (nums[mid] >= nums[start]) {  // 这一段是有序的，一定要加等于，mid可能等于start，即区间只有一个数，是有序的
+                if (target >= nums [start] && target < nums[mid]) {
+                    // 进行二分查找
+                    return binarySearch(target, start, mid - 1, nums);
+                }else { // 在无序的那一段中
+                    return whereTarget(nums, mid + 1, end, target);
+                }
+            }else { // 这一段是无序的
+                // 先在有序段中进行二分查找
+                if (target >= nums [mid] && target <= nums[end]) {
+                    return binarySearch(target, mid + 1, end, nums);
+                }else {// 在无序的那一段中
+                    return whereTarget(nums, start, mid - 1, target);
+                }
+            }
+        }
+        return -1;
+    }
+
+    int binarySearch(int target, int start, int end, vector<int>& nums) {
+        if (start > end) return -1;
+        int mid = (start + end) / 2;    // 不越界的写法：end + (start - end) / 2;
+        if (nums[mid] == target) return mid;
+        if (nums[mid] > target) return binarySearch(target, start, mid - 1, nums);
+        return binarySearch(target, mid + 1, end, nums);
+    }
+};
+```
+
+#### 寻找旋转排序数组中的最小值
+
+![image-20240918171913574](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240918171913574.png)
+
+基于[搜索旋转排序数组](####搜索旋转排序数组)中的第一种做法，本题也可以从寻找`pivot`的角度出发直接求解：因为最小值就是上一题中的`pivot`。代码如下：
+
+```cpp
+class Solution {
+public:
+    int findMin(vector<int>& nums) {
+        int pIdx = -1;
+        searchPivot(nums, 1, nums.size()-1, pIdx);
+        return pIdx == -1 ? nums[0] : nums[pIdx];
+    }
+
+    void searchPivot(vector<int>& nums, int start, int end, int& pIdx) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] < nums[0]) {
+                pIdx = mid;
+                searchPivot(nums, start, mid - 1, pIdx);
+            }else {
+                searchPivot(nums, mid + 1, end, pIdx);
+            }
+        }
+    }
+};
+```
+
+假如本题是要找到排序数组中的最大值，那么`pIdx`只需要在`nums[mid] > nums[0]`时进行更新即可，这样能通过不断记录比`nums[0]`大的元素，逐渐逼近最大的那个。代码如下：
+
+```cpp
+void searchPivot(vector<int>& nums, int start, int end, int& pIdx) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] < nums[0]) {
+                searchPivot(nums, start, mid - 1, pIdx);
+            }else {
+                pIdx = mid;
+                searchPivot(nums, mid + 1, end, pIdx);
+            }
+        }
+    }
+```
+
