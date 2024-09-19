@@ -2382,3 +2382,59 @@ void searchPivot(vector<int>& nums, int start, int end, int& pIdx) {
     }
 ```
 
+### 寻找两个正序数组的中位数
+
+![image-20240919195326467](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240919195326467.png)
+
+如何从分治的角度思考查找中位数？首先，根据数组长度和为奇数还是偶数划分，中位数是两个数组中的第`(m+n)/2+1`个数或者第`(m+n)/2+1`和第`(m+n)/2`个数的平均数。因此，问题转换为了找到两个数组中的第K大的数，其中$K=(m+n)/2$或$K=(m+n)/2+1$。直接找到目标数并不容易，但是该问题的一个**最小的问题是，找到第1小的数**：直接比较两个数组的首元素，哪个小返回即可。所以分治的目标即是将第K大的元素通过规模减小，逐渐减小到找到第1大的元素。
+
+另一方面，`O(log(m+n))`的时间复杂度直接提示该题使用二分：二分能够帮助排除区间的一部分长度，直到K为1为止。由于有两个数组，本题应该选择的`pivot`是`K/2-1`位置上的数，比较两个数组该位置上的数字的大小有三种情况：
+
+- `nums1[pIdx]<nums2[pIdx]`：那么`nums1[pIdx]`位置处的元素一定不是第K大的数，因为它至多比`K-2`个数大，加上`nums1[pIdx]`，即他至多是是第K-1大的元素；因此nums1的前`K/2-1`个数可以排除，在后续的结果中递归寻找第`K-(K/2-1 + 1)`个数。
+- `nums1[pIdx]>nums2[pIdx]`，类比第一类可以排除得到结果
+- `nums1[pIdx]==nums2[pIdx]`，如果相等，也可以排除，参考第一类即可。
+
+另外，有一种特殊的情况，如果该轮次的开始元素+`K/2-1`大于数组长度了，那么可以选择数组的最后一个元素，最后去除的时候去除实际去除的元素即可。
+
+实现代码如下：
+
+```cpp
+class Solution {
+public:
+    double findMedianSortedArrays(vector<int>& nums1, vector<int>& nums2) {
+        // 数组长度为偶数，返回中间两数和的平均
+        if ((nums1.size() + nums2.size()) % 2 == 0) {
+            int k1 = (nums1.size() + nums2.size()) / 2;
+            int k2 = k1 + 1;
+            return (getKth(nums1, nums2, k1, 0, 0) + getKth(nums1, nums2, k2, 0, 0)) / 2.0;
+        }else {
+            int k = (nums1.size() + nums2.size()) / 2 + 1;
+            return getKth(nums1, nums2, k, 0, 0);
+        }
+    }
+
+    double getKth(vector<int>& nums1, vector<int>& nums2, int K, int left1, int left2) {
+        if (left1 == nums1.size()) return nums2[left2 + K - 1];
+        if (left2 == nums2.size()) return nums1[left1 + K - 1];
+        if (K == 1) return min(nums1[left1], nums2[left2]);
+        // 如果有越界的情况：
+        int pivotIdx1 = left1 + K/2 - 1 >= nums1.size() ? nums1.size() - 1 : left1 + K/2 - 1;
+        int pivotIdx2 = left2 + K/2 - 1 >= nums2.size() ? nums2.size() - 1 : left2 + K/2 - 1;
+        if (nums1[pivotIdx1] <= nums2[pivotIdx2]) {
+            int newK = K - ((K/2 - 1) + 1);
+            if (left1 + K/2 - 1 >= nums1.size()){
+                newK = K - (nums1.size() - 1 - left1 + 1);
+            }
+            return getKth(nums1, nums2, newK, pivotIdx1+1, left2);
+        }else {
+            // 如果数组2没有越界：排除nums2前k/2-1个个元素以及nums1[left1 + K/2 - 1]
+            int newK = K - ((K/2 - 1) + 1);
+            if (left2 + K/2 - 1 >= nums2.size()){
+                newK = K - (nums2.size() - 1 - left2 + 1);
+            }
+            return getKth(nums1, nums2, newK, left1, pivotIdx2+1);
+        }
+    }
+};
+```
+

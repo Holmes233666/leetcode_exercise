@@ -60,6 +60,8 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         在排序数组中查找元素的第一个和最后一个位置/test.cpp
         搜索旋转排序数组/test.cpp
         寻找旋转排序数组中的最小值/test.cpp
+        有效的括号/test.cpp
+        寻找两个正序数组的中位数/test.cpp
 )
 
 add_executable(test 括号生成/test.cpp)
