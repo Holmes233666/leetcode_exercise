@@ -2438,3 +2438,82 @@ public:
 };
 ```
 
+## 栈
+
+### 字符串解码
+
+![image-20240920144149311](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240920144149311.png)
+
+不难看出，最关键的问题在于如何处理嵌套式的编码，比如：`3[a2[b4[ab]]]`；如果是直观写法的话，应该先处理最内层的编码，然后由内而外进行处理。由内而外的处理过程提示我们之前扫描过的字符需要暂存；而一组闭合的`[]`提示一层编码结束了，形成了一个字符串，新的字符串也需要暂存（因为可能是某个内嵌的字符串，需要\*n处理的）。`[]`前面必有数字，这些数字也应该得到暂存，\*n处理的过程以及由内而外处理的过程提示我们暂存的结果最好以栈的形式进行存取（队列的话不方便由内）。
+
+具体处理方法：分两个栈：数字栈，符号栈
+
+- 遇到数字，一直i++，获取完整的数字后压栈
+- 遇到符号
+  - 扫描`[`：压字符栈`[`
+  - 扫描字母：压字符栈
+  - 扫描`]`：弹字符栈，直到遇到`[`，表示形成一个字母串。弹栈`[`，然后与数字栈顶的数字形成*n的串，弹出数字栈顶元素，最后形成的新的字符串压字符栈
+- 扫描完毕，从栈中取出字符串逆序连接。
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    string decodeString(string s) {
+        stack<int> nums;
+        stack<string> strs;
+        for (int i = 0; i < s.size();) {
+            int tempNum = 0;
+            if (s[i] >= '0' && s[i] <= '9') {
+                while (s[i] >= '0' && s[i] <= '9') {
+                    tempNum = tempNum * 10 + s[i] - '0';
+                    i++;
+                }
+                nums.emplace(tempNum);
+            }else {
+                string tempStr;
+                if (s[i] == '[') {
+                    tempStr.push_back('[');
+                    strs.emplace(tempStr);
+                    i++;
+                }else if (s[i] == ']') {
+                    while (!strs.empty() && strs.top() != "[") {
+                        tempStr = strs.top() + tempStr;
+                        strs.pop();
+                    }
+                    // 弹出'['
+                    if (!strs.empty()) strs.pop();
+                    // tempStr要重复num次
+                    int num = nums.top();
+                    nums.pop();
+                    string newStr = tempStr;
+                    while (--num) {
+                        newStr += tempStr;
+                    }
+                    // 新的字符串压栈
+                    strs.emplace(newStr);
+                    i++;
+                }else { // 遇到的是字符，直接压栈
+                    string tempStr;
+                    tempStr.push_back(s[i]);
+                    strs.emplace(tempStr);
+                    i++;
+                }
+            }
+        }
+        // 获得了所有的字符后，将字符串取出，进行连接。
+        string res;
+        while (!strs.empty()) {
+            res = strs.top() + res;
+            strs.pop();
+        }
+        return res;
+    }
+};
+```
+
+### 每日温度
+
+![image-20240920161919322](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240920161919322.png)
+

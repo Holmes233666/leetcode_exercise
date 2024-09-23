@@ -62,6 +62,13 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         寻找旋转排序数组中的最小值/test.cpp
         有效的括号/test.cpp
         寻找两个正序数组的中位数/test.cpp
+        最小栈/test.cpp
+        字符串解码/test.cpp
+        数组中的第K个最大元素/test.cpp
+        每日温度/test.cpp
+        柱状图中最大的矩形/test.cpp
+        买卖股票的最佳时机/test.cpp
+        爬楼梯/test.cpp
 )
 
-add_executable(test 括号生成/test.cpp)
+add_executable(test 每日温度/test.cpp)
