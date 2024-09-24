@@ -2513,7 +2513,112 @@ public:
 };
 ```
 
-### 每日温度
+### 单调栈
+
+#### 每日温度
 
 ![image-20240920161919322](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240920161919322.png)
+
+#### 接雨水
+
+在双指针一节中，接雨水使用了动态规划的方式求解，
+
+#### 柱状图中最大的矩形
+
+![image-20240924133014452](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240924133014452.png)
+
+暴力的想法：
+
+- 枚举宽度：对于每个柱子，向右遍历，记录当前的最低高度，并不断更新该高度，遍历到每一个柱子时，记录下此时的面积，不断更新最大面积
+- 枚举高度：对于一个柱子，我们向左/右分别寻找比他高度小的第一个柱子，然后枚举面积。
+
+枚举宽度的做法对于每个柱子都要向右枚举，时间复杂度为$O(n^2)$，代码如下（超时）：
+
+```cpp
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        int res = 0;
+        for (int left = 0; left < heights.size(); left++) {
+            if (heights[left] == 0) continue;
+            int miniHeight = heights[left];
+            res = max(res, heights[left]);
+            for (int right = left + 1; right < heights.size(); right++) {
+                miniHeight = min(heights[right], miniHeight);
+                res = max(miniHeight * (right - left + 1), res);
+            }
+        }
+        return res;
+    }
+};
+```
+
+对于枚举高度的做法， 向左向右寻找第一个更小的值的过程，使用两次$O(n)$的循环+单调栈实现，最后再计算面积，代码如下：
+
+```cpp
+class Solution2 {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        stack<pair<int, int>> numStack;
+        numStack.push({heights[0],0});
+        vector<int> rightFirLow = vector<int>(heights.size(), heights.size()-1);
+        vector<int> leftFirLow = vector<int>(heights.size(), 0);
+        int res = 0;
+        // 先从右到左，求解每个位置的下一个最小值出现的位置
+        for (int i = 1; i < heights.size(); i++) {
+            while (!numStack.empty() && heights[i] < numStack.top().first) {
+                rightFirLow[numStack.top().second] = i-1;
+                numStack.pop();
+            }
+            numStack.push({heights[i], i});
+        }
+
+        stack<pair<int, int>> numStack2;
+        numStack2.push({heights[heights.size()-1], heights.size()-1});
+        // 然后从左到右，求解每个位置的下一个最小元素出现的位置
+        for (int i = heights.size()-2; i >= 0; i--) {
+            while (!numStack2.empty() && heights[i] < numStack2.top().first) {
+                leftFirLow[numStack2.top().second] = i+1;
+                numStack2.pop();
+            }
+            numStack2.push({heights[i], i});
+        }
+        // 求解完左边和右边的第一个比当前元素的下标（包括当前元素），然后对每个矩形求解其能构成的最大面积
+        for (int i = 0; i < heights.size(); i++) {
+            res = max(heights[i] * (rightFirLow[i] - leftFirLow[i] + 1), res);
+        }
+        return res;
+    }
+};
+```
+
+上述的代码使用了两个循环记录，但其实在从左向右寻找右侧第一个最小值时，对于栈顶元素：`stack.top()`，他找到了右侧的第一个比它小的值`i`；而对于正好遍历到的元素`i`，待弹栈过程结束时，他找到了左侧第一个比它小的值；即代码可以优化如下：
+
+```cpp
+class Solution {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        stack<pair<int, int>> numStack;
+        numStack.push({heights[0],0});
+        vector<int> rightFirLow = vector<int>(heights.size(), heights.size()-1);
+        vector<int> leftFirLow = vector<int>(heights.size(), 0);
+        int res = 0;
+        // 先从右到左，求解每个位置的下一个最小值出现的位置
+        for (int i = 1; i < heights.size(); i++) {
+            while (!numStack.empty() && heights[i] < numStack.top().first) {
+                rightFirLow[numStack.top().second] = i-1;
+                numStack.pop();
+            }
+            leftFirLow[i] = numStack.empty() ? 0 : numStack.top().second + 1;
+            numStack.push({heights[i], i});
+        }
+
+        // 求解完左边和右边的第一个比当前元素的下标（包括当前元素），然后对每个矩形求解其能构成的最大面积
+        for (int i = 0; i < heights.size(); i++) {
+            res = max(heights[i] * (rightFirLow[i] - leftFirLow[i] + 1), res);
+        }
+        return res;
+    }
+};
+```
 
