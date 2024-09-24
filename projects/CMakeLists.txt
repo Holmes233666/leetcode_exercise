@@ -69,6 +69,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         柱状图中最大的矩形/test.cpp
         买卖股票的最佳时机/test.cpp
         爬楼梯/test.cpp
+        前K个高频元素/test.cpp
+        数据流的中位数/test.cpp
+        跳跃游戏/test.cpp
 )
 
-add_executable(test 每日温度/test.cpp)
+add_executable(test 数组中的第K个最大元素/test.cpp)
