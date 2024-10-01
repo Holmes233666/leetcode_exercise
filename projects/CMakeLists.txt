@@ -75,6 +75,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         跳跃游戏II/test.cpp
         划分字母区间/test.cpp
         杨辉三角/test.cpp
+        打家劫舍/test.cpp
 )
 
 add_executable(test 数组中的第K个最大元素/test.cpp)

@@ -2630,8 +2630,129 @@ public:
 
 ## 贪心算法
 
+### 买卖股票的最佳时机
 
+![image-20241001123455355](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241001123455355.png)
+
+如何做出最佳决策？对于第$i$天，如果知道后面哪一天价格最高，那么可得第$i$天的最大利润；全局的最优解即为所有可能买入时间的利润的最大值。所以问题的关键在于，**对于每一天如何知道后面哪天的价格最高**。不难想到，先从右向左记录每个元素的后续最大值：`rightMax[i] = max(price[i], rightMax[i+1])`，同时`rightMax`中的所有元素初始化为`rightMax[i] = price[end]`。此外，同时维护一个`maxPro`变量，即可在边记录时，边更新最大利润。代码如下：
+
+```cpp
+class Solution {
+public:
+    int maxProfit(vector<int>& prices) {
+        int maxPro = 0;
+        vector<int> rightMax = vector<int>(prices.size(), prices[prices.size()-1]);
+        for (int i = prices.size()-2; i >= 0; i--) {
+            rightMax[i] = prices[i] >= rightMax[i+1] ? prices[i] : rightMax[i+1];
+            maxPro = max(maxPro, rightMax[i] - prices[i]);
+        }
+        return maxPro;
+    }
+};
+```
+
+### 跳跃游戏
+
+![image-20241001150829927](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241001150829927.png)
+
+暴力想法：遍历数组的每一个位置，将可以到达的位置都打上标记，遍历完后检查最后一个位置是否被标记了即可，此时时间复杂度为$O(n^2)$。代码如下：
+```cpp
+class Solution {
+public:
+    bool canJump(vector<int>& nums) {
+        vector<bool> ifJump = vector<bool>(nums.size(), false);
+        ifJump[0] = true;
+        for (int i = 0; i < nums.size(); i++) {
+            if (ifJump[i]) {
+                for (int j = 1; j < nums[i]; j++) {
+                    ifJump[i+j] = true;
+                }
+            }
+        }
+        return ifJump[nums.size()-1];
+    }
+};
+```
+
+上述的方法的主要时间浪费在给每个可达元素做标记，其中有很多是重复的。不妨维护一个变量`maxReach`，表示目前能够跳到的最大位置，在遍历数组的过程中只更新`maxReach`（而不是给每个元素都做标记），直到`maxReach`大于等于数组的最后位置的下标，或者遍历到`maxReach`后无法向前。代码如下：
+
+```cpp
+class Solution {
+public:
+    bool canJump(vector<int>& nums) {
+        int lastMaxIdx = nums[0];
+        for (int i = 0; i <= lastMaxIdx; i++) {
+            lastMaxIdx = max(i + nums[i], lastMaxIdx);
+            if (lastMaxIdx >= nums.size()-1) return true;   // 提前跳出循环的重要性
+        }
+        return false;
+    }
+};
+```
+
+这样时间复杂度优化到了$O(n)$。
+
+### 跳跃游戏II
+
+![image-20241001155611599](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241001155611599.png)
+
+在[跳跃游戏](###跳跃游戏)的基础上，要求记录最少的步数。在上一题第二种解法的基础上，其实最少的步数就是我们更新了`maxReach`，`maxReach`超过最后一个下标的时候。
 
 ### 划分字母区间
 
 ![image-20240925183525280](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240925183525280.png)
+
+### 打家劫舍
+
+![image-20241001231602944](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241001231602944.png)
+
+直观的想法是，使用一个二维数组$f[0][i]$和$f[1][i]$分别表示对第$i$家是否进行偷窃获得的最大金额，在比较的过程中记录最大的偷窃金额，初始情况如下：
+$$
+\begin{align}f(0)=\begin{cases}nums[0],&取\\
+0,&不取
+\end{cases}\end{align}\\
+$$
+
+$$
+\begin{align}f(1)=\begin{cases}nums[1],&取\\
+nums[0],&不取
+\end{cases}\end{align}
+$$
+
+对于任意$n\geq 2$，递推方程为：
+$$
+f(n)=\begin{align}\begin{cases}\max(\begin{cases}f(n-2),不取\\f(n-2),取\end{cases})+nums[n]\\max(f(n-1),f(n-2))\end{cases}\end{align}
+$$
+代码如下：
+
+```cpp
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int n = nums.size();
+        if (n==1) return nums[0];
+        vector<vector<int>> f = vector<vector<int>>(2, vector<int>(n, 0));  // 2个数组，0是不取，1是取
+        f[0][0] = 0;    // 对于第0家，不取
+        f[1][0] = nums[0];  // 对于第0家，取
+        f[0][1] = nums[0];  // 对于第1家，不取
+        f[1][1] = nums[1];  // 对于第1家，取
+        int maxPro = max(nums[0], nums[1]);
+        for (int i = 2; i < n; i++) {
+            f[0][i] = max(max(f[0][i-1], f[1][i-1]), max(f[0][i-2], f[1][i-2]));
+            f[1][i] = max(f[0][i-2], f[1][i-2]) + nums[i];
+            maxPro = max(f[0][i], f[1][i]);
+        }
+        return maxPro;
+    }
+};
+```
+
+注意到，其实上述的递推公式中，我们始终需要的都是取与不取中的较大值，所以设$f(n)$为考虑完第$n$家时的最大值利润，其实递推公式可以化简为：
+$$
+f(n) = max(f(n-2)+nums[n], f(n-1))
+$$
+最后返回$f(n)$即可。代码如下：
+
+```cpp
+```
+

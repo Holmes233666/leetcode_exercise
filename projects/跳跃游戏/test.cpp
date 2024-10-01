@@ -44,11 +44,9 @@ class Solution3 {
 public:
     bool canJump(vector<int>& nums) {
         int lastMaxIdx = nums[0];
-        for (int i = 0; i < nums.size(); i++) {
-            if (lastMaxIdx >= i) {
-                lastMaxIdx = max(i + nums[i], lastMaxIdx);
-                if (lastMaxIdx >= nums.size()-1) return true;   // 提前跳出循环的重要性
-            }
+        for (int i = 0; i <= lastMaxIdx; i++) {
+            lastMaxIdx = max(i + nums[i], lastMaxIdx);
+            if (lastMaxIdx >= nums.size()-1) return true;   // 提前跳出循环的重要性
         }
         return false;
     }

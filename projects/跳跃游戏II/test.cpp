@@ -70,3 +70,23 @@ public:
 };
 
 // 在跳跃游戏的解法上进行优化，每次只要在超过maxStep时进行记录即可
+class Solution4 {
+public:
+    int jump(vector<int>& nums) {
+        int currMaxReach = nums[0], end = nums[0];
+        int currSteps = 0;
+        for (int i = 0; i < currMaxReach; i++) {
+            if (i + nums[i] > currMaxReach) {
+                currMaxReach = i + nums[i];
+                if (i > end) {
+                    end = currMaxReach;
+                    currSteps++;
+                }
+            }
+            if (currMaxReach >= nums.size()) break;
+        }
+        return currSteps;
+    }
+};
+
+
