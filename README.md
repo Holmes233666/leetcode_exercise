@@ -2702,6 +2702,85 @@ public:
 
 ![image-20240925183525280](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240925183525280.png)
 
+划分字母区间要求一个字母只能在一个区间内出现，所以知道该字母出现的最后一个位置非常重要。获取：
+
+- 比$x$大/小的最后一个数
+- 比$x$大/小的下一个数
+- 字母出现的下一个位置
+
+等等，都可以采取从右向左扫描记录的方式。
+
+对于字母的最后一个位置的记录，可以使用数组或者哈希表。（下面的两种代码分别给出了两种方式）
+
+划分字母区间即要获取一个片段的start位置和end位置：
+
+- 对于start处的字母，获取`s[start]`的最后一个位置，记为`end`，然后扫描`[start, end]`区间内的所有字母，获取区间内的所有字母的最后出现的位置，更新end，直到扫描到end，即获取到了一个片段。
+- end + 1位置为下一个start位置，重复上述步骤。
+
+记录方式为哈希表和数组的两种方式的代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<int> res;
+    vector<int> nextLetterLoc;
+    unordered_map<char, int> umap;
+    vector<int> partitionLabels(string s) {
+        nextLetterLoc = vector<int>(s.size(), 0);
+        for (int i = s.size()-1; i >= 0; i--) {
+            if (umap[s[i]] == 0) umap[s[i]] = i;    // 第一次出现
+            // 记录umap中最后一次出现的位置
+            nextLetterLoc[i] = umap[s[i]];
+        }
+        int start = 0;
+        while (start < s.size()) {
+            start = getAStr(s, start) + 1;
+        }
+        return res;
+    }
+
+    int getAStr(string& s, int start) {
+        // 找到start和start字母最后一次出现的位置之间的所有字母的下一个位置
+        int nextIdxofStart = nextLetterLoc[start], end = nextIdxofStart;
+        // 记录中间出现的字母的下一个最大位置，初始最大位置为start字母出现的下一个最大位置。
+        for (int i = start + 1; i < end; i++) {
+            end = max(end, nextLetterLoc[i]);
+        }
+        res.push_back(end - start + 1);
+        return end;
+    }
+};
+```
+
+```cpp
+class Solution {
+public:
+    vector<int> res;
+    vector<int> nextLetterLoc = vector<int>(26, 0);
+    vector<int> partitionLabels(string s) {
+        for (int i = s.size()-1; i >= 0; i--) {
+            nextLetterLoc[s[i] - 'a'] = max(nextLetterLoc[s[i]-'a'], i);
+        }
+        int start = 0;
+        while (start < s.size()) {
+            start = getAStr(s, start) + 1;
+        }
+        return res;
+    }
+
+    int getAStr(string& s, int start) {
+        // 找到start和start字母最后一次出现的位置之间的所有字母的下一个位置
+        int nextIdxofStart = nextLetterLoc[s[start]-'a'], end = nextIdxofStart;
+        // 记录中间出现的字母的下一个最大位置，初始最大位置为start字母出现的下一个最大位置。
+        for (int i = start + 1; i < end; i++) {
+            end = max(end, nextLetterLoc[s[i]-'a']);
+        }
+        res.push_back(end - start + 1);
+        return end;
+    }
+};
+```
+
 ### 打家劫舍
 
 ![image-20241001231602944](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241001231602944.png)
@@ -2754,5 +2833,56 @@ $$
 最后返回$f(n)$即可。代码如下：
 
 ```cpp
+class Solution {
+public:
+    int rob(vector<int>& nums) {
+        int n = nums.size();
+        if (n==1) return nums[0];
+        vector<int> f = vector<int>(n, nums[0]);
+        f[1] = max(nums[0], nums[1]);
+        for (int i = 2; i < n; i++) {
+            f[i] = max(f[i-2] + nums[i], f[i-1]);
+        }
+        return f[n-1];
+    }
+};
 ```
 
+## 动态规划
+
+### 完全平方数
+
+![image-20241002170023344](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241002170023344.png)
+
+对于输入$n$，设$f(n)$为输入$n$的完全平方数的最少数量，其子问题是：对于任意$j<n$，如果有$j+i^2 = n$，那么有状态转移方程：
+$$
+f(n) = \min_{i=1}^{int(\sqrt{n})}(f[n-i^2]+1,f(n))
+$$
+该状态方程表示的是，在所有的$n-i^2=j$的$j$中挑一个最小的。【注意这里的+1指的就是$n-i^2+i^2$后等于n了，即是能够构成和为n的所有情况里挑一个】
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    int numSquares(int n) {
+        vector<int> f = vector<int>(n+1,INT_MAX-1);
+        f[0] = 1;
+        for (int i = 2; i <= n; i++) {
+            int SqrtI = int(sqrt(i));
+            if (i == SqrtI * SqrtI) {
+                f[i] = 1;
+            }else{
+                for (int j = 1; j <= SqrtI; j++) {
+                    f[i] = min(f[i-j*j]+1, f[i]);
+                }
+            }
+        }
+        return f[n];
+    }
+};
+```
+
+### 零钱兑换
+
+![image-20241002171114780](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241002171114780.png)
