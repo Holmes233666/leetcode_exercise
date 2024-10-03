@@ -2781,6 +2781,8 @@ public:
 };
 ```
 
+## 动态规划
+
 ### 打家劫舍
 
 ![image-20241001231602944](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241001231602944.png)
@@ -2848,8 +2850,6 @@ public:
 };
 ```
 
-## 动态规划
-
 ### 完全平方数
 
 ![image-20241002170023344](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241002170023344.png)
@@ -2886,3 +2886,34 @@ public:
 ### 零钱兑换
 
 ![image-20241002171114780](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241002171114780.png)
+
+与[完全平方数](###完全平方数)一题的状态转移方程类似，定义$f(n)$为和为$n$时需要的最少的硬币个数，那么有状态转移方程：
+$$
+f(n) = \min_{i\in coins[j]}(f(n-coins[j])+1, f(n))
+$$
+代码如下：
+
+```cpp
+class Solution {
+public:
+    int coinChange(vector<int>& coins, int amount) {
+        vector<int> f = vector<int>(amount+1, INT_MAX-1);
+        f[0] = 0;
+        for (int i = 1; i <= amount; i++) {
+            for (int j = 0; j < coins.size(); j++) {
+                if (coins[j] <= i) {
+                    f[i] = min(f[i-coins[j]] + 1, f[i]);
+                }
+            }
+        }
+        if (f[amount] == INT_MAX-1) return -1;
+        return f[amount];
+    }
+};
+```
+
+另一种更直观的方式是进行深度优先搜索，遍历所有的方式，记录数量最少的方式。代码如下：
+
+```cpp
+```
+

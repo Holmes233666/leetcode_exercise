@@ -1,4 +1,6 @@
+#include<queue>
 
+using namespace std;
 
 class MedianFinder {
 public:

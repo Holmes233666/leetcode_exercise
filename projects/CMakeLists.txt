@@ -79,6 +79,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         完全平方数/test.cpp
         零钱兑换/test.cpp
         单词拆分/test.cpp
+        最长递增子序列/test.cpp
+        乘积最大子数组/test.cpp
+        分割等和子集/test.cpp
 )
 
 add_executable(test 数组中的第K个最大元素/test.cpp)
