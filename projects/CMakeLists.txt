@@ -82,6 +82,13 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         最长递增子序列/test.cpp
         乘积最大子数组/test.cpp
         分割等和子集/test.cpp
+        最长有效括号/test.cpp
+        不同路径/test.cpp
+        最小路径和/test.cpp
+        最长回文子串/test.cpp
+        最长公共子序列/test.cpp
+        只出现一次的数字/test.cpp
+        多数元素/test.cpp
 )
 
 add_executable(test 数组中的第K个最大元素/test.cpp)
