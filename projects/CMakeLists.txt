@@ -89,6 +89,10 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         最长公共子序列/test.cpp
         只出现一次的数字/test.cpp
         多数元素/test.cpp
+        颜色分类/test.cpp
+        下一个排列/test.cpp
+        寻找重复数/test.cpp
+        编辑距离/test.cpp
 )
 
 add_executable(test 数组中的第K个最大元素/test.cpp)
