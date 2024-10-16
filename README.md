@@ -113,7 +113,11 @@ public:
 
 ![image-20240731174401300](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240731174401300.png)
 
+### 合并两个有序数组
 
+
+
+![image-20241011213453819](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241011213453819.png)
 
 ## 前缀和
 
@@ -2914,6 +2918,79 @@ public:
 
 另一种更直观的方式是进行深度优先搜索，遍历所有的方式，记录数量最少的方式。代码如下：
 
+
+
+### 编辑距离
+
+![image-20241010215732778](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241010215732778.png)
+
+首先，需要注意到将`word1`转换为`word2`需要的最少操作次数和将`word2`转换为`word1`的最少操作次数是对称的，所以次数相等，所以我们只需要考虑将`word1`转换为`word2`的操作即可，即每次有三种选择：
+
+- 在word1中插入字符
+- 在word1中删除字符
+- 在word1中替换字符
+
+【分析子问题】：如果两个单词的末尾的单词相同，比如都是字母`e`，那么这个转换的问题一定可以推给子问题：两个单词都去掉最后一个字母后的最小转换次数，如下图：
+
+<img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241011111359521.png" alt="image-20241011111359521" style="zoom:50%;" />
+
+如果不同，以`word1=horse`，`word2=ros`为例，分别考虑三种操作下的子问题：
+
+- 在word1中插入一个字母`s`，那么只需要比较`word1[0....n1]`和`word2[0...n2-1]`即可。（n1,n2分别是单词的总长度）
+
+  <img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241011111545630.png" alt="image-20241011111545630" style="zoom:50%;" />
+
+- 在word1中删除字符`e`，那么需要比较的是`word1[0,...n1]`和`word2[0...n2]`即可。
+
+  <img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241011112259523.png" alt="image-20241011112259523" style="zoom:50%;" />
+
+- 在word1中替换字符，将`word1`尾部的`e`替换成了`word2`尾部的`s`，那么考了的就是`word[0,....,n1-1]`和`word2[0,...,n2-1]`：
+
+  <img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241011112433991.png" alt="image-20241011112433991" style="zoom:50%;" />
+
+<img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241011112516221.png" alt="image-20241011112516221" style="zoom:50%;" />
+
+综上，我们最终得到`word1`转换为`word2`的最少操作次数，如果他们尾部字符不相同，那么只需要在上述三种情况下选择操作次数最少的一种方法。这就是该问题的子问题。
+
+使用`dp[i][j]`表示考虑`word1`的前`i`和字符和`word2`的前`j`个字符需要的最少转换次数，那么状态转移方程可以写成下面的形式：
+$$
+dp[i][j]=\begin{cases}\begin{align}&dp[i-1][j-1],& word[i] == word[j]\\
+&min(dp[i][j-1], dp[i-1][j],dp[i-1][j-1])+1, & else\end{align}\end{cases}
+$$
+从用自下而上的方式计算，初始化矩阵为$n1+1$行$n2+1$列，矩阵的第一行和第一列都分别初始化为$0,1,2....,n2$和$0,1,2,...,n1$，表示第前0个字母如何转换为相应的结果。而每个$dp[i][j]$在计算的时候需要的结果：$dp[i-1][j]、dp[i][j-1]、dp[i-1][j-1]$都已经完成计算，可以直接使用。代码如下：
+
 ```cpp
+class Solution {
+public:
+    int minDistance(string word1, string word2) {
+        int n1 = word1.size(), n2 = word2.size();
+        vector<vector<int>> dp = vector<vector<int>>(n1+1, vector<int>(n2+1, 0));
+        // 首先初始化，从word1的前i个字符到word20个字符的值等于word1此时的长度
+        for (int i = 1; i <= word1.size(); i++) {
+            dp[i][0] = i;
+        }
+        // 从word2的前若干个字符到word1的前0个字符的值等于word2此时的长度
+        for (int j = 1; j <= word2.size(); j++) {
+            dp[0][j] = j;
+        }
+        // 开始填表
+        for (int i = 1; i <= n1; i++) {
+            for (int j = 1; j <= n2; j++) {
+                // 取：A中增加一个字符，在B中增加一个字符，更改A中的一个字符 三者中最小的
+                if (word1[i-1] == word2[j-1]) {
+                    dp[i][j] = min(min(dp[i][j-1]+1, dp[i-1][j]+1), dp[i-1][j-1]);
+                }else{
+                    dp[i][j] = min(min(dp[i][j-1]+1, dp[i-1][j]+1), dp[i-1][j-1]+1);
+                }
+                
+            }
+        }
+        return dp[n1][n2];
+    }
+};
 ```
+
+## 其他技巧
+
+### 位运算
 

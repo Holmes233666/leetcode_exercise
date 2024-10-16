@@ -93,6 +93,11 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         下一个排列/test.cpp
         寻找重复数/test.cpp
         编辑距离/test.cpp
+        合并两个有序数组/test.cpp
+        移除元素/test.cpp
+        盛水最多的容器/test.cpp
+        删除有序数组中的重复项/test.cpp
+        删除有序数组中的重复项II/test.cpp
 )
 
 add_executable(test 数组中的第K个最大元素/test.cpp)
