@@ -226,6 +226,30 @@ N皇后/test.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\maxcontiseq.dir\build.make CMakeFiles/maxcontiseq.dir/N皇后/test.cpp.s
 .PHONY : N皇后/test.cpp.s
 
+O(1)时间插入、删除和获取随机元素/test.obj: O(1)时间插入、删除和获取随机元素/test.cpp.obj
+.PHONY : O(1)时间插入、删除和获取随机元素/test.obj
+
+# target to build an object file
+O(1)时间插入、删除和获取随机元素/test.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\maxcontiseq.dir\build.make CMakeFiles/maxcontiseq.dir/O(1)时间插入、删除和获取随机元素/test.cpp.obj
+.PHONY : O(1)时间插入、删除和获取随机元素/test.cpp.obj
+
+O(1)时间插入、删除和获取随机元素/test.i: O(1)时间插入、删除和获取随机元素/test.cpp.i
+.PHONY : O(1)时间插入、删除和获取随机元素/test.i
+
+# target to preprocess a source file
+O(1)时间插入、删除和获取随机元素/test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\maxcontiseq.dir\build.make CMakeFiles/maxcontiseq.dir/O(1)时间插入、删除和获取随机元素/test.cpp.i
+.PHONY : O(1)时间插入、删除和获取随机元素/test.cpp.i
+
+O(1)时间插入、删除和获取随机元素/test.s: O(1)时间插入、删除和获取随机元素/test.cpp.s
+.PHONY : O(1)时间插入、删除和获取随机元素/test.s
+
+# target to generate assembly for a file
+O(1)时间插入、删除和获取随机元素/test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\maxcontiseq.dir\build.make CMakeFiles/maxcontiseq.dir/O(1)时间插入、删除和获取随机元素/test.cpp.s
+.PHONY : O(1)时间插入、删除和获取随机元素/test.cpp.s
+
 main.obj: main.cpp.obj
 .PHONY : main.obj
 
@@ -393,6 +417,30 @@ main.cpp.s:
 买卖股票的最佳时机/test.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles\maxcontiseq.dir\build.make CMakeFiles/maxcontiseq.dir/买卖股票的最佳时机/test.cpp.s
 .PHONY : 买卖股票的最佳时机/test.cpp.s
+
+买股票的最佳时机II/test.obj: 买股票的最佳时机II/test.cpp.obj
+.PHONY : 买股票的最佳时机II/test.obj
+
+# target to build an object file
+买股票的最佳时机II/test.cpp.obj:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\maxcontiseq.dir\build.make CMakeFiles/maxcontiseq.dir/买股票的最佳时机II/test.cpp.obj
+.PHONY : 买股票的最佳时机II/test.cpp.obj
+
+买股票的最佳时机II/test.i: 买股票的最佳时机II/test.cpp.i
+.PHONY : 买股票的最佳时机II/test.i
+
+# target to preprocess a source file
+买股票的最佳时机II/test.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\maxcontiseq.dir\build.make CMakeFiles/maxcontiseq.dir/买股票的最佳时机II/test.cpp.i
+.PHONY : 买股票的最佳时机II/test.cpp.i
+
+买股票的最佳时机II/test.s: 买股票的最佳时机II/test.cpp.s
+.PHONY : 买股票的最佳时机II/test.s
+
+# target to generate assembly for a file
+买股票的最佳时机II/test.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles\maxcontiseq.dir\build.make CMakeFiles/maxcontiseq.dir/买股票的最佳时机II/test.cpp.s
+.PHONY : 买股票的最佳时机II/test.cpp.s
 
 二叉搜索树中第K小的元素/test.obj: 二叉搜索树中第K小的元素/test.cpp.obj
 .PHONY : 二叉搜索树中第K小的元素/test.obj
@@ -2433,6 +2481,9 @@ help:
 	@echo ... N皇后/test.obj
 	@echo ... N皇后/test.i
 	@echo ... N皇后/test.s
+	@echo ... O(1)时间插入、删除和获取随机元素/test.obj
+	@echo ... O(1)时间插入、删除和获取随机元素/test.i
+	@echo ... O(1)时间插入、删除和获取随机元素/test.s
 	@echo ... main.obj
 	@echo ... main.i
 	@echo ... main.s
@@ -2454,6 +2505,9 @@ help:
 	@echo ... 买卖股票的最佳时机/test.obj
 	@echo ... 买卖股票的最佳时机/test.i
 	@echo ... 买卖股票的最佳时机/test.s
+	@echo ... 买股票的最佳时机II/test.obj
+	@echo ... 买股票的最佳时机II/test.i
+	@echo ... 买股票的最佳时机II/test.s
 	@echo ... 二叉搜索树中第K小的元素/test.obj
 	@echo ... 二叉搜索树中第K小的元素/test.i
 	@echo ... 二叉搜索树中第K小的元素/test.s

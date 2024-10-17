@@ -115,9 +115,146 @@ public:
 
 ### 合并两个有序数组
 
-
-
 ![image-20241011213453819](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241011213453819.png)
+
+**双指针：**合并两个有序数组的直接做法是使用额外空间的数组，使用双指针+扫尾即可。这种实现的代码如下：
+
+```cpp
+class Solution {
+public:
+    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+        vector<int> sorted = nums1;
+        int p0=0, p1=0, p=0;
+        while (p < m+n) {
+            if (m != 0 && n != 0 && nums1[p0] <= nums2[p1]) {
+                sorted[p++] = nums1[p0++];
+            }else if (m != 0 && n != 0 && nums1[p0] > nums2[p1]){
+                sorted[p++] = nums2[p1++];
+            }
+
+            if (p0 == m) {  // 扫尾只剩下p1
+                while (p1 < n) {
+                    sorted[p++] = nums2[p1++];
+                }
+            }else if (p1 == n) {
+                while (p0 < m) {
+                    sorted[p++] = nums1[p0++];
+                }
+            }
+        }
+
+        // 拷贝回nums1
+        for (int i = 0; i < sorted.size(); i++) {
+            nums1[i] = sorted[i];
+        }
+    }
+};
+```
+
+**排序：**另一种方法是直接合并，然后排序，这种方法的时间复杂度会比双指针的时间复杂度更高一些。
+
+**逆向双指针：**在双指针的方法中使用了额外的空间，而不是进行原地操作（因为原地操作回覆盖数组1中的数）。在数组1的大小为`m+n`时，如果进行逆向扫描，那么可以直接原地完成两个数组的合并，代码如下：
+
+```cpp
+class Solution2 {
+public:
+    void merge(vector<int>& nums1, int m, vector<int>& nums2, int n) {
+        int end1 = m-1, end2 = n-1, end = m + n -1;
+        while (end1 >= 0 || end2 >= 0) {
+            if (end1 >= 0 && end2 >= 0) {
+                if (nums1[end1] > nums2[end2]) {
+                    nums1[end--] = nums1[end1--];
+                }else {
+                    nums1[end--] = nums2[end2--];
+                }
+            }else if (end1 >= 0) {
+                nums1[end--] = nums1[end1--];
+            }else if (end2 >= 0) {
+                nums1[end--] = nums2[end2--];
+            }
+        }
+    }
+};
+```
+
+### 移除元素
+
+![image-20241017161031084](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241017161031084.png)
+
+在处理移除元素怎么做前，我们处理过：使用一个pivot将数组分成左右两个部分，一部分大于这个pivot，一部分小于这个pivot。这是快速排序中的场景。这里要求原地删除所有数值等于pivot的数，且其检查的方法只扫描数组的前若干个元素，并不真的完全扫描完数组，所以类似的，可以使用快速排序中的双指针+pivot的做法：可以选择`val`为pivot，利用双指针将数组右边的数设置为`val`，左边的数不等于`val`。具体地，我们遇到值不等于pivot时，就将其换到前方；否则位置不变。这样最后数组中的前若干个数即为不需要删除的元素。代码如下：
+
+```cpp
+class Solution {
+public:
+    int removeElement(vector<int>& nums, int val) {
+        // 双指针：其中一个指针后面都是不等于val的数，一个指针负责前进，进行交换
+        int right = -1, left = 0;
+        while (left < nums.size()) {
+            if (nums[left] != val) {
+                right++;
+                swap(nums[left], nums[right]);
+            }
+            left++;
+        }
+    }
+};
+```
+
+### 删除有序数组中的重复项
+
+![image-20241017162658626](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241017162658626.png)
+
+本题要求原地删除，即不能使用额外的一个数组。双指针的实现比较符合直观的想法：两个指针，一个向前走（fast），一个不动（slow），fast指针一直向前走，直到遇到不等于slow指针指向的元素，此时slow++，nums[slow]赋值为nums[fast]。fast指针扫完数组，那么重复的元素也就全部删除了。代码如下：
+
+```cpp
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        int n = nums.size(), slow = 0, fast = 0;
+        while (fast < n) {
+            if (nums[slow] == nums[fast]) {
+                fast++;
+            }else { // 不相等
+                slow++;
+                nums[slow] = nums[fast];
+            }
+        }
+        return slow+1;
+    }
+};
+```
+
+### 删除有序数组中的重复项
+
+![image-20241017163503716](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241017163503716.png)
+
+**双指针+计数**：如果直接仿真，那么采取的措施仍基于双指针，slow指针不动，fast指针向前直到找到不同于slow指针所指元素的位置，同时记录有多少个重复元素。如果slow所指元素不重复（fast只比上次所在的位置多走了1步），那么`nums[slow] = nums[fast-1]`，然后`slow++`即可；否则如果有多个元素重复，`nums[slow] = nums[fast-1], nums[++slow]=nums[slow-1]，slow+=1`；由于快慢指针最多只走完整个数组，即`2n`，所以时间复杂度为`O(n)`。完成代码如下：
+
+```cpp
+class Solution {
+public:
+    int removeDuplicates(vector<int>& nums) {
+        int slow = 0, fast = 0, n = nums.size(); // slow记录的始终是第一个待更改的数
+        while (fast < n) {
+            int temp = nums[fast];
+            while(fast < n && nums[fast] == temp) { // 找到第一个与当前下标不同的元素
+                fast++;
+                steps++;
+            }
+            nums[slow] = nums[fast-1];
+            if (steps > 1) {    // 不止一个数，那么保留两个
+                nums[slow+1] = nums[slow];
+                slow += 2;
+            }else {
+                slow++;
+            }
+        }
+        return slow;
+    }
+};
+```
+
+
 
 ## 前缀和
 
@@ -453,9 +590,8 @@ public:
 - 不使用队列的优化
 
 ```cpp
-```
 
-## 动态规划
+```
 
 ## 单调栈/队列
 
