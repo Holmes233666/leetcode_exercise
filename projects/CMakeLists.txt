@@ -100,6 +100,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         删除有序数组中的重复项II/test.cpp
         买股票的最佳时机II/test.cpp
         "O(1)时间插入、删除和获取随机元素/test.cpp"
+        H指数/test.cpp
 )
 
 add_executable(test 数组中的第K个最大元素/test.cpp)

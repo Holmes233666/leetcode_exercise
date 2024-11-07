@@ -51,3 +51,16 @@ public:
         return false;
     }
 };
+
+// 第二次刷到：
+class Solution4 {
+public:
+    bool canJump(vector<int>& nums) {
+        int currMax = 0;
+        for (int i = 0; i <= currMax && i < nums.size(); i++) {
+            currMax = max(currMax, i + nums[i]);
+            if (currMax >= nums.size()-1) return true;
+        }
+        return false;
+    }
+};
