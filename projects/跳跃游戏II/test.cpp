@@ -74,16 +74,15 @@ class Solution4 {
 public:
     int jump(vector<int>& nums) {
         if (nums.size() == 1) return 0;
-        int maxStep = -1, maxReach = 0, lastReach = 0;
+        int maxStep = 0, maxReach = 0, lastReach = 0;
         for (int i = 0; i < nums.size(); i++) {
             maxReach = max(maxReach, i + nums[i]);
+            if (maxReach >= nums.size()-1) {
+                return maxStep+1;
+            }
             if (i == lastReach) {
                 maxStep++;
                 lastReach = maxReach;
-            }
-            if (maxReach >= nums.size()-1) {
-                if (maxReach > lastReach) return maxStep+2;
-                return maxStep+1;
             }
         }
         return maxStep;

@@ -224,7 +224,7 @@ public:
 };
 ```
 
-### 删除有序数组中的重复项
+### 删除有序数组中的重复项II
 
 ![image-20241017163503716](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241017163503716.png)
 
@@ -2836,7 +2836,29 @@ public:
 
 ![image-20241001155611599](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241001155611599.png)
 
-在[跳跃游戏](###跳跃游戏)的基础上，要求记录最少的步数。在上一题第二种解法的基础上，其实最少的步数就是我们更新了`maxReach`，`maxReach`超过最后一个下标的时候。
+在[跳跃游戏](###跳跃游戏)的基础上，要求记录最少的步数。在上一题第二种解法的基础上，我们需要维护一个`lastReach`变量，记录过去一轮能够够到的最远的距离，`maxReach`为当前轮次能够够到的最远距离。在遍历的过程中，当`maxReach`超过最后一个下标的时候，那么就说明目前的步数+1就是最少步数了。随着遍历中`i`逐渐递增，会达到`lastReach`（等于），这时候需要更新`lastReach`为当前的`maxReach`，同时说明步数需要增加1。数组中只有一个元素的例子需要额外特殊处理。代码如下：
+
+```cpp
+class Solution {
+public:
+    int jump(vector<int>& nums) {
+        if (nums.size() == 1) return 0;
+        int maxStep = 0, maxReach = 0, lastReach = 0;
+        for (int i = 0; i < nums.size(); i++) {
+            maxReach = max(maxReach, i + nums[i]);
+            if (maxReach >= nums.size()-1) {
+                return maxStep+1;
+            }
+            if (i == lastReach) {
+                maxStep++;
+                lastReach = maxReach;
+            }
+        }
+        return maxStep;
+    }
+};
+
+```
 
 ### 划分字母区间
 
@@ -3130,3 +3152,14 @@ public:
 
 ### 位运算
 
+
+
+### 颜色分类
+
+![image-20241111110020938](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241111110020938.png)
+
+
+
+### 下一个排列
+
+![image-20241111105924271](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241111105924271.png)

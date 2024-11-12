@@ -4,6 +4,8 @@
 
 using namespace std;
 
+
+// 法1：计数排序 + 逆序搜索
 class Solution {
 public:
     int hIndex(vector<int>& citations) {
@@ -24,6 +26,9 @@ public:
         return 0;
     }
 };
+
+// 法2：计数排序 + 二分查找
+
 
 
 
