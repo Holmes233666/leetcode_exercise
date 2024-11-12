@@ -103,6 +103,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         H指数/test.cpp
         加油站/test.cpp
         最后一个单词的长度/test.cpp
+        分发糖果/test.cpp
 )
 
 add_executable(test 数组中的第K个最大元素/test.cpp)

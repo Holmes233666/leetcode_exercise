@@ -680,7 +680,86 @@ public:
 
 ![image-20240724162316693](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240724162316693.png)
 
+**暴力解法**：暴力的想法是对于每个位置使用双指针，分别向左和向右找到最高的柱子，然后记录当前位置能接的水。这种情况下的时间复杂度是$O(n^2)$。代码省略。
 
+**单调栈类似模拟**：仍然使用双指针，但是不是对于每个位置都进行双指针，而是每次都找到一个降序位置，这样的降序位置构成一个能够接水的坑，然后找下一个坑。具体来说，首先跳过一开始的升序情况（升序情况无法接水），然后开始从第一个降序开始接雨水。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int tot = 0;
+        int start = 0; 
+        // 跳过最开始的非降序情况
+        while(start < height.size() - 1 && height[start+1] >= height[start]) {
+            start++;
+        }
+        // 从第一个降序开始尝试接雨水
+        for (int left = start; left < height.size() - 1; ) {
+            // 对于紧密的右侧低于left的情况是可以构成盛水的容器的，那么不断右移right指针，直到找到第一个高于等于左指针的height
+            int right = left + 2;
+            int minus_squ = height[left+1];
+            int notfindhigh_squ = minus_squ;
+            int maxHeightIndex = left + 1;
+
+            // 寻找右指针位置
+            while (right < height.size() && height[right] < height[left]) {
+                minus_squ += height[right];
+                // 为找不到比left更高的柱子做准备：记录中间过程中最高的柱子
+                maxHeightIndex = height[maxHeightIndex] > height[right] ? maxHeightIndex : right;
+                right++;
+            }
+
+            // 成功接到雨水：找到更高的
+            if (right < height.size() && height[right] >= height[left]) {
+                tot += (right - left - 1) * height[left] - minus_squ;
+                // 移动指针位置
+                while(right < height.size() - 1 && height[right+1] > height[right]) {
+                    right++;
+                }
+                left = right;
+                continue;
+            }
+            // 成功接到雨水：找到最后一个都没找到更高的，那么期间最高的一个就作为一个承接点
+            if (right == height.size() && right - left > 1) {
+                int minus = 0;
+                for (int k = left+1; k < maxHeightIndex; k++) {
+                    minus += height[k];
+                }
+                tot += height[maxHeightIndex] * (maxHeightIndex - left - 1) - minus;
+                left = maxHeightIndex;
+                continue;
+            }
+            left++;
+        }
+        return tot;
+    }
+};
+```
+
+**动态规划**：以上代码过于复杂，实际上在暴力想法的基础上进行优化，只需要找到左边和右边的最高的柱子即可。可以分别从左向右和从右向左扫描一遍数组，提前记录右边和左边的最大值（包括自己的位置）。最后对于某个位置能够接到的雨水：`min(leftMax[i], rightMax[i])-heights[i]`。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int trap(vector<int>& height) {
+        int n = height.size();
+        vector<int> leftMax(n, height[0]), rightMax(n, height[n-1]);
+        // 分别找到每个柱子左边和右边的最高的柱子
+        for (int i = 1, j = n-2; i < n && j >= 0; i++, j--) {
+            leftMax[i] = max(height[i], leftMax[i-1]);
+            rightMax[j] = max(height[j], rightMax[j+1]);
+            // cout << leftMax[i] << " " << rightMax[i] << endl;
+        }
+        // 根据柱子的高度计算当前位置能接多少水，并累加
+        int water = 0;
+        for(int i = 0; i < n; i++) {
+            water += min(leftMax[i], rightMax[i]) - height[i];
+        }
+        return water;
+    }
+};
+```
 
 ## 数组的处理
 
@@ -986,6 +1065,37 @@ public:
             }
         }
         return false;
+    }
+};
+```
+
+### 分发糖果
+
+![image-20241112164706151](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241112164706151.png)
+
+直观的想法是对于每个孩子，向左和向右进行比较，然后调整他的糖果值。但是对于下一个孩子，他进行调整后是可能影响上一个孩子的结果的。比如样例`[1,2,87,87,87,2,1]`，在对最后一个2进行调整后，上一个87的结果将会不对。即，从左向右的遍历只能保证从左向右的结果一定是对的，但是无法保证从右向左的结果是对的。补上一次从右向左的遍历后即可实现完整的功能，代码如下：
+
+```cpp
+class Solution {
+public:
+    int candy(vector<int>& ratings) {
+        int n = ratings.size(), number = n;
+        vector<int> res(n, 1);
+        // 从左向右扫描，保证如果right比left大，那么一定有res[right] > res[left]
+        for (int i = 1; i < n; i++) {
+            if (ratings[i] > ratings[i-1] && res[i] <= res[i-1]) {
+                number++;
+                res[i]++;
+            }
+        }
+        // 从右向左扫描，保证如果left比right大，那么一定有res[left] > res[right]
+        for (int i = n-2; i >= 0; i--) {
+            if (ratings[i] > ratings[i+1] && res[i] >= res[i+1]) {
+                number++;
+                res[i]++;
+            }
+        }
+        return number;
     }
 };
 ```
