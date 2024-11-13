@@ -1102,7 +1102,89 @@ public:
 
 ### 排序
 
-计数排序
+#### 计数排序
+
+##### H指数
+
+![image-20241113150556765](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241113150556765.png)
+
+**计数排序：**首先类似计数排序的处理：遍历数字，记录每个引用次数下有多少篇论文，记在数组中。假设记录的数组为`nums`，那么`nums[i]`的值表示引用为$i$的论文有多少篇。
+
+基于上述确定H指数是多少可以从数组末尾开始向前遍历，并累积一个currCite值（`currCite += nums[i]`），直到currCite值超过i为止。时间复杂度和空间复杂度都是$O(n)$，代码如下：
+
+```cpp
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        int maxCite = *max_element(citations.begin(), citations.end());
+        vector<int> nums(maxCite+1, 0);
+        // 计数排序，得到引用i次的文章有多少篇的数组
+        for (int i = 0; i < citations.size(); i++) {
+            nums[citations[i]]++;
+        }
+        int currNum = 0;
+        for (int i = maxCite; i >= 0; i--) {
+            // 记录引用大于等于i的文章有多少篇
+            currNum += nums[i];
+            if (currNum >= i) {
+                return i;
+            }
+        }
+        return 0;
+    }
+};
+```
+
+**排序**：另一种方式是对数组进行排序，然后从大到小遍历。具体来说，首先初始化$h$值为0，如果`citations[i]>h`，那么`h++`，直到h不变为止（保证了至少有h篇论文的引用是超过h的）。时间复杂度为$O(n\log n)$。代码如下：
+
+```cpp
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        sort(citations.begin(), citations.end());
+        int h = 0;
+        for (int i = citations.size()-1; i >= 0; i--) {
+            if (citations[i] > h) {
+                h++;
+            }else {
+                break;
+            }
+        }
+        return h;
+    }
+};
+```
+
+**二分查找**：H指数是最大的那个满足“至少有h篇论文的引用指数大于h”的h值。所以如果H指数是h，那么所有小于h的值`x`也一定满足至少有`x`篇论文的引用指数大于`x`。因此可以进行二分查找，遍历每一种h的可能，然后在每种可能中进行检查：是否满足“至少有h篇论文的引用指数大于h”。代码如下：
+
+```cpp
+class Solution {
+public:
+    int hIndex(vector<int>& citations) {
+        int n = citations.size(), left = 0, right = n;
+
+        return binarySearchIfH(citations, left, right);
+    }
+
+    int binarySearchIfH(vector<int>& citations, int start, int end) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            int cnt = 0;
+            for (int i = 0; i < citations.size(); i++) {
+                if (citations[i] >= mid) {
+                    cnt++;
+                }
+            }
+            if (cnt < mid) {   // 说明mid需要更小，那么end改为mid-1
+                return binarySearchIfH(citations, start, mid - 1);
+            }else {
+                return binarySearchIfH(citations, mid + 1, end);
+            }
+        }
+        return end;
+    }
+};
+```
 
 ## 链表的处理
 
