@@ -104,6 +104,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         加油站/test.cpp
         最后一个单词的长度/test.cpp
         分发糖果/test.cpp
+        最长公共前缀/test.cpp
+        反转字符串中的单词/test.cpp
+        Z字形变换/test.cpp
 )
 
 add_executable(test 数组中的第K个最大元素/test.cpp)
