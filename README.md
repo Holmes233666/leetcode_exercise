@@ -1100,6 +1100,59 @@ public:
 };
 ```
 
+### O(1)时间插入、删除和获取随机元素
+
+![image-20241113194850281](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241113194850281.png)
+
+**哈希表+可变长数组**：哈希表能够快速地定位一个元素、移出一个元素。但是随机返回一个元素，比较方便的还是通过数组随机下标的方式获取元素。因此比较方便的是将哈希表与数组结合：哈希表中key为元素，value为该元素在数组中的下标。插入元素时间复杂度O(1)，随机返回时获取数组的长度设置随机数返回对应下标的元素即可，时间复杂度也是O(1)。
+
+但是题目还涉及到元素的移出，哈希表中移出一个元素很容易，但是在数组中移出某个下标中的位置同时又要保证随机获取元素时可以借助数组的长度是困难的：一个元素移出数组，数组中的所有的元素都要向前移动，然后依次改变他们在哈希表中的下标，最差的时间复杂度是O(n)，不满足题目的要求。
+
+给出一种方式：每次移出时，将数组尾部的元素改放到移出的位置，只改变这个元素在数组中的位置以及其哈希表对应的value值即可。这样就能实现时间复杂度为O(1)的所有操作。代码如下：
+
+```cpp
+class RandomizedSet {
+public:
+    unordered_map<int, int> umap;   // value-index in vector
+    vector<int> vec;
+    RandomizedSet() {
+
+    }
+    // 不存在时，向集合中插入该项，并返回 true ；否则，返回 false
+    bool insert(int val) {
+        // 首先判断umap中的元素是不是存在
+        if (umap.find(val) == umap.end()) { // 如果没有这个元素，那么插入
+            umap[val] = vec.size();
+            vec.push_back(val);
+            return true;
+        }else {
+            return false;
+        }
+    }
+
+    // 存在时，从集合中移除该项，并返回 true ；否则，返回 false 。
+    bool remove(int val) {
+        if (umap.find(val) == umap.end()) { // 如果没有这个元素，那么直接返回false;
+            return false;
+        }
+        // 问题：数组中怎么快速找到元素并且移出？
+        // 关键：直接将数组最后一个元素放入当前元素的位置，然后pop最后一个位置的元素
+        umap[vec[vec.size()-1]] = umap[val];
+        vec[umap[val]] = vec[vec.size()-1];
+        vec.pop_back();
+        // 从集合中移出
+        umap.erase(val);
+        return true;
+    }
+
+    // 随机返回现有集合中的一项（测试用例保证调用此方法时集合中至少存在一个元素）。每个元素应该有 相同的概率 被返回。
+    int getRandom() {
+        int idx = rand() % vec.size();
+        return vec[idx];
+    }
+};
+```
+
 ### 排序
 
 #### 计数排序
@@ -2986,6 +3039,12 @@ public:
     }
 };
 ```
+
+### 加油站
+
+![image-20241113201255600](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241113201255600.png)
+
+
 
 ### 跳跃游戏
 
