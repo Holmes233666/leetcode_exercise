@@ -107,6 +107,11 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         最长公共前缀/test.cpp
         反转字符串中的单词/test.cpp
         Z字形变换/test.cpp
+        找出字符串中第一个匹配项的下标/test.cpp
+        罗马数字转整数/test.cpp
+        判断子序列/test.cpp
+        验证回文串/test.cpp
+        整数转罗马数字/test.cpp
 )
 
 add_executable(test 数组中的第K个最大元素/test.cpp)

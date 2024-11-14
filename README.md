@@ -761,7 +761,7 @@ public:
 };
 ```
 
-## 数组的处理
+## 数组/字符串的处理
 
 ### 合并区间
 
@@ -1152,6 +1152,47 @@ public:
     }
 };
 ```
+
+### 验证回文串
+
+![image-20241114153306819](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241114153306819.png)
+
+需要记住的只有一个问题：`A`的ASCII码比`a`小32。代码如下：
+
+```cpp
+class Solution {
+public:
+    bool isPalindrome(string s) {
+        int n = s.size();
+        for(int i = 0, j = n-1; i <= j; ) {
+            if (s[i] >= 'A' && s[i] <= 'Z') {
+                s[i] = s[i] + 32;
+            }
+            if (s[j] >= 'A' && s[j] <= 'Z') {
+                s[j] = s[j] + 32;
+            }
+
+            // 如果不是字母/数字，那么应该跳过
+            if ((s[i] < 'a' || s[i] > 'z') && (s[i] < '0' || s[i] > '9')) {
+                i++;
+                continue;
+            }
+            if ((s[j] < 'a' || s[j] > 'z') && (s[j] < '0' || s[j] > '9')) {
+                j--;
+                continue;
+            }
+            if (s[i] != s[j]) {
+                return false;
+            }
+            i++;
+            j--;
+        }
+        return true;
+    }
+};
+```
+
+
 
 ### 排序
 
