@@ -112,6 +112,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         判断子序列/test.cpp
         验证回文串/test.cpp
         整数转罗马数字/test.cpp
+        两数之和II-输入有序数组/test.cpp
+        长度最小的子数组/test.cpp
+        无重复字符最长子串/test.cpp
 )
 
-add_executable(test 数组中的第K个最大元素/test.cpp)
+add_executable(test 长度最小的子数组/test.cpp)

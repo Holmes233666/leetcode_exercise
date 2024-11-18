@@ -111,6 +111,26 @@ public:
     }
 };
 
+// 滑动窗口：使用模板写法
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        int n = s.size(), start = 0, end = 0, maxLen = 0;
+        unordered_map<char, int> umap;
+        while(end < n) {
+            char currChar = s[end];
+            while(start < end && umap.find(currChar) != umap.end()) {
+                umap.erase(s[start]);
+                start++;
+            }
+            maxLen = max(maxLen, end - start + 1);
+            umap[currChar] = end;
+            end++;
+        }
+        return maxLen;
+    }
+};
+
 int main() {
     Solution3 solution;
     string s = "pwwkew";
