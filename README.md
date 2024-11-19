@@ -1069,6 +1069,104 @@ public:
 };
 ```
 
+### 生命游戏
+
+<img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241119152617974.png" alt="image-20241119152617974" style="zoom: 50%;" />
+
+因为细胞的死活是同时发生的，不能使用已经更新的状态对判断别的细胞。新词，如果不对数组进行拷贝，那么原地处理的方式需要引入额外的状态：比如可以使用2表示死细胞变活，使用-2表示活细胞变死。在判断细胞死活时根据额外的状态判断，并在最后将对应的额外状态映射到标准的状态即可，代码如下：
+
+```cpp
+class Solution {
+public:
+    void gameOfLife(vector<vector<int>>& board) {
+        int n = board.size(), m = board[0].size();
+        vector<vector<int>> dir = {{-1,-1}, {-1,0}, {-1,1},{0,-1},{0,1},{1,-1},{1,0},{1,1}};
+        // 用2表示死细胞变活，用-2表示活细胞变死
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                int currCeil = board[i][j];
+                int aroundLive = 0, aroundDead = 0;
+                for (int k = 0; k < 8; k++) {
+                    int newI = i + dir[k][0], newJ = j + dir[k][1];
+                    if (newI >=0 && newI < n && newJ >= 0 && newJ < m) {    // 合法位置
+                        int ifAlive = board[newI][newJ];
+                        if (ifAlive == 2 || ifAlive == 0) aroundDead++;
+                        if (ifAlive == -2 || ifAlive == 1) aroundLive++;
+                    }
+                }
+                if (currCeil == 1) {    // 是活细胞
+                    if (aroundLive < 2 || aroundLive > 3) {
+                        board[i][j] = -2;
+                    }
+                }else { // 是死细胞
+                    if (aroundLive == 3) {
+                        board[i][j] = 2;
+                    }
+                }
+            }
+        }
+        // 更新整个矩阵的状态
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (board[i][j] == 2) {
+                    board[i][j] = 1;
+                }else if (board[i][j] == -2) {
+                    board[i][j] = 0;
+                }
+            }
+        }
+    }
+};
+```
+
+### 有效的数独
+
+![image-20241119152720021](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241119152720021.png)
+
+最直接的想法是直接按照题目给出的规则进行检验：先检验行，再检验列，最后检验每个小矩阵。但是这样每个元素会被检查3次，即需要扫描3次矩阵。
+
+可以预先将所有的检查矩阵创建出来（类似DFS中的visisted矩阵），在对矩阵进行逐行扫描的时候根据行、列下标信息进行标记，重复标记返回错误即可，这样只需要扫描一次矩阵。另外需要注意数字是从1开始的，不是从0开始。代码如下：
+
+```cpp
+class Solution {
+public:
+    bool isValidSudoku(vector<vector<char>>& board) {
+        vector<vector<char>> row(9, vector<char>(9, '0'));
+        vector<vector<char>> line(9, vector<char>(9, '0'));
+        vector<vector<vector<char>>> matrixs(9, vector<vector<char>>(3, vector<char>(9, '0')));
+
+        for (int i = 0; i < 9; i++) {
+            for (int j = 0; j < 9; j++) {
+                char currChar = board[i][j];
+                if (currChar == '.') continue;
+                // 检查行
+                if (row[i][currChar-'0'-1] != '1') {
+                    row[i][currChar-'0'-1] = '1';
+                }else {
+                    return false;
+                }
+                // 检查列
+                if (line[j][currChar-'0'-1] != '1') {
+                    line[j][currChar-'0'-1] = '1';
+                }else {
+                    return false;
+                }
+                // 检查矩阵
+                int matRowIdx = ceil(i/3), matLineIdx = ceil(j/3);
+                if (matrixs[matRowIdx][matLineIdx][currChar-'0'-1] != '1') {
+                    matrixs[matRowIdx][matLineIdx][currChar-'0'-1] = '1';
+                }else {
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+};
+```
+
+
+
 ### 分发糖果
 
 ![image-20241112164706151](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241112164706151.png)

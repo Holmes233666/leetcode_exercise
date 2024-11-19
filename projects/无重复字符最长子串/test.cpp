@@ -14,21 +14,17 @@ public:
         // 尝试将每个字母作为一个子串的前缀，内部使用hash_map去重
         int maxLen = 1;
         for (int i = 0; i < s.size(); i++) {
-            //cout << "-------i = " << i << " string[i] = "<<s[i]<< "-----"<<endl;
             unordered_set<char> stringBuffer;
             stringBuffer.insert(s[i]);
             int tempLength = 1;
             for(int j = i + 1; j < s.size(); j++) {
                 auto it = stringBuffer.find(s[j]);
                 // 找不到这个元素
-                //cout << "j = " << j << " string[j] = "<<s[j]<< endl;
                 if (it == stringBuffer.end()) {
-                    //cout << "add " << s[j] << endl;
                     tempLength++;
                     maxLen = max(maxLen, tempLength);
                     stringBuffer.insert(s[j]);
                 }else{  // 出现重复元素
-                    //maxLen = max(maxLen, tempLength);
                     break;
                 }
             }

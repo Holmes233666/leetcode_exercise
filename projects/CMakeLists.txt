@@ -115,6 +115,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         两数之和II-输入有序数组/test.cpp
         长度最小的子数组/test.cpp
         无重复字符最长子串/test.cpp
+        串联所有单词的子串/test.cpp
+        有效的数独/test.cpp
+        生命游戏/test.cpp
 )
 
 add_executable(test 长度最小的子数组/test.cpp)
