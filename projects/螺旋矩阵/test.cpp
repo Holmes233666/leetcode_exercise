@@ -36,6 +36,35 @@ public:
     }
 };
 
+class Solution2 {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        vector<vector<int>> dir = {{0,1}, {1,0}, {0,-1}, {-1,0}};
+        vector<int> res;
+        int n = matrix.size(), m = matrix[0].size();
+        vector<vector<char>> visited(n, vector<char>(m, '0'));  // 初始标记为都没有访问过
+        int num = n * m;
+        int i = 0, j = 0;
+        int k = 0;
+        while (num--) {
+            res.push_back(matrix[i][j]);
+            visited[i][j] = '1';
+            int nextI = i + dir[k % 4][0], nextJ = j + dir[k % 4][1];
+            if (nextI < 0 || nextI >= n || nextJ < 0 || nextJ >= m || visited[nextI][nextJ] == '1') {    // 无效单元格
+                k++;
+                i += dir[k % 4][0];
+                j += dir[k % 4][1];
+            }else {
+                i = nextI;
+                j = nextJ;
+            }
+        }
+        return res;
+    }
+};
+
+
+
 int main() {
     Solution sol;
     vector<vector<int>> matrix = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}};

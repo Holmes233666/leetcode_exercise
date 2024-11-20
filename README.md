@@ -953,12 +953,15 @@ public:
 
 - 碰到边界后转向：定义右下左上四个方向数组，在一轮循环中使用是按照这个方向行走的。
 - 如何定义边界：除了数组本身的边界外，碰到已经输出的数也应该转向，因此可以采取两种方案更新边界：
-  - 使用map记录已经输出的数的下标，每次打印一个数字前判断该数的索引是否在map中，在的话不进行输出，否则输出，并记录该数在map中
+  - 记录已经输出的数的下标，每次打印一个数字前判断该数是否已经打印，已经打印的话不进行输出，否则输出，并记录已经打印的数。（记录方式可以使用visit数组或者使用map记录）
   - 定义上下左右四个边界，输出完第一行，应该upper++；输出完最后一列，应该right--……
 
 后者的空间复杂度更小，而且不用查询，两种方式的代码如下：
 
+- 使用基于记录的方式：
+
 ```cpp
+// *************************** 使用map记录 *****************************
 class Solution {
 public:
     vector<int> spiralOrder(vector<vector<int>>& matrix) {
@@ -989,6 +992,39 @@ public:
         return res;
     }
 };
+
+// ************************** 使用visited数组 ******************************
+class Solution {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        vector<vector<int>> dir = {{0,1}, {1,0}, {0,-1}, {-1,0}};
+        vector<int> res;
+        int n = matrix.size(), m = matrix[0].size();
+        vector<vector<char>> visited(n, vector<char>(m, '0'));  // 初始标记为都没有访问过
+        int num = n * m;
+        int i = 0, j = 0;
+        int k = 0;
+        while (num--) {
+            res.push_back(matrix[i][j]);
+            visited[i][j] = '1';
+            int nextI = i + dir[k % 4][0], nextJ = j + dir[k % 4][1];
+            if (nextI < 0 || nextI >= n || nextJ < 0 || nextJ >= m || visited[nextI][nextJ] == '1') {    // 无效单元格
+                k++;
+                i += dir[k % 4][0];
+                j += dir[k % 4][1];
+            }else {
+                i = nextI;
+                j = nextJ;  
+            }
+        }
+        return res;
+    }
+};
+```
+
+- 使用边界重定义的方式：
+
+```cpp
 ```
 
 
