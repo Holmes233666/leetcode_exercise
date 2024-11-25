@@ -119,6 +119,10 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         有效的数独/test.cpp
         生命游戏/test.cpp
         文本左右对齐/test.cpp
+        赎金信/test.cpp
+        同构字符串/test.cpp
+        单词规律/test.cpp
+        有效的字母异位词/test.cpp
 )
 
-add_executable(test 长度最小的子数组/test.cpp)
+add_executable(test 字母异位词分组/test.cpp)

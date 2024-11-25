@@ -64,6 +64,100 @@ public:
 };
 ```
 
+### 字母异位词分组
+
+![image-20241125142852052](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241125142852052.png)
+
+【排序+哈希表】：经过排序后异位词就是相同的一个词了，可以使用该词作为哈希表的key，要返回的未排序过的词构成的数组作为value，在遍历的过程中，不断往key对应的数组中加入值。最后提取哈希表中所有的value即可。时间复杂度为$O(nklogk)$，其中$k$为单词的最大长度，$n$是单词的数量。代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        int n = strs.size();
+        // 先给字符排序，排序结果应该存储在另一个数组中，因此使用一个数组复制
+        vector<string> ordered = strs;
+        unordered_map<string, vector<string>> resMap;
+        vector<vector<string>> resVec;
+        for (int i = 0; i < n; i++) {
+            sort(ordered[i].begin(), ordered[i].end());
+        }
+        // 依次遍历strs中的所有内容
+        for (int i = 0; i < n; i++) {
+            resMap[ordered[i]].push_back(strs[i]);
+        }
+        // 将hashmap中的所有结果放进resVec中返回
+        for (auto it : resMap) {
+            resVec.push_back(it.second);
+        }
+        return resVec;
+    }
+};
+```
+
+【计数】：利用每个异位词的词频相同，将词频作为哈希表的key，相应的异位词构成的数组作为value。额外的开销是每次对于一个单词都要记录他的每次字母出现的频率。代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        int n = strs.size();
+        unordered_map<string, vector<string>> resMap;
+        vector<vector<string>> resVec;
+        // 先给所有的单词做字母统计，然后放入特定的value中
+        for (int i = 0; i < n; i++) {
+            vector<int> count(26, 0);
+            for (int j = 0; j < strs[i].size(); j++) {
+                count[strs[i][j]-'a']++;    // 统计词频
+            }
+            // 遍历统计结果，查找哈希表
+            string key;
+            for (int j = 0; j < 26; j++) {
+                key.push_back(j + 'a');
+                key.push_back(count[j] + '0');
+            }
+            resMap[key].push_back(strs[i]);
+        }
+        // 遍历哈希表，提取结果
+        for (auto it : resMap) {
+            resVec.push_back(it.second);
+        }
+        return resVec;
+    }
+};
+```
+
+题解省去了创建string的过程，自定义了一个array<int, 26>类型的哈希函数，即直接使用数组作为key，代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        // 自定义对 array<int, 26> 类型的哈希函数
+        auto arrayHash = [fn = hash<int>{}] (const array<int, 26>& arr) -> size_t {
+            return accumulate(arr.begin(), arr.end(), 0u, [&](size_t acc, int num) {
+                return (acc << 1) ^ fn(num);
+            });
+        };
+
+        unordered_map<array<int, 26>, vector<string>, decltype(arrayHash)> mp(0, arrayHash);
+        for (string& str: strs) {
+            array<int, 26> counts{};
+            int length = str.length();
+            for (int i = 0; i < length; ++i) {
+                counts[str[i] - 'a'] ++;
+            }
+            mp[counts].emplace_back(str);
+        }
+        vector<vector<string>> ans;
+        for (auto it = mp.begin(); it != mp.end(); ++it) {
+            ans.emplace_back(it->second);
+        }
+        return ans;
+    }
+};
+```
+
 ## 双指针
 
 ### 移动零
@@ -1326,7 +1420,95 @@ public:
 };
 ```
 
+### 找出字符串中第一个匹配项的下标
 
+<img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241125170424954.png" alt="image-20241125170424954" style="zoom:50%;" />
+
+【KMP算法】：使用KMP算法实现的主要思想是利用最长相同前后缀跳过暴力解法中的对某些位置的比较，保证匹配串（长串）的指针$i$永远只进行后移，而不会进行回溯，而只对模式串（短串）的指针$j$进行后回溯。回溯的位置使用next数组决定。
+
+算法的关键在于如何以$O(n)$时间复杂度完成对next数组的计算：
+
+- 首先：next数组中`next[j]`含义是在匹配串中j处不匹配时，应该将匹配串的指针j移动到`next[j]`位置处，即跳过`next[j]`个字符的比较，直接比较`next[j]`处是否相同
+
+- 其次：`next[0]`将其初始化为0，表示在第一个位置就不同，那么直接移动到第一个位置
+
+- 最后：下面详细说明next数组的计算过程，该过程巧妙利用了之前的计算的next数组结果
+
+  - 维护一个匹配的串的长度`prefix_len`，表示到当前字符之前为止，最长的匹配的公共前后缀长度，初始化为0。
+
+  - 使用指针i遍历模式串，如果：
+
+    - `needle[prefix_len] == needle[j]`：那么直接看上一位，将其记为`next[j]=++prefix_len`
+
+      ![image-20241125201604375](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241125201604375.png)
+
+    - 如果二者不等，那么看下图：
+
+      ![image-20241125201630573](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241125201630573.png)
+      
+      需要利用前面已经算好的结果，看看有没有可能有更短的前后缀。左边的ABA和右边的ABA在之前的比较中知道是相同的，那么在上图中，相当于把B放到C的位置，看看ABAB的最长公共前后缀，将prefix_len更新为next[prefix_len-1]=1，即A处的值（这是一个递归的过程，需要体会一下），然后再接着比较……
+
+得到next数组后，可以代入主流程中。注意，主流程的结束条件是
+
+- 主串到了末尾（一直没找到模式串）
+- j指针到末尾了（找到了模式串）
+
+上述KMP详细实现的代码如下：
+
+```cpp
+class Solution {
+public:
+    int strStr(string haystack, string needle) {
+        vector<int> next;
+        int m = haystack.size(), n = needle.size();
+        getNext(needle, next);
+        for (int i = 0, j = 0; i < m; ) {
+            if (haystack[i] == needle[j]) {
+                i++;
+                j++;
+            }else if (j > 0) {  // 不匹配
+                j = next[j-1];
+            }else { // 不匹配
+                i++;
+            }
+            if (j == n) return i-j; // 如果到末尾都不匹配呢？
+        }
+        return -1;
+    }
+
+    void getNext(string& needle, vector<int>& next) {
+        int n = needle.size();
+        next.push_back(0);  // next[0] = 0;
+        int prefix_len = 0;
+        for(int i = 1; i < n; ) {
+            if (needle[i] == needle[prefix_len]) {
+                prefix_len++;
+                next.push_back(prefix_len);
+                i++;
+            }else {
+                if (prefix_len == 0) {
+                    next.push_back(0);
+                    i++;
+                }else {
+                    prefix_len = next[prefix_len - 1];  // 看看有没有更短的前后缀
+                }
+            }
+        }
+    }
+};
+```
+
+【调库】：在C++中，串匹配的函数为`haystack.find(needle)`，如果找不到会返回一个特殊符号`haystack.npos`。直接调用的代码如下：
+
+```cpp
+class Solution {
+public:
+    int strStr(string haystack, string needle) {
+        int res = haystack.find(needle);
+        return res == haystack.npos ? -1 : res;
+    }
+};
+```
 
 ### 排序
 
