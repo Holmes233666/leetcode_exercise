@@ -158,6 +158,98 @@ public:
 };
 ```
 
+### 最长连续序列
+
+![image-20241126161150144](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241126161150144.png)
+
+### 存在重复元素II
+
+![image-20241126161534451](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241126161534451.png)
+
+【哈希表】：顺序扫描，哈希表中只存储目前最大的index即可，如果该下标不满足，那么其他的比index更小的之前的下标更不可能满足$abs(i - j) <= k$。代码如下：
+
+```cpp
+class Solution {
+public:
+    bool containsNearbyDuplicate(vector<int>& nums, int k) {
+        unordered_map<int, int> umap;   // key: 数值，value：为该数值的最新的索引
+        int n = nums.size();
+        for (int i = 0; i < n; i++) {
+            if (umap.find(nums[i]) != umap.end()) { // 集合里有这个数
+                if (abs(umap[nums[i]] - i) <= k) {
+                    return true;
+                }
+                umap[nums[i]] = i;
+            }else { // 集合里没有这个数
+                umap[nums[i]] = i;
+            }
+        }
+    }
+};
+```
+
+### 快乐数
+
+![image-20241126161909798](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241126161909798.png)
+
+【哈希表】：直观的方法是直接使用哈希表判断是否有重复数字或者到达了1，下面的代码使用了字符串，额外增加了空间开销，但是时间开销能降低。代码如下：
+
+```cpp
+class Solution {
+public:
+    bool isHappy(int n) {
+        // 使用字符串存储n，方便提取数字
+        string currNumStr = to_string(n);
+        sort(currNumStr.begin(), currNumStr.end());
+        unordered_map<string, bool> umap;
+        umap[currNumStr] = true;
+        while(true) {
+            string newStr;
+            int accumulateNum = 0, len = currNumStr.size();
+            for (int i = 0; i < len; i++) {
+                accumulateNum += pow(currNumStr[i] - '0', 2);
+            }
+            if (accumulateNum == 1) return true;
+            newStr = to_string(accumulateNum);
+            // 对newStr排序
+            sort(newStr.begin(), newStr.end());
+            if (umap.find(newStr) != umap.end()) {  // 已经有这个数字了
+                return false;
+            }
+            umap[newStr] = true; // 没有这个数
+            currNumStr = newStr;
+        }
+        return false;
+    }
+};
+```
+
+【快慢指针】：快慢指针的思想类似于在链表中判断链表是否含环的问题，关键思路在于：如果有重复数就意味着形成了一个数环，只要存在环，那么快指针和慢指针一定会在成环的位置相遇，如果是归于1，那么就在1处相遇，否则在别的位置相遇。代码如下：
+
+```cpp
+class Solution {
+public:
+    bool isHappy(int n) {
+        int fast = getNext(n), slow = n;
+        while (fast != slow && fast != 1) {
+            slow = getNext(slow);                  // 每次走一步
+            fast = getNext(getNext(fast));     // 每次走两步
+        }
+        return fast == 1;
+    }
+
+    int getNext(int n) {
+        int res = 0;
+        while(n > 0) {
+            int d = n % 10;
+            n = n / 10;
+            res += d * d;
+        }
+        return res;
+    }
+};
+```
+
 ## 双指针
 
 ### 移动零

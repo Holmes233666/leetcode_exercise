@@ -124,6 +124,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         单词规律/test.cpp
         有效的字母异位词/test.cpp
         快乐数/test.cpp
+        存在重复元素II/tesst.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)
