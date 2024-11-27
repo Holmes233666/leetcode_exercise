@@ -6,7 +6,7 @@
 
 using namespace std;
 
-// 内存溢出版本
+// 利用桶排序：内存溢出版本
 class Solution {
 public:
     int longestConsecutive(vector<int>& nums) {
@@ -76,6 +76,8 @@ public:
         return longestStreak;
     }
 };
+
+
 
 int main() {
     vector<int> nums = {0,1,2,4,8,5,6,7,9,3,55,88,77,99};

@@ -162,6 +162,37 @@ public:
 
 ![image-20241126161150144](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241126161150144.png)
 
+【暴力想法】：暴力想法是将所有的数放入哈希表中，然后遍历数组元素`nums[i]`，尝试找出`nums[i]+1, nums[i]+2, ..., nums[i]+ n`。该方法的时间复杂度是$O(n^2)$。
+
+【哈希表+判断序列第一个数字】：上述暴力的方法主要的时间花在了重复的操作：因为使用`nums[i]`判断后，如果存在`nums[i+x]==nums[i]+1`，遍历到`nums[i+x]`时又会重新进行一次寻找后续数值的过程，但这个结果不会比`nums[i]`更优。因此，每次查找是否有后续数时应该保证该数字是序列的第一个元素，即如果哈希表中存在`nums[i]`的前序数字`nums[i]-1`，那么不对该数进行后续数的查找遍历。保证了每个数仅遍历一次，时间复杂度为$O(n)$，空间复杂度也为$O(n)$。代码如下：
+
+```cpp
+class Solution {
+public:
+    int longestConsecutive(vector<int>& nums) {
+        int n = nums.size();
+        if (n == 0) return 0;
+        unordered_set<int> uset;
+        for (int i = 0; i < nums.size(); i++) {
+            uset.insert(nums[i]);
+        }
+        int maxLen = 1;
+        for (auto it : uset) {
+            int len = 0;
+            if(uset.find(it-1) == uset.end()) { // 没有前序，那么他是序列的第一个数
+                int num = it;
+                while(uset.find(num) != uset.end()) {
+                    len++;
+                    num++;
+                }
+            }
+            maxLen = max(maxLen, len);
+        }
+        return maxLen;
+    }
+};
+```
+
 ### 存在重复元素II
 
 ![image-20241126161534451](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241126161534451.png)
