@@ -126,6 +126,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         快乐数/test.cpp
         存在重复元素II/tesst.cpp
         汇总区间/test.cpp
+        插入区间/test.cpp
+        用最少数量的箭引爆气球/test.cpp
+        简化路径/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)

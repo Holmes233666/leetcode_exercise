@@ -600,6 +600,16 @@ public:
 
 ## 滑动窗口
 
+### 长度最小的子数组
+
+![image-20241128103820137](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241128103820137.png)
+
+
+
+### 无重复字符最长子串
+
+![image-20241128103923154](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241128103923154.png)
+
 ### 最小覆盖子串
 
 ![image-20240723193558399](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240723193558399.png)
@@ -3485,6 +3495,112 @@ public:
         // 求解完左边和右边的第一个比当前元素的下标（包括当前元素），然后对每个矩形求解其能构成的最大面积
         for (int i = 0; i < heights.size(); i++) {
             res = max(heights[i] * (rightFirLow[i] - leftFirLow[i] + 1), res);
+        }
+        return res;
+    }
+};
+```
+
+### 最小栈
+
+![image-20241129150105746](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241129150105746.png)
+
+本题的关键在于在常数时间内找到最小元素，除了该要求外，其他的需求都能直接使用一个栈进行模拟。考虑到常数时间内的元素检索，需要使用两个栈对最小栈进行模拟：
+
+- 一个栈（`allNumStack`）正常对所有元素进行入栈、出栈操作，不对最小元素进行特别处理
+- 一个栈（`miniStack`）只维护后续**可能称为最小元素**的元素：如果新入栈的元素比当前的最小元素（`miniStack.top()`）更大，那么该元素是不可能在后续的`pop/push`操作后成为最小的元素的：因为他不可能比目前的`minStack.top()`更小。可以看出`miniStack`是一个单调递减栈，元素是保持不严格降序的，因此栈顶始终是最小的元素，可以在尝试时间内返回最小的元素。
+
+代码如下：
+
+```cpp
+class MinStack {
+public:
+    stack<int> allStack, minNumS;
+    MinStack() {
+
+    }
+    
+    void push(int val) {
+        allStack.emplace(val);
+        if (minNumS.empty() || val <= minNumS.top()) {
+            minNumS.emplace(val);
+        }
+    }
+    
+    void pop() {
+        if (!allStack.empty()) {    // 只要allStack不空，minNumS一定也不空
+            int val = allStack.top();
+            allStack.pop();
+            if (val == minNumS.top()) {
+                minNumS.pop();
+            }
+        }
+    }
+    
+    int top() {
+        return allStack.top();
+    }
+    
+    int getMin() {
+        return minNumS.top();
+    }
+};
+```
+
+官方题解中的最小栈对每个元素对应的最小值都进行了存储，其实没有必要。
+
+### 简化路径
+
+![image-20241129154234929](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241129154234929.png)
+
+【`stringstream`+可变长数组模拟栈】：简化路径的关键在于首先将字符串`path`按照`/`进行分割。单个字符（`char`）的遍历会比较麻烦。而使用可变长数组（`vector`）模拟栈的原因是按照`/`进行分割后会出现以下四种情况，依次处理如下：
+
+- 空字符串：`stringstream`的分割结果如果是连续的`///`那么会出现空字符串，直接跳过即可
+- `.`：当前目录，跳过
+- `..`：父目录，当栈非空的时候需要弹栈，弹出`/`和上一个目录；如果是根目录了（即栈空），跳过
+- 其他情况：当做正常目录压栈，（除了是最后一个目录外）然后压一个`/`，用以分割。
+
+最后当输出完毕的时候，如果末尾还是`/`，还需要抹除最后的`/`。代码如下：
+
+```cpp
+class Solution {
+public:
+    string simplifyPath(string path) {
+        // 首先对path进行按照/的划分
+        stringstream ss(path);
+        vector<string> stringVec;
+        string segment;
+        while (getline(ss, segment, '/')) {
+            stringVec.push_back(segment);
+        }
+        int n = stringVec.size(), currIdx = 1;
+        vector<string> resPath = {"/"}; // 结果存在vec中，方便正向读取连接最终结果
+        while (currIdx < n) {
+            while (currIdx < n && stringVec[currIdx] == "") {
+                currIdx++;
+            }
+            if (currIdx >= n) break;
+            if (stringVec[currIdx] == ".") {    // 当前目录，直接跳过
+                currIdx++;
+            }else if (stringVec[currIdx] == "..") {
+                if (resPath.size() != 1) {  // 如果不是根目录
+                    resPath.pop_back(); // 弹出 “/"
+                    resPath.pop_back(); // 弹出字符
+                }
+                currIdx++;
+            }else { // 其他字符直接当做正常字符处理
+                resPath.push_back(stringVec[currIdx]);
+                if (currIdx != n-1) {
+                    resPath.push_back("/");
+                }
+                currIdx++;
+            }
+        }
+        // 遍历数组，合并产生正确的结果
+        string res;
+        for (int j = 0; j < resPath.size(); j++) {
+            if (j == resPath.size()-1 && resPath[j] == "/" && resPath.size() != 1) break;
+            res += resPath[j];
         }
         return res;
     }
