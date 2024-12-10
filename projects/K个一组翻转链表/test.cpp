@@ -96,6 +96,43 @@ public:
     }
 };
 
+// 第二次刷
+class Solution3 {
+public:
+    pair<ListNode*, ListNode*> reversReturn(ListNode* head, ListNode* tail) { // 返回新的头和尾
+        ListNode *pre = nullptr, *currNode = head;
+        while (currNode != tail) {
+            ListNode *nextNode = currNode->next;
+            currNode->next = pre;
+            pre = currNode;
+            currNode = nextNode;
+        }
+        currNode->next = pre;
+        return {tail, head};    // 返回新的头和尾
+    }
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        ListNode *p = head, *pre = new ListNode(0, head), *res = pre;
+        while (p != nullptr) {
+            int term = k;
+            ListNode *currTail = p;
+            while (--term && currTail != nullptr) {
+                currTail = currTail->next;
+            }
+            if (currTail != nullptr) {  // 足以进行一组翻转
+                ListNode *nextNode = currTail->next;
+                pair<ListNode*, ListNode*> resTwoNodes = reversReturn(p, currTail);
+                pre->next = resTwoNodes.first;
+                resTwoNodes.second->next = nextNode;
+                p = nextNode;
+                pre = resTwoNodes.second;
+            }else {
+                break;
+            }
+        }
+        return res->next;
+    }
+};
+
 int main() {
     vector<int> vec = {1,2,3,4,5};
     int k = 2, num = 5, currNodeIndex = 0;

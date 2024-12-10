@@ -129,6 +129,12 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         插入区间/test.cpp
         用最少数量的箭引爆气球/test.cpp
         简化路径/test.cpp
+        逆波兰表达式求值/test.cpp
+        最小覆盖子串/test.cpp
+        反转链表II/test.cpp
+        删除排序链表中的重复元素/test.cpp
+        删除排序链表中的重复元素II/test.cpp
+        插入区间/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)

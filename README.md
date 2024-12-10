@@ -610,6 +610,8 @@ public:
 
 ![image-20241128103923154](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241128103923154.png)
 
+
+
 ### 最小覆盖子串
 
 ![image-20240723193558399](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240723193558399.png)
@@ -2257,6 +2259,75 @@ public:
 };
 ```
 
+### 反转链表
+
+
+
+### 反转链表II
+
+![image-20241209142644099](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241209142644099.png)
+
+
+
+### 删除排序链表中的重复元素
+
+![image-20241209160123959](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241209160123959.png)
+
+【一个`pre`指针】：如果删除重复元素但每个元素保留一个，那么可以使用一个`pre`指针+一个`current`指针，`current`指针不断向前扫，直到找到与`pre`指针不同的元素，然后进行next关系的建立。代码如下：
+
+```cpp
+class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        // 使用pre指针和current指针
+        if (head == nullptr) return head;
+        for (ListNode *current = head->next, *pre = head; current != nullptr; ) {
+            if (current->val != pre->val) {
+                pre = current;
+                current = current->next;
+            }else { // 如果current指针在和pre相同，那么current一直前进，直到二者不相同或者curr = nullptr
+                while (current != nullptr && current->val == pre->val) {
+                    current = current->next;
+                }
+                pre->next = current;
+                pre = current;
+                if (current == nullptr) break;
+                current = current->next;
+            }
+        }
+        return head;
+    }
+};
+```
+
+但是现在不希望保留任何相同的元素，此时，仍使用一个结点`pre`来建立`next`关系，但是`curr`的值需要记录下来，跳过所有满足与`curr`值相同的节点：`current`在跳过时令`current = current->next`，不断检验是不是与当前值相同，直到找到与当前值不同的`current`结点。具体代码如下所示。需要额外体会的是next关系记录的时刻是15行，而不在13行后建立next关系：出现`2->2->2->3->3->3`中`current`指向第一个`3`，但是`3`仍然是重复值的情况。
+
+```cpp
+class Solution {
+public:
+    ListNode* deleteDuplicates(ListNode* head) {
+        if (head == nullptr) return head;
+        // 使用pre，current和next指针
+        ListNode *pre = new ListNode(0, head), *current = head;
+        ListNode *res = pre;
+        while (current != nullptr) {
+            if (current->next != nullptr && current->val == current->next->val) {
+                int currentVal = current->val;
+                while (current != nullptr && current->val == currentVal) {
+                    current = current->next;
+                }
+            }else {
+                pre->next = current;
+                pre = current;
+                current = current->next;
+            }
+        }
+        pre->next = current;
+        return res->next;
+    }
+};
+```
+
 ### K个一组翻转链表
 
 ![image-20240809101855076](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240809101855076.png)
@@ -2310,6 +2381,46 @@ public:
 };
 ```
 
+第二次刷的时候写的更直接了，代码如下：
+
+```cpp
+class Solution {
+public:
+    pair<ListNode*, ListNode*> reversReturn(ListNode* head, ListNode* tail) { // 返回新的头和尾
+        ListNode *pre = nullptr, *currNode = head;
+        while (currNode != tail) {
+            ListNode *nextNode = currNode->next;
+            currNode->next = pre;
+            pre = currNode;
+            currNode = nextNode;
+        }
+        currNode->next = pre;
+        return {tail, head};    // 返回新的头和尾
+    }
+    ListNode* reverseKGroup(ListNode* head, int k) {
+        ListNode *p = head, *pre = new ListNode(0, head), *res = pre;
+        while (p != nullptr) {
+            int term = k;
+            ListNode *currTail = p;
+            while (--term && currTail != nullptr) {
+                currTail = currTail->next;
+            }
+            if (currTail != nullptr) {  // 足以进行一组翻转
+                ListNode *nextNode = currTail->next;
+                pair<ListNode*, ListNode*> resTwoNodes = reversReturn(p, currTail);
+                pre->next = resTwoNodes.first;
+                resTwoNodes.second->next = nextNode;
+                p = nextNode;
+                pre = resTwoNodes.second;
+            }else {
+                break;
+            }
+        }
+        return res->next;
+    }
+};
+```
+
 上面的想法给出了一个直观的想法，下面给的代码是另一种思路：需要额外遍历链表记录要进行翻转的次数，反转链表函数每次返回的是尾部节点和尾部节点的下一个节点，然后在主函数中进行连接：（这种方法省一点循环的时间）
 
 ```cpp
@@ -2351,6 +2462,39 @@ public:
             currHead = currHead->next;
         }
         return res;
+    }
+};
+```
+
+### 随机链表的复制
+
+![image-20241209140336066](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241209140336066.png)
+
+【哈希表】：最直接的方式是建立原节点到新创建结点之间的映射，即`original Node ---> new Node`。第一遍循环建立一般的`next`关系和该映射，第二遍循环通过第一轮建立的映射关系通过`umap[currHead->random]`补全新链表的随机关系即可。代码实现如下：
+
+```cpp
+class Solution {
+public:
+    Node* copyRandomList(Node* head) {
+        // 使用哈希表：original Node ---> new Node
+        unordered_map<Node*, Node*> umap;
+        Node *newHead = new Node(0), *currHead = head;    // 设置哑结点
+        // 构建从 original node ---> new Node的链表
+        for (Node *tail = newHead; currHead != NULL; tail = tail->next, currHead = currHead->next) {
+            Node *newNode = new Node(currHead->val);
+            umap[currHead] = newNode;
+            tail->next = newNode;
+        }
+
+        // 访问原链表中的random信息，将映射的random信息填入
+        for (Node *newNode = newHead->next, *currHead = head; currHead != NULL; currHead = currHead->next, newNode = newNode->next) {
+            if (currHead->random != NULL) {
+                newNode->random = umap[currHead->random];
+            }else{
+                newNode->random = NULL;
+            }
+        }
+        return newHead->next;
     }
 };
 ```
@@ -3793,6 +3937,10 @@ public:
     }
 };
 ```
+
+### 用最少数量的箭引爆气球
+
+![image-20241209161104002](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241209161104002.png)
 
 ## 动态规划
 

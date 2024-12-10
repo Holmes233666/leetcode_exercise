@@ -8,7 +8,6 @@
 using namespace std;
 
 // 滑动窗口+umap + queue： 使用了队列，空间复杂度较高（队列是用来记录最新的有效的字母及其下标的，以快速定位到这个字母）
-// 滑动窗口+umap + queue： 使用了队列，空间复杂度较高（队列是用来记录最新的有效的字母及其下标的，以快速定位到这个字母）
 class Solution {
 public:
     string minWindow(string s, string t) {
@@ -215,6 +214,42 @@ public:
             }
         }
         return minLen == INT_MAX ? "" : s.substr(start, minLen);
+    }
+};
+
+// 第二次刷该题：
+class SolutionT {
+public:
+    string minWindow(string s, string t) {
+        unordered_map<char, int> umap, currMap;
+        int n = t.size(), m = s.size(), resl = 0, minLen = m + 1;
+        for (int i = 0; i < n; i++) {
+            umap[t[i]]++;
+        }
+        int charNum = umap.size(), currNum = 0;  // 需要记录多少个单词
+        int left = 0, right = 0;
+        for (; right < n; right++) {
+            char currChar = s[right];
+            currMap[currChar]++;
+            if (currMap[currChar] == umap[currChar]) {
+                currNum++;
+            }
+
+            // 尝试缩短串，直到遇到不满足数量为止
+            while (left < right && currNum == charNum) {
+                if (minLen > right - left + 1) {
+                    resl = left;
+                    minLen = right - left + 1;
+                }
+                char currChar = s[left];
+                currMap[currChar]--;
+                if (currMap[currChar] < umap[currChar]) {
+                    currNum--;
+                }
+                left++;
+            }
+        }
+        return s.substr(resl, minLen);
     }
 };
 
