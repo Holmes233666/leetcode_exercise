@@ -135,6 +135,8 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         删除排序链表中的重复元素/test.cpp
         删除排序链表中的重复元素II/test.cpp
         插入区间/test.cpp
+        旋转链表/test.cpp
+        分隔链表/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)
