@@ -2499,6 +2499,78 @@ public:
 };
 ```
 
+### LRU缓存
+
+![image-20241212141315432](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241212141315432.png)
+
+【双向链表 + 哈希表】：该题有两个方面的$O(1)$时间复杂度的需求：（a）需要快速查找/更新值；（b）`put`操作需要隐式维护一个访问的排序：从最新访问到最久没有访问。第一个需求不难联想到哈希表。第二个需求需要提取元素并且排序，两种选择：数组和链表。数组无法实现$O(1)$时间的元素移动；考虑用链表实现，但是链表也无法直接定位到需要移动的结点——需要遍历整个链表？可以将哈希表与链表结合：哈希表中不直接存储题中的key对应的value，而是存储节点的指针，这样就能直接定位到要移动的结点是哪个，并且通过指针访问对应的`value`。但是使用链表还有一个问题：
+
+为什么使用双向链表？因为使用哈希表定位到该节点对应的指针后，该结点需要移动到头部/尾部，从而维持一个访问顺序，但是该结点的前序节点和后继节点还需要建立连接关系。如果使用单链表，直接访问到该结点对应的指针无法实现获得前序节点，该连接关系无法建立，还是需要扫描链表，无法满足时间复杂度的要求。而双向链表可以解决这个问题。
+
+详细代码实现如下：
+
+```cpp
+struct LNode {
+    int key;
+    int val;
+    LNode *pre;
+    LNode *next;
+    LNode () : key(-1), val(-1), pre(nullptr), next(nullptr) {};
+    LNode (int key, int val) : key(key), val(val), pre(nullptr), next(nullptr) {};
+    LNode (int key, int val, LNode *pre, LNode *next) : key(key), val(val), pre(pre), next(next) {};
+};
+
+class LRUCache {
+public:
+    unordered_map<int, LNode*> umap;  // key ---> LNode*
+    int capacity;
+    LNode *head = new LNode(), *q = head; // 尾插法
+
+    LRUCache(int cap) {
+        capacity = cap;
+    }
+    
+    int get(int key) {
+        if (umap.find(key) != umap.end()) { // 在哈希表中
+            // 移动该结点到链表最后
+            LNode *currNode = umap[key];
+            if (currNode->next == nullptr) return currNode->val;    // 已经是最新访问的结点了，不需要移动到末尾
+            currNode->pre->next = currNode->next;
+            currNode->next->pre = currNode->pre;
+            currNode->next = q->next;
+            currNode->pre = q;
+            q->next = currNode;
+            q = currNode;
+            return currNode->val;
+        }
+        return -1;
+    }
+    
+    void put(int key, int value) {
+        if (umap.find(key) != umap.end()) {
+            if (get(key) != value) umap[key]->val = value;
+        }else{  // 不在哈希表中，直接在尾部插入元素
+            if (umap.size() == capacity) {
+                // 移出头部元素
+                LNode *removeNode = head->next;
+                if (q == removeNode) q = head;
+                umap.erase(removeNode->key);
+                if (head->next != nullptr) {
+                    head->next = removeNode->next;
+                    if (head->next != nullptr) head->next->pre = head;
+                }
+                delete removeNode;
+            }
+            // 在尾部插入元素
+            LNode *currNode = new LNode(key, value, q, nullptr);
+            umap[key] = currNode;
+            q->next = currNode;
+            q = currNode;
+        }
+    }
+};
+```
+
 ## 树的处理（递归）
 
 ### 从前序与中序遍历构造二叉树
