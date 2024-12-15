@@ -85,3 +85,31 @@ public:
         }
     }
 };
+
+
+// 第二次刷
+class Solution3 {
+public:
+    unordered_map<int, int> umap;  // preOrder中的数在inordered中的哪个位置（定位root）
+    TreeNode* buildTree(vector<int>& preorder, vector<int>& inorder) {
+        int start = 0, end = preorder.size()-1, preStart = 0;
+        TreeNode* root = new TreeNode();
+        for (int i = 0; i <= end; i++) {
+            umap[inorder[i]] = i;
+        }
+        createTreeRecur(preorder, inorder, start, end, preStart, root);
+        return root;
+    }
+
+    //
+    void createTreeRecur(vector<int>& preorder, vector<int>& inorder, int start, int end, int preStart, TreeNode* &root) {
+        if (start <= end) {
+            int rootVal = preorder[preStart];  // 现根据前序找到根节点：preorder的第一个元素
+            root = new TreeNode(rootVal);
+            int inorderIdx = umap[rootVal]; // 找到root在inorder中的序号，以确定新的start和end
+            int leftLen = inorderIdx - start;
+            createTreeRecur(preorder, inorder, start, inorderIdx-1, preStart+1, root->left);  // 左子树：start往后
+            createTreeRecur(preorder, inorder, inorderIdx+1, end, preStart+leftLen+1, root->right);
+        }
+    }
+};

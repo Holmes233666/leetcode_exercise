@@ -100,3 +100,22 @@ public:
         }
     }
 };
+
+// 第二次刷
+class Solution4 {
+public:
+    bool isSymmetric(TreeNode* root) {
+        if (!root) return true;
+        return travel(root->left, root->right);
+    }
+
+    bool travel(TreeNode* root1, TreeNode* root2) {
+        if (root1 && root2) {   // 两个都不为空指针
+            return travel(root1->left, root2->right) && travel(root1->right, root2->left) && (root1->val == root2->val);
+        }else if (!root1 && !root2) {   // 两个都为空指针
+            return true;
+        }else{  // 其中一个为空指针
+            return false;
+        }
+    }
+};

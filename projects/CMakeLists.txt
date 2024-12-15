@@ -138,6 +138,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         旋转链表/test.cpp
         分隔链表/test.cpp
         相同的树/test.cpp
+        从中序与后序遍历序列构造二叉树/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)
