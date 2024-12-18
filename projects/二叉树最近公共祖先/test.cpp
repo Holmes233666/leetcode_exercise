@@ -27,3 +27,22 @@ public:
         return root;
     }
 };
+
+// 二刷
+class Solution2 {
+public:
+    TreeNode* lowestCommonAncestor(TreeNode* root, TreeNode* p, TreeNode* q) {
+        return LCA(root, p, q);
+    }
+
+    TreeNode* LCA(TreeNode* root, TreeNode* p, TreeNode* q) {
+        if (root == p || root == q || !root) return root;       // 自底向上传递当前结点的状态
+        TreeNode* leftRes = LCA(root->left, p, q);
+        TreeNode* rightRes = LCA(root->right, p, q);
+        // 在左子树和右子树分别找到了需要的结点，那么这个结点就是最终的最近公共祖先
+        if (leftRes != nullptr && rightRes != nullptr) return root;
+        if (leftRes == nullptr) return rightRes;
+        if (rightRes == nullptr) return leftRes;
+        return nullptr;
+    }
+};

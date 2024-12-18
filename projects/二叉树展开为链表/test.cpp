@@ -14,7 +14,7 @@ struct TreeNode {
 class Solution {
 public:
     void flatten(TreeNode* root) {
-        if (root == nullptr) return;
+        // if (root == nullptr) return;
         vector<TreeNode*> res;
         preTravel(root, res);
         TreeNode* pre = res[0];
@@ -63,6 +63,33 @@ public:
             return findMostRight(root->left);
         }
         // 叶子结点
+        return root;
+    }
+};
+
+// 第二次刷：寻找前驱结点
+class Solution3 {
+public:
+    void flatten(TreeNode* root) {
+        TreeNode* currNode = root;
+        while (currNode != nullptr) {
+            if (currNode->left != nullptr) {    // 如果左子树不为空
+                TreeNode* left_pre = findPre(currNode->left);
+                left_pre->right = currNode->right;
+                currNode->right = currNode->left;
+                currNode->left = nullptr;
+            }   // 如果左子树是空指针，直接进入下一个节点
+            currNode = currNode->right;
+        }
+    }
+
+    TreeNode* findPre(TreeNode* root) { // 由主函数flatten输入的root一定不是空指针
+        if (root->right != nullptr) {
+            return findPre(root->right);
+        }
+        if (root->left != nullptr){ // 右子树为空，那么从左子树找
+            return findPre(root->left);
+        }
         return root;
     }
 };

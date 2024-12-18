@@ -2571,7 +2571,7 @@ public:
 };
 ```
 
-## 树的处理（递归）
+## 树的处理
 
 ### 从前序与中序遍历构造二叉树
 
@@ -2618,12 +2618,17 @@ public:
 
 ![image-20240910210742517](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240910210742517.png)
 
-如何找二叉树的最近公共祖先：遍历每个子树，当左右子树返回的都不是空节点时，那么这个结点是最近的公共祖先。
+【递归】：核心思想是由底向上传递每个子树的状态：
 
-- 先判断在不在左子树
-- 再判断在不在右子树
+- 递归终止条件：
+  - 如果一个节点是`p`或者是`q`，那么该节点返回这个结点本身，即`p`或者`q`
+  - 如果一个节点是空节点，那么返回空指针，表示不可能是最近公共祖先
+  - 如果一个节点的左子树和右子树都返回了非空的结果，那么说明他的左子树和右子树分别含有`p`或`q`，该结点是最近公共祖先
+- 进一步递归条件：
+  - 搜索左子树：得到空指针或者非空指针
+  - 搜索右子树：得到空指针或者非空指针
 
-返回的是自下往上第一个满足组右子树都满足非空的结点（一定一个是p，一个是q），所以该结点一定是LCA
+特别地，当`p`是两个公共节点的最近公共祖先或者`q`是两个结点的最近公共祖先时，`p`会一直沿着递归栈返回，因为另一侧子树的结果永远都是`nullptr`。
 
 ```cpp
 class Solution {
@@ -2633,15 +2638,191 @@ public:
     }
 
     TreeNode* LCA(TreeNode* root, TreeNode* p, TreeNode* q) {
-        if (root == nullptr || root == p || root == q) return root;
-        TreeNode* leftNode = LCA(root->left, p, q);
-        TreeNode* rightNode = LCA(root->right, p, q);
-        if (leftNode == nullptr) return rightNode;
-        if (rightNode == nullptr) return leftNode;
+        if (root == p || root == q || !root) return root;       // 自底向上传递当前结点的状态
+        TreeNode* leftRes = LCA(root->left, p, q);
+        TreeNode* rightRes = LCA(root->right, p, q);
+        // 在左子树和右子树分别找到了需要的结点，那么这个结点就是最终的最近公共祖先
+        if (leftRes != nullptr && rightRes != nullptr) return root;
+        if (leftRes == nullptr) return rightRes;
+        if (rightRes == nullptr) return leftRes;
+        return nullptr;
+    }
+};
+```
+
+### 基于树的层序遍历的问题
+
+#### 填充每一个节点的下一个右侧节点指针II
+
+![image-20241215211902292](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241215211902292.png)
+
+【基于队列的层序遍历】：如果通过递归建立相邻结点的之间的`next`关系通常是复杂的，比较直接的方法是层序遍历，使用队列存储层序遍历过程中的结点。进一步地，每次的遍历应该是以层为单位的：层内节点的`next`则是队首节点；但是在一层遍历完时，最后一个节点的`next`是`nullptr`。因此，在层序遍历中有必要对层进行维护，以便对下一个节点是`nullptr`的情况进行处理。维护层数的方式很简单：外层循环在弹出一个结点前获取当前队列中的元素数量，当前队列中有几个节点该层就有几个节点。使用内层循环依次对该层的这些节点进行遍历：压入左右指针、建立`next`关系即可。建立`next`关系时注意对最后一个节点的特殊护理。详细代码如下：
+
+```cpp
+class Node {
+public:
+    int val;
+    Node* left;
+    Node* right;
+    Node* next;
+
+    Node() : val(0), left(NULL), right(NULL), next(NULL) {}
+
+    Node(int _val) : val(_val), left(NULL), right(NULL), next(NULL) {}
+
+    Node(int _val, Node* _left, Node* _right, Node* _next)
+        : val(_val), left(_left), right(_right), next(_next) {}
+};
+
+class Solution {
+public:
+    Node* connect(Node* root) {
+        if (root == nullptr) return root;
+        queue<Node*> t_queue;
+        t_queue.push(root);
+        while (!t_queue.empty()) {
+            Node* currNode = t_queue.front();
+            int num = t_queue.size();   // 记录目前队列中有多少个结点，即这一层的节点数
+            for (int i = 0; i < num; i++) {
+                t_queue.pop();
+                if (currNode->left != nullptr) t_queue.push(currNode->left);
+                if (currNode->right != nullptr) t_queue.push(currNode->right);
+                if (i != num-1) {   // 如果不是最后一个节点，那么next指针指向队列的第一个元素
+                    currNode->next = t_queue.front();
+                }else { // 如果是这一层的最后一个节点，那么next结点应该指向nullptr
+                    currNode->next = nullptr;
+                }
+                currNode = t_queue.front();
+            }
+        }
         return root;
     }
 };
 ```
+
+### 二叉树展开为链表
+
+![image-20241216124608676](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241216124608676.png)
+
+【前序遍历+新建二叉树】：基于前序遍历将数值存储在数组中，然后根据数组中的值重构二叉树是一个直接的方法。此方法的时间复杂度和空间复杂度都是`O(n)`。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        vector<int> res;
+        preTravel(root, res);
+        // 根据res中的内容修改root节点
+        modifyTree(root, res, 0);
+    }
+
+    void preTravel(TreeNode* root, vector<int>& res) {
+        if (root != nullptr) {  // 进行先序遍历
+            res.push_back(root->val);
+            preTravel(root->left, res);
+            preTravel(root->right, res);
+        }
+    }
+
+    void modifyTree(TreeNode* &root, vector<int>& res, int idx) {
+        if (idx <= res.size()-1) {
+            if (root == nullptr) {
+                root = new TreeNode(res[idx++]);
+            }else{
+                root->val = res[idx++];
+            }
+            if (root->left != nullptr) root->left = nullptr;
+            modifyTree(root->right, res, idx);
+        }
+    }
+};
+```
+
+在上面的代码中，由于函数列表中`Tree* &root`使用的引用传入，以修改树，创建新的节点，但是如果是空指针传入，后面可能会引发未知的问题。
+
+【前序遍历+数组直接存储指针】：上述的做法需要重新开辟空间建立树节点，但是如果在数组中直接存储指针，那么就不需要重新开辟空间了。此时由于还是需要用到数组，所以时间复杂度和空间复杂度还都是`O(n)`。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        if (root == nullptr) return;
+        vector<TreeNode*> res;
+        preTravel(root, res);
+        TreeNode* pre = res[0];
+        for (int i = 1; i < res.size(); i++) {
+            TreeNode* curr = res[i];
+            pre->left = nullptr;
+            pre->right = curr;
+            pre = curr;
+        }
+    }
+
+    void preTravel(TreeNode* root, vector<TreeNode*> &res) {
+        if (root != nullptr) {
+            res.push_back(root);
+            preTravel(root->left, res);
+            preTravel(root->right, res);
+        }
+    }
+};
+```
+
+【寻找前驱结点】：找到前驱结点指的是在先序遍历中，遍历的顺序是根-左-右，要展开为链表即要将右子树的结点都放在左子树之后，找的前驱是右子树的前驱。因此寻找前驱结点来展开二叉树为链表可以分为下面的步骤：
+
+- 对于当前结点，分为两种情况：
+  - 如果左子树为空，那么左子树不会被展开，当前节点直接变为当前节点的右子树的结点
+  - 如果左子树不为空，那么左子树是需要展开的，右子树需要跟在左子树的【先序遍历的最后一个节点】后面，即这里的【前驱】指的是右子树的前驱。具体来说：
+    - 找到左子树中的右子树前驱
+    - 将右子树置为该前驱结点的右子树
+    - 将整合后的左子树整体移动到当前结点的右子树上
+    - 当前结点的左子树置为空
+- 遍历下一个节点
+
+此时，代码的时间复杂度是$O(n)$，但空间复杂度上，如果寻找右子树的前驱过程时间复杂度是$O(1)$的，那么，整体的空间复杂度可以下降到$O(1)$，所以关键是如何以`O(1)`复杂度找到右子树的前驱。
+
+详细代码如下：
+
+```cpp
+class Solution {
+public:
+    void flatten(TreeNode* root) {
+        TreeNode* currNode = root;
+        while (currNode != nullptr) {
+            if (currNode->left != nullptr) {    // 如果左子树不为空
+                TreeNode* left_pre = findPre(currNode->left);
+                left_pre->right = currNode->right;
+                currNode->right = currNode->left;
+                currNode->left = nullptr;
+            }   // 如果左子树是空指针，直接进入下一个节点
+            currNode = currNode->right;
+        }
+    }
+
+    TreeNode* findPre(TreeNode* root) { // 由主函数flatten输入的root一定不是空指针
+        if (root->right != nullptr) {
+            return findPre(root->right);
+        }
+        if (root->left != nullptr){ // 右子树为空，那么从左子树找
+            return findPre(root->left);
+        }
+        return root;
+    }
+};
+```
+
+### 二叉树中的最大路径和
+
+![image-20241217214821668](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241217214821668.png)
+
+【深搜】：对于一个树根节点来说，计算这棵树的最大值需要知道：
+
+- 左子树（一定包括左子树的root节点）的路径的最大值
+- 右子树（一定包括右子树的root结节点）的路径的最大值
+
+对于该问题的最小问题：对于一个节点来说，这棵树的最大路径一定是该节点的本身。
+
+
 
 ## 图论算法
 
@@ -2816,8 +2997,6 @@ public:
     }
 };
 ```
-
-
 
 如果不将指针数组定义为`vector<Tire*> child`，定义为其他数据结构，比如``vector<LinkNode*> child``应该也是可以的。（尝试下）
 
@@ -4013,6 +4192,40 @@ public:
 ### 用最少数量的箭引爆气球
 
 ![image-20241209161104002](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241209161104002.png)
+
+【排序+贪心】：考虑随机地射出一支箭，移动箭的位置以尽可能多的射中气球：只要保证原本射中的气球仍被射中即可，再考虑能不能射中更多的气球。参考下图，箭需要尽可能地右移，最多能右移且原本射中的气球仍被射中的位置即是某个区间的**右边界**。
+
+因此：**一定存在一种最优（射出的箭数最小）的方法，使得每一支箭的射出位置都恰好对应着某一个气球的右边界。**
+
+考虑所有的区间中最靠左的一个区间，按照他为标准进行射箭，能够获得一轮射中最多的气球。因此对这些区间进行参考右边界的从小到大的排序，然后遍历，直到有区间的左边界大于最小区间的有边界，那么需要的箭数量增加。更新箭的数量。
+
+![image-20241215214312466](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241215214312466.png)
+
+详细代码如下：
+
+```cpp
+class Solution {
+public:
+    static bool cmp(vector<int>& a, vector<int>& b) {
+        return a[1] < b[1]; // 升序排列
+    }
+    int findMinArrowShots(vector<vector<int>>& points) {
+        sort(points.begin(), points.end(), cmp);
+        int n = points.size(), shotNum = 0;
+        for (int i = 0; i < n; ) {
+            int currStart = i, nextStart = i + 1;
+            while (nextStart < n && points[nextStart][0] <= points[currStart][1]) { // 直到找到一个不满足的区间
+                nextStart++;
+            }
+            i = nextStart;
+            shotNum++;
+        }
+        return shotNum;
+    }
+};
+```
+
+
 
 ## 动态规划
 

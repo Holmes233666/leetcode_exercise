@@ -139,6 +139,11 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         分隔链表/test.cpp
         相同的树/test.cpp
         从中序与后序遍历序列构造二叉树/test.cpp
+        填充每个节点的下一个右侧节点指针II/test.cpp
+        从根节点到叶结点数字之和/test.cpp
+        二叉搜索树迭代器/test.cpp
+        路径总和I/test.cpp
+        完全二叉树的节点个数/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)

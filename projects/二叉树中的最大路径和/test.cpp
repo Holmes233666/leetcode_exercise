@@ -1,4 +1,5 @@
 #include<vector>
+#include<iostream>
 
 using namespace std;
 
@@ -39,5 +40,35 @@ public:
         }else{
             return root->val;
         }
+    }
+};
+
+// 第二次刷
+class Solution2 {
+public:
+    // 以一个结点往下的最大路径和的四种情况：左子树路径、右子树路径、左+根、右+根、左+右+根
+    // 深搜，自底向上进行计算
+    int maxPathSum(TreeNode* root) {
+        int maxNum = -INT_MAX;
+        getMaxSum(root, maxNum);
+        return maxNum;
+    }
+
+    int getMaxSum(TreeNode* root, int& maxNum) {    // 递归时只需要递归计算左子树+根的值，以及右子树+根的值
+        if (root ->left == nullptr && root->right == nullptr) {
+            maxNum = max(root->val, maxNum);
+            return root->val;
+        }
+        // if (root -> left == nullptr) {
+        //     int num =
+        //     maxNum = max(maxNum, );
+        //     return getMaxSum(root->right, maxNum) + root->val;
+        // }
+        // 注意，在更新路径最大值时，只有该值非负才会可能使用
+        int leftSum = max(getMaxSum(root->left, maxNum), 0);
+        int rightSum = max(getMaxSum(root->right, maxNum), 0);
+        int connect = leftSum + rightSum + root->val;
+        maxNum = max(connect, maxNum);
+        return root->val + max(leftSum, rightSum);
     }
 };
