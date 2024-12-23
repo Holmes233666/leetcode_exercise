@@ -2700,6 +2700,12 @@ public:
 };
 ```
 
+#### 二叉树的右视图
+
+![image-20241218154724258](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241218154724258.png)
+
+
+
 ### 二叉树展开为链表
 
 ![image-20241216124608676](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241216124608676.png)
@@ -2810,6 +2816,61 @@ public:
     }
 };
 ```
+
+### 完全二叉树的节点个数
+
+![image-20241218205907509](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241218205907509.png)
+
+【基于遍历/二分+位运算】：如果不考虑完全二叉树的特点，直接搜索也能求得节点的个数，时间复杂度为$O(n)$。如果考虑完全二叉树的特点，可知最后一层如果有节点，那么最左侧的节点一定有节点。因此可以先确定层数$h$。然后根据层数以及完全二叉树的特点确定最后一层的节点数量范围。在该数据量范围内做二分查找。
+
+如何做二分查找？
+
+![image-20241218210853659](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241218210853659.png)
+
+代码如下：
+
+```cpp
+class Solution {
+public:
+    int countNodes(TreeNode* root) {
+        if (root == nullptr) {
+            return 0;
+        }
+        int level = 0;
+        TreeNode* node = root;
+        while (node->left != nullptr) {
+            level++;
+            node = node->left;
+        }
+        int low = 1 << level, high = (1 << (level + 1)) - 1;
+        while (low < high) {
+            int mid = (high - low + 1) / 2 + low;
+            if (exists(root, level, mid)) {
+                low = mid;
+            } else {
+                high = mid - 1;
+            }
+        }
+        return low;
+    }
+
+    bool exists(TreeNode* root, int level, int k) {
+        int bits = 1 << (level - 1);
+        TreeNode* node = root;
+        while (node != nullptr && bits > 0) {
+            if (!(bits & k)) {
+                node = node->left;
+            } else {
+                node = node->right;
+            }
+            bits >>= 1;
+        }
+        return node != nullptr;
+    }
+};
+```
+
+
 
 ### 二叉树中的最大路径和
 

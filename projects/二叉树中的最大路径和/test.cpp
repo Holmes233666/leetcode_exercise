@@ -59,11 +59,6 @@ public:
             maxNum = max(root->val, maxNum);
             return root->val;
         }
-        // if (root -> left == nullptr) {
-        //     int num =
-        //     maxNum = max(maxNum, );
-        //     return getMaxSum(root->right, maxNum) + root->val;
-        // }
         // 注意，在更新路径最大值时，只有该值非负才会可能使用
         int leftSum = max(getMaxSum(root->left, maxNum), 0);
         int rightSum = max(getMaxSum(root->right, maxNum), 0);

@@ -38,3 +38,32 @@ public:
         return res;
     }
 };
+
+// 二刷：基于层序遍历
+class Solution2 {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        queue<TreeNode*> nodes_q;
+        vector<int> res;
+        if (root) nodes_q.emplace(root);
+        int nodesLevel = 1;
+        while (!nodes_q.empty()) {
+            int nextLevelNodes = 0;
+            for (int i = 0; i < nodesLevel; i++) {
+                TreeNode* currNode = nodes_q.front();
+                nodes_q.pop();
+                if (currNode->left != nullptr) {
+                    nodes_q.emplace(currNode->left);
+                    nextLevelNodes++;
+                }
+                if (currNode->right != nullptr) {
+                    nodes_q.emplace(currNode->right);
+                    nextLevelNodes++;
+                }
+                if (i == nodesLevel-1) res.push_back(currNode->val);
+            }
+            nodesLevel = nextLevelNodes;
+        }
+        return res;
+    }
+};
