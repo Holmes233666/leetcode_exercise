@@ -67,3 +67,24 @@ public:
         return root->val + max(leftSum, rightSum);
     }
 };
+
+// 第三次写笔记
+class Solution3 {
+public:
+    // 以一个结点往下的最大路径和的四种情况：左子树路径、右子树路径、左+根、右+根、左+右+根
+    // 深搜，自底向上进行计算
+    int maxPathSum(TreeNode* root) {
+        int maxNum = -INT_MAX;
+        getMaxSum(root, maxNum);
+        return maxNum;
+    }
+
+    int getMaxSum(TreeNode* root, int& maxNum) {    // 递归时只需要递归计算左子树+根的值，以及右子树+根的值
+        if (!root) return 0;
+        int leftMax = max(getMaxSum(root->left, maxNum), 0);
+        int rightMax = max(getMaxSum(root->right, maxNum), 0);
+        int connectSum = root->val + leftMax + rightMax;
+        maxNum = max(maxNum, connectSum);
+        return max(leftMax+root->val, rightMax+root->val);
+    }
+};

@@ -2876,14 +2876,69 @@ public:
 
 ![image-20241217214821668](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241217214821668.png)
 
-【深搜】：对于一个树根节点来说，计算这棵树的最大值需要知道：
+【深搜】：**递归边界：**对于该问题的最小问题：对于一个空节点来说，那么这棵树的最大路径一定是0。
 
-- 左子树（一定包括左子树的root节点）的路径的最大值
-- 右子树（一定包括右子树的root结节点）的路径的最大值
+**问题分解（分治处理）：**对于二叉树中的任意一个节点 root，我们需要计算以该节点为根的最大路径和。这个值的计算需要综合考虑以下几种情况：
 
-对于该问题的最小问题：对于一个节点来说，这棵树的最大路径一定是该节点的本身。
+1. 左子树的最大路径和（以左子树根节点为起点）。
+2. 右子树的最大路径和（以右子树根节点为起点）。
+3. 仅包含当前节点的路径和。
+4. 包含当前节点，以及左、右子树的路径和。
 
+假设当前节点的值为 `currVal`，左子树的最大路径和为 `leftMax`，右子树的最大路径和为 `rightMax`，那么以当前节点为根的最大路径和可以表示为：
+$$
+connectSum=currVal+leftMax+rightMax
+$$
+这里的 `connectSum` 表示当前节点连接左右子树的路径和。
 
+此外，针对以当前节点为起点的路径和，我们需要向上传递一个值供父节点使用。这个值应该是以下三者中的最大值：
+
+1. 当前节点值 `currVal`，
+2. 当前节点值加上左子树路径和 `currVal + leftMax`，
+3. 当前节点值加上右子树路径和 `currVal + rightMax`。
+
+**优化思路：**在更新最大路径和时，如果要对四种情况进行比较是很复杂的。为了简化计算，我们可以先对 `leftMax` 和 `rightMax` 进行预处理：如果某个子树的最大路径和小于 0，那么这条路径对最终结果没有贡献，可以直接将其置为 0。这样，路径和的计算会更加简洁。
+
+预处理代码如下：
+
+```cpp
+if (leftMax < 0) leftMax = 0;
+if (rightMax < 0) rightMax = 0;
+```
+
+经过上述处理后，我们只需要考虑以下两种情况：
+
+1. 当前节点连接左右子树的路径和（`currVal + leftMax + rightMax`）。
+2. 当前节点作为路径终点的路径和（`currVal` 或 `currVal + leftMax` 或 `currVal + rightMax`）。
+
+**递归设计：**在递归过程中，我们需要完成以下两件事：
+
+1. **更新全局最大值**：记录当前节点连接左右子树的路径和是否超过全局最大值。
+2. **向上传递路径和**：返回以当前节点为起点的最大路径和，供父节点计算。
+
+**完整代码如下：**
+
+```cpp
+class Solution {
+public:
+    // 以一个结点往下的最大路径和的四种情况：左子树路径、右子树路径、左+根、右+根、左+右+根
+    // 自底向上进行计算
+    int maxPathSum(TreeNode* root) {
+        int maxNum = -INT_MAX;
+        getMaxSum(root, maxNum);
+        return maxNum;
+    }
+
+    int getMaxSum(TreeNode* root, int& maxNum) {  
+        if (!root) return 0;
+        int leftMax = max(getMaxSum(root->left, maxNum), 0);
+        int rightMax = max(getMaxSum(root->right, maxNum), 0);
+        int connectSum = root->val + leftMax + rightMax;
+        maxNum = max(maxNum, connectSum);
+        return max(leftMax+root->val, rightMax+root->val);
+    }
+};
+```
 
 ## 图论算法
 
@@ -4057,6 +4112,73 @@ public:
         for (int j = 0; j < resPath.size(); j++) {
             if (j == resPath.size()-1 && resPath[j] == "/" && resPath.size() != 1) break;
             res += resPath[j];
+        }
+        return res;
+    }
+};
+```
+
+### 基本计算器
+
+![image-20241224132425308](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241224132425308.png)
+
+【括号击穿+栈】：该题可以现将式子转换为逆波兰表达式，然后使用栈进行处理。但是这样的做法比较复杂。在有限的时间内能够快速实现的方法是括号击穿+栈。由于本题中不包含乘法和除法，只有括号和加减，因此在去掉括号后，只要能够正确判断符号的变化，完全可以实现从左到右的依次计算。
+
+符号的变化参照下面的例子：
+
+```cpp
+1 + (2 - (3 - 4))
+```
+
+里面的 `3` 的符号直接由减号 `-` 决定，但括号里的 `-4` 也被外层的 `-` 翻转为 `+4`。
+
+括号击穿的主要思想是将每个括号括起来的部分看做一个作用域，暂存括号外的符号，从而进行变号：比如括号外是`-`，那么当前在遇到`+`时，应该变号为`-`；如果当前遇到为`-`，那么应该编号为`+`。具体地，在上述例子中，2外符号为`+`，3外符号为`-`。
+
+这种符号的结果应该被保存起来，方便根据前一个域的符号进行变号。而当离开一个作用域后，能够快速地判断前一个域的符号，进行变号。
+
+这种括号域的符号暂存的实现的方式是使用栈：
+
+- 当遇到`(`时，保存当前累计的符号：压栈；
+- 当遇到`)`时，弹出栈顶，当前符号变为新的栈顶符号；
+
+当前符号可以直接使用一个值为`{-1,1}`的数`sign`表示累计变化的结果。对于`sign`的变化：
+
+- 遇到`+`，`sign`为栈顶符号
+- 遇到`-`，`sign`变为栈顶符号的相反数
+
+详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int calculate(string s) {
+        stack<int> ops;
+        ops.push(1);    // 初始符号为正号
+        int res = 0, sign = 1;            // 最后结果，和初始符号位
+        for (int i = 0; i < s.size(); ) {
+            if (s[i] == '(') {
+                ops.push(sign);
+                i++;
+            }else if (s[i] == ')') {
+                ops.pop();
+                sign = ops.top();
+                i++;
+            }else if (s[i] == '+') {
+                sign = ops.top();
+                i++;
+            }else if (s[i] == '-') {
+                sign = -ops.top();
+                i++;
+            }else if (s[i] == ' '){
+                i++;
+            }else {
+                long currNum = 0;
+                while (i < s.size() && s[i] >= '0' && s[i] <= '9') {
+                    currNum = currNum * 10 + s[i] - '0';
+                    i++;
+                }
+                res += sign * currNum;
+            }
         }
         return res;
     }

@@ -144,9 +144,11 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         二叉搜索树迭代器/test.cpp
         路径总和I/test.cpp
         完全二叉树的节点个数/test.cpp
-        二叉搜索树的最小绝对值/test.cpp
+        二叉搜索树的最小绝对差/test.cpp
         二叉树的锯齿形层序遍历/test.cpp
         二叉树的层平均值/test.cpp
+        基本计算器/test.cpp
+        组合/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)
