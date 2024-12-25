@@ -2940,6 +2940,60 @@ public:
 };
 ```
 
+### 验证二叉搜索树
+
+![image-20241224191023068](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241224191023068.png)
+
+【中序遍历】：根据二叉搜索树的性质，使用中序搜索会得到一个递增序列，所以可以先对二叉搜索树进行中序遍历，并在遍历的过程中判断是不是比上一个元素大，时间复杂度和空间复杂度都是`O(n)`。代码如下：
+
+```cpp
+class Solution {
+public:
+    bool isValidBST(TreeNode* root) {
+        vector<int> nums;
+        midTravel(root, nums);
+        if (nums.size() == 0) return true;
+        for (int i = 1; i < nums.size(); i++) {
+            if (nums[i] <= nums[i-1]) return false;
+        }
+        return true;
+    }
+
+    void midTravel(TreeNode* root, vector<int>& vec) {
+        if (root != nullptr) {
+            midTravel(root->left, vec);
+            vec.push_back(root->val);
+            midTravel(root->right, vec);
+        }
+    }
+};
+```
+
+【自上而下判断】：对于某个结点位置处，判断是否为二叉搜索树需要三个条件：
+
+- 当前节点的左节点小于当前结点，右节点大于当前节点
+- 左子树是二叉搜索树
+- 右子树是二叉搜索树
+
+后面两个条件需要递归判断，但是需要携带对上层节点的信息：`[minNum, maxNum]`。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    bool isValidBST(TreeNode* root) {
+        long maxNum = INT_MAX+1, minNum = -INT_MAX-1;
+        return check(root, maxNum, minNum);
+    }
+
+    bool check(TreeNode* root, long maxNum, long minNum) {
+        if (root != nullptr) {
+            if (maxNum < root->val || minNum > root->val) return false;
+            return check(root->left, root->val, minNum) && check(root->right, maxNum, root->val);
+        }
+    }
+};
+```
+
 ## 图论算法
 
 ### 拓扑排序和环检测
@@ -4543,7 +4597,11 @@ public:
 
 另一种更直观的方式是进行深度优先搜索，遍历所有的方式，记录数量最少的方式。代码如下：
 
+### 单词拆分
 
+![image-20241225163409995](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241225163409995.png)
+
+使用`f[i]`表示串`s`中的前`i`个字母
 
 ### 编辑距离
 

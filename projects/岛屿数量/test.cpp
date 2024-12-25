@@ -94,3 +94,35 @@ public:
 
 };
 
+
+// 第二次刷：DFS + 数组标记
+class Solution3 {
+public:
+    int numIslands(vector<vector<char>>& grid) {
+        int n = grid.size(), m = grid[0].size(), res = 0;
+        vector<vector<char>> visited(n, vector<char>(m, '0'));
+        vector<vector<int>> dir = {{0,1},{0,-1},{1,0},{-1,0}};  // 方向数组
+        for (int start_i = 0; start_i < n; start_i++) {
+            for (int start_j = 0; start_j < m; start_j++) {
+                if (visited[start_i][start_j] == '0' && grid[start_i][start_j] == '1') {
+                    DFS(grid, dir, visited, start_i, start_j, n, m);
+                    res++;
+                }
+            }
+        }
+        return res;
+    }
+
+    void DFS(vector<vector<char>>& grid, vector<vector<int>>& dir, vector<vector<char>>& visited, int start_i, int start_j, int n, int m) {
+        if (grid[start_i][start_j] == '1' && visited[start_i][start_j] == '0') {    // 没有访问过
+            visited[start_i][start_j] = '1';
+            for (int i = 0; i < 4; i++) {
+                int new_i = start_i + dir[i][0], new_j = start_j + dir[i][1];
+                if (new_i >= 0 && new_i < n && new_j >= 0 && new_j < m
+                    && grid[new_i][new_j] == '1' && visited[new_i][new_j] == '0') {
+                    DFS(grid, dir, visited, new_i, new_j, n, m);
+                    }
+            }
+        }
+    }
+};

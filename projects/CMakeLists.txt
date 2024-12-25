@@ -149,6 +149,7 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         二叉树的层平均值/test.cpp
         基本计算器/test.cpp
         组合/test.cpp
+        被环绕的区域/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)

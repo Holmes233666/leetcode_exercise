@@ -11,6 +11,7 @@ struct TreeNode {
     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
 };
 
+// 法1：中序遍历后验证
 class Solution {
 public:
     bool isValidBST(TreeNode* root) {
@@ -31,3 +32,22 @@ public:
         }
     }
 };
+
+
+// 法2：自上而下判断
+class Solution2 {
+public:
+    bool isValidBST(TreeNode* root) {
+        long maxNum = INT_MAX+1, minNum = -INT_MAX-1;
+        return check(root, maxNum, minNum);
+    }
+
+    bool check(TreeNode* root, long maxNum, long minNum) {
+        if (root != nullptr) {
+            if (maxNum < root->val || minNum > root->val) return false;
+            return check(root->left, root->val, minNum) && check(root->right, maxNum, root->val);
+        }
+    }
+};
+
+
