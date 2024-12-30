@@ -150,6 +150,10 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         基本计算器/test.cpp
         组合/test.cpp
         被环绕的区域/test.cpp
+        三角形最小路径和/test.cpp
+        克隆图/test.cpp
+        不同路径II/test.cpp
+        交错字符串/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)

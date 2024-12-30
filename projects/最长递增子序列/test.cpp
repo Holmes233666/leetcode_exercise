@@ -5,10 +5,16 @@ using namespace std;
 class Solution {
 public:
     int lengthOfLIS(vector<int>& nums) {
-        vector<int> f = vector<int> (nums.size(), 0);
-        for (int i = 1; i < nums.size(); i++) {
-            f[i] = nums[i] > nums[i-1] ? f[i-1] + 1 : 1;
+        int n = nums.size(), maxLen = 1;
+        vector<int> f(n, 1);
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (nums[i] > nums[j]) {
+                    f[i] = max(f[i], f[j]+1);
+                    maxLen = max(f[i], maxLen);
+                }
+            }
         }
-        return f[nums.size()-1];
+        return maxLen;
     }
 };

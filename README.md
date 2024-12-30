@@ -4466,7 +4466,9 @@ public:
 
 ## 动态规划
 
-### 打家劫舍
+### 基本入门
+
+#### 打家劫舍
 
 ![image-20241001231602944](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241001231602944.png)
 
@@ -4533,7 +4535,7 @@ public:
 };
 ```
 
-### 完全平方数
+#### 完全平方数
 
 ![image-20241002170023344](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241002170023344.png)
 
@@ -4566,7 +4568,7 @@ public:
 };
 ```
 
-### 零钱兑换
+#### 零钱兑换
 
 ![image-20241002171114780](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241002171114780.png)
 
@@ -4597,13 +4599,15 @@ public:
 
 另一种更直观的方式是进行深度优先搜索，遍历所有的方式，记录数量最少的方式。代码如下：
 
-### 单词拆分
+### 字符串处理
+
+#### 单词拆分
 
 ![image-20241225163409995](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241225163409995.png)
 
 使用`f[i]`表示串`s`中的前`i`个字母
 
-### 编辑距离
+#### 编辑距离
 
 ![image-20241010215732778](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241010215732778.png)
 
