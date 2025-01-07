@@ -153,6 +153,44 @@ public:
     }
 };
 
+// 二刷
+class Solution4 {
+public:
+    bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
+        int n = prerequisites.size();
+        vector<int> onpath(numCourses, 0);
+        vector<int> visited(numCourses, 0);
+        vector<vector<int>> matrix = vector<vector<int>> (numCourses, vector<int>());
+        for (int i = 0; i < n; i++) {
+            matrix[prerequisites[i][0]].push_back(prerequisites[i][1]);
+        }
+        for (int i = 0; i < n; i++) {
+            if (visited[prerequisites[i][0]] == 0) {    // 没有访问过
+                onpath[prerequisites[i][0]] = 1;
+                bool ifcircle = dfs(prerequisites[i][0], matrix, onpath, visited);
+                if (ifcircle) return false;
+                onpath[prerequisites[i][0]] = 0;
+            }
+        }
+        return true;
+    }
+
+    bool dfs(int currNode, vector<vector<int>>& matrix, vector<int>& onpath, vector<int>& visited) {
+        visited[currNode] = 1;
+        for (int i = 0; i < matrix[currNode].size(); i++) {
+            int nextNode = matrix[currNode][i];
+            if (onpath[nextNode] == 1) return true;    // 含有环
+            if (visited[nextNode] == 0) {
+                onpath[nextNode] = 1;
+                bool ifonpath = dfs(nextNode, matrix, onpath, visited);
+                if (ifonpath) return true;  // 含有环
+                onpath[nextNode] = 0;
+            }
+        }
+        return false;   // 所有的深搜结果都没有环，返回false;
+    }
+};
+
 int main() {
 
 }

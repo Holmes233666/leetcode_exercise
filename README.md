@@ -3002,6 +3002,8 @@ public:
 
 #### 环检测
 
+##### 课程表
+
 环检测的实例：编译器的包依赖关系
 
 关键：除了一般的`visited`数组外，增加一个`onpath`数组：记录目前正在递归栈中的元素，如果正在递归栈中的元素再次被访问到了：那说明含环；而在深搜中`visited`数组起的作用是防止重复深搜（深搜针对的对象是【结点】，针对结点扫描邻接节点），这么看的话，不考虑时间限制的话，其实可以不用`visited`。
@@ -3011,50 +3013,43 @@ public:
 ```cpp
 class Solution {
 public:
-    // 数组实现邻接表
-    vector<vector<int>> grid;
-    vector<int> visted;
-    vector<int> onpath;
     bool canFinish(int numCourses, vector<vector<int>>& prerequisites) {
-        grid = vector<vector<int>> (numCourses, vector<int>());
-        visted = vector<int> (numCourses, 0);
-        onpath = vector<int> (numCourses, 0);
-        bool flag = true;
-        // 创建邻接表
-        for (int i = 0; i < prerequisites.size(); i++) {
-            int sour = prerequisites[i][1], to = prerequisites[i][0];
-            grid[sour].push_back(to);
+        int n = prerequisites.size();
+        vector<int> onpath(numCourses, 0);
+        vector<int> visited(numCourses, 0);
+        vector<vector<int>> matrix = vector<vector<int>> (numCourses, vector<int>());
+        for (int i = 0; i < n; i++) {
+            matrix[prerequisites[i][0]].push_back(prerequisites[i][1]);
         }
-        // 遍历所有的结点，进行深搜
-        for (int i = 0; i < numCourses; i++) {
-            if (visted[i] == 0) flag = DFS(i);
-            if (flag) return (!flag);
+        for (int i = 0; i < n; i++) {
+            if (visited[prerequisites[i][0]] == 0) {    // 没有访问过
+                onpath[prerequisites[i][0]] = 1;
+                bool ifcircle = dfs(prerequisites[i][0], matrix, onpath, visited);
+                if (ifcircle) return false;
+                onpath[prerequisites[i][0]] = 0;
+            }
         }
-        return (!flag);
+        return true;
     }
 
-    // 深度优先搜索
-    bool DFS(int currNode) {
-        onpath[currNode] = 1;
-        visted[currNode] = 1;
-        bool flag = false;  // 默认不含环
-        for (int i = 0; i < grid[currNode].size(); i++) {
-            int to = grid[currNode][i];
-            if (onpath[to] == 1) {
-                return true;    // 含有环
-            }
-            if (visted[to] == 1) {   // 访问过，不用继续深搜这个路线返回true
-                continue;
-            }else if (visted[to] == 0) {   // 没访问过，需要继续深搜
-                flag = DFS(to);
-                if (flag) break;
+    bool dfs(int currNode, vector<vector<int>>& matrix, vector<int>& onpath, vector<int>& visited) {
+        visited[currNode] = 1;
+        for (int i = 0; i < matrix[currNode].size(); i++) {
+            int nextNode = matrix[currNode][i];
+            if (onpath[nextNode] == 1) return true;    // 含有环
+            if (visited[nextNode] == 0) {
+                onpath[nextNode] = 1;
+                bool ifonpath = dfs(nextNode, matrix, onpath, visited);
+                if (ifonpath) return true;  // 含有环
+                onpath[nextNode] = 0;
             }
         }
-        onpath[currNode] = 0;
-        return flag;
+        return false;   // 所有的深搜结果都没有环，返回false;
     }
 };
 ```
+
+
 
 ### 前缀树
 
@@ -3329,6 +3324,93 @@ public:
         return false;
     }
 
+};
+```
+
+### 除法求值
+
+![image-20250103112619229](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250103112619229.png)
+
+```cpp
+#include<vector>
+#include<list>
+#include<unordered_map>
+
+using namespace std;
+
+class Graph {
+public:
+    int vertices; // 图的顶点数量
+    unordered_map<string, int> ump;     // 由string映射到邻接表的数组下标
+    vector<list<pair<string, double>>> adjList; // 邻接表，存储 <目标顶点, 权重>
+
+    // 构造函数，初始化图
+    Graph(int v, unordered_map<string, int>& umap) {
+        vertices = v;
+        adjList.resize(v);
+        ump = umap;
+    }
+
+    // 添加带权边（有向图）
+    void addEdge(string src, string dest, double weight) {
+        adjList[ump[src]].emplace_back(dest, weight);
+        adjList[ump[dest]].emplace_back(src, 1/weight);
+    }
+};
+
+class Solution {
+public:
+    vector<double> calcEquation(vector<vector<string>>& equations, vector<double>& values, vector<vector<string>>& queries) {
+        int n = equations.size(), k = 0;
+        unordered_map<string, int> umap;
+        vector<double> resVec;
+        // 建图，遍历得到顶点个数
+        for (int i = 0; i < n; i++) {
+            if (umap.find(equations[i][0]) == umap.end()) {
+                umap[equations[i][0]] = k++;
+            }
+            if (umap.find(equations[i][1]) == umap.end()) {
+                umap[equations[i][1]] = k++;
+            }
+        }
+        vector<int> visited(k, 0);
+        // k为顶点个数
+        Graph g = Graph(k, umap);
+        // 添加边
+        for (int i = 0; i < n; i++) {
+            g.addEdge(equations[i][0], equations[i][1], values[i]);
+        }
+
+        // 对每个查询进行深搜
+        for (int i = 0; i < queries.size(); i++) {
+            double res = -1.0;
+            dfs(g, queries[i][0], queries[i][1], visited, 1, res);
+            resVec.push_back(res);
+            visited = vector<int>(k, 0);
+        }
+        return resVec;
+    }
+
+    void dfs(Graph& g, string& currNode, string& dest, vector<int>& visited, double val, double& res) {
+        if (g.ump.find(currNode) == g.ump.end()) {
+            return;
+        }
+        int idx = g.ump[currNode];
+        list<pair<string, double>> l = g.adjList[idx];
+        visited[idx] = 1;
+        // 递归终止条件
+        if (currNode == dest) {
+            res = val;
+            return;
+        }
+        for (auto it = l.begin(); it != l.end(); it++) {
+            string nextNode = it->first;
+            int nextIdx = g.ump[nextNode];
+            if (visited[nextIdx] == 0) {    // 进行深搜
+                dfs(g, nextNode, dest, visited, val*(it->second), res);
+            }
+        }
+    }
 };
 ```
 
@@ -4462,8 +4544,6 @@ public:
 };
 ```
 
-
-
 ## 动态规划
 
 ### 基本入门
@@ -4676,6 +4756,23 @@ public:
     }
 };
 ```
+
+#### 最长回文子串
+
+![image-20241230153849360](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20241230153849360.png)
+
+#### 交错字符串
+
+![image-20241230153907077](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20241230153907077.png)
+
+【错误解法：双指针】：直观地看题意，会直接认为可以使用双指针：两个指针分别指向两个子串，如果主串的待比较字符和两个指针指向的某个字符相同，那么主串的待比较字符后移，两个子串指针中字符相同的串的指针后移。但实际上与主串字符相同的可能不只是某个子串，当两个子串的字符都与主串相同时，移动哪个子串的指针？如果随意移动一个指针，可能导致下面的情况：
+
+- 待匹配串：`acabc`
+- 子串`s1`：`abc`，子串`s2`：`ac`
+
+假设当两个子串的字符都和待匹配串相同时（如上例所示的`a`），我们优先移动子串1的指针，即使用子串1中的字母进行匹配。那么将得出子串1和子串2无法交错形成待匹配串的结论。
+
+【动态规划】：正确的方法是以二维动态规划的角度求解。设`f[i][j]`表示使用子串`s1`的前`i`个字符和`s2`的前`j`个字符是否能够构成主串的前`i+j`个字符（由于`i`和`j`是序数，此处`i>=1, j>=1`）。
 
 ## 其他技巧
 

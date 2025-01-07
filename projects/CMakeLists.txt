@@ -154,6 +154,12 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         克隆图/test.cpp
         不同路径II/test.cpp
         交错字符串/test.cpp
+        除法求值/test.cpp
+        二进制求和/test.cpp
+        课程表II/test.cpp
+        蛇形棋/test.cpp
+        最小基因变化/test.cpp
+        单词接龙/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)
