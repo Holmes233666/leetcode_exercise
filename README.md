@@ -2571,6 +2571,8 @@ public:
 };
 ```
 
+
+
 ## 树的处理
 
 ### 从前序与中序遍历构造二叉树
@@ -2994,6 +2996,134 @@ public:
 };
 ```
 
+### 建立四叉树
+
+![image-20250109144944151](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250109144944151.png)
+
+【暴力递归】：暴力递归只需要结合判断函数`judge`判断四个区域的值是不是都是0或者都是1，然后根据判断结果递归建树即可。详细代码如下：
+
+```cpp
+#include<vector>
+
+using namespace std;
+
+class Node {
+public:
+    bool val;
+    bool isLeaf;
+    Node* topLeft;
+    Node* topRight;
+    Node* bottomLeft;
+    Node* bottomRight;
+
+    Node() {
+        val = false;
+        isLeaf = false;
+        topLeft = NULL;
+        topRight = NULL;
+        bottomLeft = NULL;
+        bottomRight = NULL;
+    }
+
+    Node(bool _val, bool _isLeaf) {
+        val = _val;
+        isLeaf = _isLeaf;
+        topLeft = NULL;
+        topRight = NULL;
+        bottomLeft = NULL;
+        bottomRight = NULL;
+    }
+
+    Node(bool _val, bool _isLeaf, Node* _topLeft, Node* _topRight, Node* _bottomLeft, Node* _bottomRight) {
+        val = _val;
+        isLeaf = _isLeaf;
+        topLeft = _topLeft;
+        topRight = _topRight;
+        bottomLeft = _bottomLeft;
+        bottomRight = _bottomRight;
+    }
+};
+
+
+class Solution {
+public:
+    Node* construct(vector<vector<int>>& grid) {
+        int n = grid.size();
+        Node* currNode;
+        createTree(0, n-1, 0, n-1, grid, currNode);
+        return currNode;
+    }
+
+    void createTree(int startI, int endI, int startJ, int endJ, vector<vector<int>>& grid, Node* &currNode) {
+        if (startI <= endI && startJ <= endJ) {
+            currNode = new Node(false, false);
+            if (!judge(startI, endI, startJ, endJ, grid)) { // 不是叶子结点，需要继续递归
+                createTree(startI, (startI+endI)/2, startJ, (startJ+endJ)/2, grid, currNode->topLeft);
+                createTree(startI, (startI + endI)/2, (startJ+endJ)/2+1, endJ, grid, currNode->topRight);
+                createTree((startI+endI)/2+1, endI, startJ, (startJ+endJ)/2, grid, currNode->bottomLeft);
+                createTree((startI+endI)/2+1, endI, (startJ+endJ)/2+1, endJ, grid, currNode->bottomRight);
+            }else { // 是叶子结点
+                currNode->val = grid[startI][startJ];
+                currNode->isLeaf = true;
+            }
+        }else {
+            currNode = nullptr;
+        }
+    }
+
+    bool judge(int startI, int endI, int startJ, int endJ, vector<vector<int>>& grid) {
+        int cmp = grid[startI][startJ];
+        for (int i = startI; i <= endI ; i++) {
+            for (int j = startJ; j<= endJ; j++) {
+                if (grid[i][j] != cmp) return false;    // 是不是叶子结点，需要继续递归
+            }
+        }
+        return true;    // 是叶子结点
+    }
+};
+```
+
+【前缀和优化】：在暴力递归中最耗费时间的是对每个二维数组小块进行遍历，判断是否需要递归创建。可以使用前缀和对这部分进行优化。需要特别注意的是为了后续边界处理更加方便前缀和数组比grid数组多一个第0行和第0列，同时以`grid[i][j]`结尾的前缀和需要映射到前缀和数组的`pre[i+1][j+1]`。详细代码入下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> pre;
+    Node* construct(vector<vector<int>>& grid) {
+        int n = grid.size();
+        Node* currNode;
+        pre = vector<vector<int>>(n+1, vector<int>(n+1, 0));   // n+1是为了方便i==0和j==0的检查函数
+        // 进行pre数组计算
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= n; j++) {
+                pre[i][j] = pre[i][j-1] + pre[i-1][j] - pre[i-1][j-1] + grid[i-1][j-1];
+            }
+        }
+        createTree(0, n-1, 0, n-1, grid, currNode);
+        return currNode;
+    }
+
+    void createTree(int startI, int endI, int startJ, int endJ, vector<vector<int>>& grid, Node* &currNode) {
+        if (startI <= endI && startJ <= endJ) {
+            currNode = new Node(false, false);
+            int prefixNum = pre[endI + 1][endJ + 1] - pre[endI + 1][startJ] - pre[startI][endJ+1] + pre[startI][startJ];
+            int square = (endI - startI + 1) * (endJ - startJ + 1);
+            if (prefixNum != square && prefixNum != 0) { // 不是叶子结点，需要继续递归
+                createTree(startI, (startI+endI)/2, startJ, (startJ+endJ)/2, grid, currNode->topLeft);
+                createTree(startI, (startI + endI)/2, (startJ+endJ)/2+1, endJ, grid, currNode->topRight);
+                createTree((startI+endI)/2+1, endI, startJ, (startJ+endJ)/2, grid, currNode->bottomLeft);
+                createTree((startI+endI)/2+1, endI, (startJ+endJ)/2+1, endJ, grid, currNode->bottomRight);
+            }else { // 是叶子结点
+                currNode->val = grid[startI][startJ];
+                currNode->isLeaf = true;
+            }
+        }else {
+            currNode = nullptr;
+        }
+    }
+};
+```
+
 ## 图论算法
 
 ### 拓扑排序和环检测
@@ -3002,13 +3132,15 @@ public:
 
 #### 环检测
 
-##### 课程表
-
 环检测的实例：编译器的包依赖关系
 
-关键：除了一般的`visited`数组外，增加一个`onpath`数组：记录目前正在递归栈中的元素，如果正在递归栈中的元素再次被访问到了：那说明含环；而在深搜中`visited`数组起的作用是防止重复深搜（深搜针对的对象是【结点】，针对结点扫描邻接节点），这么看的话，不考虑时间限制的话，其实可以不用`visited`。
+##### 课程表
 
 ![image-20240912194516913](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240912194516913.png)
+
+关键：除了一般的`visited`数组外，增加一个`onpath`数组：记录目前正在递归栈中的元素，如果正在递归栈中的元素再次被访问到了：那说明含环；而在深搜中`visited`数组起的作用是防止重复深搜（深搜针对的对象是【结点】，针对结点扫描邻接节点）（这么看的话，不考虑时间限制的话，其实可以不用`visited`）。
+
+对每个节点进行包括`onpath`处理的深搜，同时使用引用变量`ifcircle`标记是否可以提前结束对每个节点的处理。详细代码如下：
 
 ```cpp
 class Solution {
@@ -3049,13 +3181,71 @@ public:
 };
 ```
 
+##### 课程表II
+
+![image-20250107152347710](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250107152347710.png)
+
+在课程表1的基础上需要保存可行路径，那么仍是基于课程表1对每个课程进行深搜的基础，增加一个保存路径的过程（数组引用）。而对于没有在依赖关系中的结点，需要额外补充一个加入结果数组的过程。
+
+```cpp
+class Solution {
+public:
+    vector<int> findOrder(int numCourses, vector<vector<int>>& prerequisites) {
+        int n = prerequisites.size();
+        vector<int> res;
+        vector<int> onpath(numCourses, 0);
+        vector<int> visited(numCourses, 0);
+        vector<vector<int>> matrix = vector<vector<int>> (numCourses, vector<int>());
+        for (int i = 0; i < n; i++) {
+            matrix[prerequisites[i][0]].push_back(prerequisites[i][1]);
+        }
+        for (int i = 0; i < n; i++) {
+            if (visited[prerequisites[i][0]] == 0) {    // 没有访问过
+                onpath[prerequisites[i][0]] = 1;
+                bool ifcircle = dfs(prerequisites[i][0], matrix, onpath, visited, res);
+                if (ifcircle) return {};
+                res.push_back(prerequisites[i][0]);
+                onpath[prerequisites[i][0]] = 0;
+            }
+        }
+        // 将所有没有在依赖关系中的结点加入数组
+        for(int i = 0; i < numCourses; i++) {
+            if (visited[i] == 0) {
+                res.push_back(i);
+            }
+        }
+        return res;
+    }
+
+    bool dfs(int currNode, vector<vector<int>>& matrix, vector<int>& onpath, vector<int>& visited, vector<int>& res) {
+        visited[currNode] = 1;
+        for (int i = 0; i < matrix[currNode].size(); i++) {
+            int nextNode = matrix[currNode][i];
+            if (onpath[nextNode] == 1) return true;    // 含有环
+            if (visited[nextNode] == 0) {
+                onpath[nextNode] = 1;
+                bool ifonpath = dfs(nextNode, matrix, onpath, visited, res);
+                if (ifonpath) return true;  // 含有环
+                onpath[nextNode] = 0;
+                res.push_back(nextNode);    // 如果已经访问过，那么不用深搜，也不用加入res数组。
+            }
+        }
+        return false;   // 所有的深搜结果都没有环，返回false;
+    }
+};
+```
+
 
 
 ### 前缀树
 
+#### 数据结构的实现
+
+##### 前缀树
+
 ![image-20240912202047055](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240912202047055.png)
 
-一个直观的方法是使用哈希表实现，哈希表中存入已经插入的单词，然后再判断有无该前缀的时候遍历哈希表，依次判断是否存在该前缀。但是该方法时间复杂度很高。代码如下：
+【哈希表实现】：一个直观的方法是使用哈希表实现，哈希表中存入已经插入的单词，然后再判断有无该前缀的时候遍历哈希表，依次判断是否存在该前缀。但是该方法时间复杂度很高。代码如下：
 
 ```cpp
 class Trie {
@@ -3109,7 +3299,7 @@ public:
 };
 ```
 
-另一个方式是使用指针数组：`vector<Tire*> child`，该数组初始化时即拥有26个位置，分别对应26个小写字母，该位置是否为空表示是否有字母存在。每个指针数组可以当做`Tire`类的属性，可使用循环迭代创建。同时，由于会有很多前缀单词，所以使用`isEnd`布尔量表征是否到达了单词末尾：在搜索时，如果到达了单词末尾，那么就成功匹配了；否则找到的是一个前缀。代码如下：
+【前缀树】：另一个方式是使用指针数组：`vector<Tire*> child`，该数组初始化时即拥有26个位置，分别对应26个小写字母，该位置是否为空表示是否有字母存在。每个指针数组可以当做`Tire`类的属性，可使用循环迭代创建。同时，由于会有很多前缀单词，所以使用`isEnd`布尔量表征是否到达了单词末尾：在搜索时，如果到达了单词末尾，那么就成功匹配了；否则找到的是一个前缀。代码如下：
 
 ```cpp
 class Trie {
@@ -3163,7 +3353,7 @@ public:
 };
 ```
 
-如果不将指针数组定义为`vector<Tire*> child`，定义为其他数据结构，比如``vector<LinkNode*> child``应该也是可以的。（尝试下）
+如果不将指针数组定义为`vector<Tire*> child`，定义为其他数据结构，比如``vector<LinkNode*> child``应该也是可以的。
 
 ```cpp
 struct LinkNode{
@@ -3175,6 +3365,138 @@ struct LinkNode{
 实现的代码：
 
 ```cpp
+class Node {
+public:
+    vector<Node*> children;
+    bool isEnd;
+
+    Node() {
+        children = vector<Node*>(26, nullptr);
+        isEnd = false; // 默认不是单词的结尾，如果是的话需要修改标记位。
+    }
+
+    Node(char val) {
+        children = vector<Node*>(26, nullptr);
+        children[val - 'a'] = new Node();
+        children[val - 'a']->isEnd = false;
+        isEnd = false;
+    }
+};
+
+class Trie {
+public:
+    Node* head;
+
+    Trie() {
+        head = new Node();
+    }
+
+    void insert(string word) {
+        int n = word.size();
+        Node *currNode = head;
+        for (int i = 0; i < n; i++) {
+            if (currNode->children[word[i]-'a'] == nullptr){    // 存在这个结点，但是之前没字母。（不会对等于2的情况进行修改）
+                currNode->children[word[i]-'a'] = new Node();
+            }
+            if (i == n-1) {
+                currNode->children[word[i]-'a']->isEnd = true;   // 有到该字母为止的单词
+            }
+            currNode = currNode->children[word[i] - 'a'];
+        }
+    }
+
+    bool search(string word) {
+        // 对head开始进行向下检索
+        int n = word.size();
+        Node* currNode = head;
+        for (int i = 0; i < n; i++) {
+            if (currNode->children[word[i]-'a'] == nullptr) return false;
+            if (i == n-1 && currNode->children[word[i]-'a']->isEnd == true) {
+                return true;
+            }
+            currNode = currNode->children[word[i] - 'a'];
+        }
+        return false;
+    }
+
+    bool startsWith(string prefix) {
+        // 对head开始进行向下检索
+        int n = prefix.size();
+        Node* currNode = head;
+        for (int i = 0; i < n; i++) {
+            if (currNode->children[prefix[i]-'a'] == nullptr) return false;
+            if (i == n-1 && currNode->children[prefix[i]-'a'] != 0){
+                return true;
+            }
+            currNode = currNode->children[prefix[i]-'a'];
+        }
+        return false;
+    }
+};
+```
+
+#### 前缀树数据结构的应用
+
+##### 添加与搜索单词-数据结构设计
+
+![image-20250108161300296](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250108161300296.png)
+
+【DFS+Tire树】在Tire树数据结构的基础上，在出现`.`的情况下需要对树进行深搜，详细代码入下：
+
+```cpp
+class WordDictionary {
+public:
+    WordDictionary* w;
+    vector<WordDictionary*> child;
+    bool isEnd;
+
+    WordDictionary() {
+        child = vector<WordDictionary*>(26);
+        isEnd = false;
+    }
+
+    void addWord(string word) {
+        int n = word.size();
+        WordDictionary* curr = this;
+        for (int i = 0; i < n; i++) {
+            int idx = word[i] - 'a';
+            if (curr->child[idx] == nullptr) {
+                curr->child[idx] = new WordDictionary();
+            }
+            curr = curr->child[idx];
+        }
+        curr->isEnd = true;
+    }
+
+    bool search(string word) {
+        return dfs(0, word, this);
+    }
+
+    bool dfs(int idx, string& word, WordDictionary* curr) {
+        if (idx == word.size() && curr->isEnd == true) {
+            return true;
+        }
+        if (idx == word.size() && curr->isEnd == false) {
+            return false;
+        }
+        if (word[idx] == '.') { // 进行深搜
+            // 尝试每个字母
+            for (int i = 0; i < 26; i++) {
+                // 任意一个单词非空，进行深搜
+                if (curr->child[i] != nullptr) {
+                    bool flag = dfs(idx+1, word, curr->child[i]);
+                    if (flag) return true;
+                }
+            }
+            return false;
+        }else { // word[idx] 是一个单词
+            int i = word[idx] - 'a';
+            if (curr->child[i] == nullptr) return false;
+            return dfs(idx+1, word, curr->child[i]);
+        }
+        return false;
+    }
+};
 ```
 
 ### 多源广度优先算法
@@ -3196,7 +3518,7 @@ public:
                 if (grid[i][j] == 1) currLastOrange++;
             }
         }
-        // 访问记录数组，防止本轮被传染的句子传染别的橘子
+        // 访问记录数组，防止本轮被传染的橘子传染别的橘子
         vector<vector<int>> visted = vector<vector<int>>(grid.size(), vector<int>(grid[0].size(),0));
 
         preLastOrange = currLastOrange + 1;
@@ -3327,17 +3649,15 @@ public:
 };
 ```
 
-### 除法求值
+#### 除法求值
 
-![image-20250103112619229](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250103112619229.png)
+<img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250103112619229.png" alt="image-20250103112619229" style="zoom: 67%;" />
+
+【邻接表 + 深度优先搜索】：本题需要注意的是含权邻接表的建立方式，如果不是含权的邻接表可以直接使用`vector<vector<int>>`的方式定义。含权的邻接表建立可以用`vector<list<pair<int, double>>>`的方式定义，也可以使用`vector<vector<pair<int, double>>>`的方式定义（第一个`int`代表结点的序号，在本题中，结点编号是使用`string`实现的）。定义邻接表后，对边进行插入，注意两项的权重互为倒数即可。
+
+在邻接表上进行深度优先搜索，注意终止条件还要加上一个不存在节点即可。
 
 ```cpp
-#include<vector>
-#include<list>
-#include<unordered_map>
-
-using namespace std;
-
 class Graph {
 public:
     int vertices; // 图的顶点数量
@@ -3408,6 +3728,83 @@ public:
             int nextIdx = g.ump[nextNode];
             if (visited[nextIdx] == 0) {    // 进行深搜
                 dfs(g, nextNode, dest, visited, val*(it->second), res);
+            }
+        }
+    }
+};
+```
+
+#### 克隆图
+
+![image-20250107153749237](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250107153749237.png)
+
+【深搜】：本题的关键在于对「引用、容器等的理解」。克隆图需要对图进行搜索，此处是基于深搜实现的。参考数据结构的实现，不难看出是基于邻接表的图，即需要对邻接表进行深度优先搜索，然后克隆图。需要注意以下细节：
+
+- 首先，传入的待复制结点的参照需要传入的是值：`Node *`【因为不需要对这个结点的地址进行修改】，但是由于需要对节点进行复制，即对一个指针变量的地址进行赋值，所以待创建结点需要传入的是引用，即`Node* &`。
+
+- 深搜过程中需要建立邻居关系。
+
+  - 如果结点没有创建，那么需要进行深度优先搜索，创建结点。然后将深搜后的结点加入邻居列表中。
+  - 如果有些节点已经创建过了，需要将其加入到当前结点的邻接表中需要利用结点的序号关系：利用序号定位到该结点。
+
+  不管有没有创建，都要为下次可能再通过其他结点访问该结点做准备。不难想到哈希表可以建立序号与结点之间的映射，同时建立邻居关系时需要使用哈希表建立。代码如下：
+
+  ```cpp
+  if (umap.find(currNextVec[i]->val) == umap.end()) { // 没找到
+      Node* nextNode;
+      dfs_create(currNextVec[i], nextNode, umap);
+      newNode->neighbors.push_back(nextNode);
+  }else{
+      newNode->neighbors.push_back(umap[currNextVec[i]->val]);
+  }
+  ```
+
+上述思路下详细代码如下：
+
+```cpp
+class Node {
+public:
+    int val;
+    vector<Node*> neighbors;
+    Node() {
+        val = 0;
+        neighbors = vector<Node*>();
+    }
+    Node(int _val) {
+        val = _val;
+        neighbors = vector<Node*>();
+    }
+    Node(int _val, vector<Node*> _neighbors) {
+        val = _val;
+        neighbors = _neighbors;
+    }
+};
+
+
+// 深度优先搜索
+class Solution {
+public:
+    Node* cloneGraph(Node* node) {
+        unordered_map<int, Node*> ump;
+        Node* res = nullptr;
+        dfs_create(node, res, ump);
+        return res;
+    }
+
+    // newNode应该在搜索完成结束后加入数组中，否则没法在数组中访问到
+    void dfs_create(Node* orignNode, Node* &newNode, unordered_map<int, Node*>& umap) {
+        if (orignNode != nullptr) {
+            newNode = new Node(orignNode->val);
+            umap[newNode->val] = newNode;
+            vector<Node*> currNextVec = orignNode->neighbors;
+            for (int i = 0; i < currNextVec.size(); i++) {
+                if (umap.find(currNextVec[i]->val) == umap.end()) { // 没找到
+                    Node* nextNode;
+                    dfs_create(currNextVec[i], nextNode, umap);
+                    umap[newNode->val]->neighbors.push_back(nextNode);
+                }else{
+                    umap[newNode->val]->neighbors.push_back(umap[currNextVec[i]->val]);
+                }
             }
         }
     }
@@ -3521,6 +3918,8 @@ public:
 };
 ```
 
+
+
 ### 分割回文串
 
 ![image-20240916212950109](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240916212950109.png)
@@ -3615,7 +4014,151 @@ public:
 };
 ```
 
+### 单词搜索
+
+![image-20250109132810488](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250109132810488.png)
+
+【回溯】：典型的搜索题目，但是本题需要注意的有三点：
+
+- 传值与传引用：首先尽量是都选择传引用，虽然传值可以减少回溯的开销，但是传值的时间太长，容易超过时间复杂度。
+- **每个起点**后visisted要置空：由于visited数组使用传值会超时，所以必须使用传引用，但是传引用不要忽视回溯操作，重新置0。
+- 深搜内部也需要回溯（当然如果visited传值就不需要了）
+
+```cpp
+class Solution {
+public:
+    bool exist(vector<vector<char>>& board, string word) {
+        int n = board.size(), m = board[0].size();
+        vector<vector<char>> visited(n, vector<char>(m, '0'));
+        vector<vector<int>> dir = {{1, 0}, {-1, 0}, {0, 1}, {0, -1}};
+        for(int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                if (board[i][j] == word[0] && visited[i][j] == '0') {
+                    bool flag = dfs(visited, board, word, 0, dir, i, j);
+                    if (flag) return true;
+                }
+                visited = vector<vector<char>>(n, vector<char>(m, '0'));
+            }
+        } 
+        return false;
+    }
+
+    bool dfs(vector<vector<char>>& visited, vector<vector<char>>& board, string& word, int currIdx, vector<vector<int>>& dir, int currI, int currJ) {
+        if (currIdx == word.size()-1) {
+            return true;
+        }
+        visited[currI][currJ] = '1';
+        int n = board.size(), m = board[0].size();
+        for (int i = 0; i < 4; i++) {
+            int nextI = currI + dir[i][0], nextJ = currJ + dir[i][1];
+            if (nextI >= 0 && nextI < n && nextJ >= 0 && nextJ < m && visited[nextI][nextJ] == '0' && board[nextI][nextJ] == word[currIdx+1]) {
+                bool flag = dfs(visited, board, word, currIdx+1, dir, nextI, nextJ);
+                visited[nextI][nextJ] = '0';
+                if (flag) return true;
+            }
+        }
+        return false;
+    }
+};
+```
+
+### 括号生成
+
+![image-20250107224156365](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250107224156365.png)
+
+【深搜】：本题的关键在于在括号匹配失败时进行剪枝，减少时间复杂度。因此可以维护一个回溯可用的栈（参考括号匹配题目，栈里只放左括号，不放右括号），在往结果串中放入括号前使用栈进行判断是否可以放入当前括号，不能放入的情况只有两种：
+
+- 已经放入了n个括号，新放入的括号还是`(`：已经放入足够多的左括号了
+- 栈空，放入的括号是`)`
+
+其余情况都是可以放入任意括号的。
+
+**特别注意递归终止条件**：
+
+- 结果串的括号数量达标且【栈空】
+
+详细代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<string> generateParenthesis(int n) {
+        stack<char> bra_s;
+        vector<string> res;
+        vector<char> brackets = {'(', ')'};
+        string currStr = "";
+        dfs(2*n, currStr, res, brackets, bra_s);
+        return res;
+    }
+
+    void dfs(int n, string& currStr, vector<string>& res, vector<char>& brackets, stack<char>& bra_s) {
+        if (n == currStr.size() && bra_s.empty()) {
+            res.push_back(currStr);
+            return;
+        }else if (n == currStr.size()) {
+            return;
+        }
+        for (int i = 0; i < brackets.size(); i++) {
+            // 尝试放入括号
+            if (judgeSta(brackets[i], bra_s, n/2)) {
+                currStr.push_back(brackets[i]);
+                if (brackets[i] == '(') {
+                    bra_s.push('(');
+                }else{
+                    bra_s.pop();
+                }
+                dfs(n, currStr, res, brackets, bra_s);
+                currStr.pop_back();
+                if (brackets[i] == '(') {
+                    bra_s.pop();
+                }else{
+                    bra_s.push('(');
+                }
+            }
+        }
+    }
+
+    bool judgeSta(char bracket, stack<char>& bra_s, int n) {
+        if (bra_s.size() == n && bracket == '(') return false;
+        if (bra_s.empty() && bracket == ')') return false;
+        return true;
+    }
+};
+```
+
 ## 二分查找
+
+### 搜索插入位置
+
+![image-20250114114423947](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250114114423947.png)
+
+二分本身的逻辑很简单，关键是找不到的情况如何处理。这里分为两种大情况，分别对应递归搜索的两个if分支：
+
+- 如果是因为`mid-1`导致上限一直向左缩短，最终区间不成立（`start > end`），那么会有两种子情况：
+  - `mid-1<0`，即`end<0`，那么返回的值为0（其实即为start）
+  - `mid-1>=0`，即`end>=0`（根据二分的思路，此时`nums[end]`只会是<0，不会是其他情况），那么应该返回`start`
+- 如果是因为`mid+1`导致下限一直向右缩短，最终区间不成立，那么不论`start>=nums.size()`，插入的位置就都是`start`本身。
+
+因此详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int searchInsert(vector<int>& nums, int target) {
+        return binarySearch(0, nums.size()-1, nums, target);
+    }
+
+    int binarySearch(int start, int end, vector<int>& nums, int target) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] == target) return mid;
+            if (nums[mid] > target) return binarySearch(start, mid-1, nums, target);
+            if (nums[mid] < target) return binarySearch(mid+1, end, nums, target);
+        }
+        return start;
+    }
+};
+```
 
 ### 搜索二维矩阵
 
@@ -4772,7 +5315,106 @@ public:
 
 假设当两个子串的字符都和待匹配串相同时（如上例所示的`a`），我们优先移动子串1的指针，即使用子串1中的字母进行匹配。那么将得出子串1和子串2无法交错形成待匹配串的结论。
 
-【动态规划】：正确的方法是以二维动态规划的角度求解。设`f[i][j]`表示使用子串`s1`的前`i`个字符和`s2`的前`j`个字符是否能够构成主串的前`i+j`个字符（由于`i`和`j`是序数，此处`i>=1, j>=1`）。
+【动态规划】：正确的方法是以二维动态规划的角度求解。设`f[i][j]`表示使用子串`s1`的前`i`个字符和`s2`的前`j`个字符是否能够构成主串的前`i+j`个字符（由于`i`和`j`是序数，此处`i>=1, j>=1`），故状态转移方程如下：
+$$
+f[i][j] = f[i-1][j]\&\&s1[i-1]==s[i+j-1] ||f[i][j-1]\&\&s2[j-1]==s[i+j-1]
+$$
+详细代码如下：
+
+```cpp
+class Solution {
+public:
+    bool isInterleave(string s1, string s2, string s3) {
+        int n1 = s1.size(), n2 = s2.size(), n3 = s3.size();
+        if (n1 + n2 != n3) return false;
+        if (n3 == 0) return true;
+        vector<vector<bool>> f(n1+1, vector<bool>(n2+1, true));
+        // 初始化矩阵的第一行
+        for (int i = 0, j = 1; j <= n2; j++) {
+            f[i][j] = f[i][j-1] && (s2[j-1] == s3[i+j-1]);
+        }
+        // 进行后续计算
+        for (int i = 1; i <= n1; i++) {
+            for (int j = 0; j <= n2; j++) {
+                if (j == 0) {
+                    f[i][j] = f[i-1][j] && (s1[i-1] == s3[i+j-1]);
+                }else {
+                    f[i][j] = (f[i-1][j] && (s1[i-1] == s3[i+j-1])) || (f[i][j-1] && (s2[j-1] == s3[i+j-1]));
+                }
+            }
+        }
+        return f[n1][n2];
+    }
+};
+```
+
+【其他想法：搜索】上述动态规划的方式本质是进行了广度优先搜索，利用了前序信息。基于深度搜索也可以实现。每个s[i]，尝试使用s1和s2中的字母，遇到不可行情况进行剪枝即可。
+
+### 数组处理
+
+#### 最大子数组和
+
+![image-20250113230020388](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250113230020388.png)
+
+【动态规划】：使用`f[i]`表示以`nums[i]`结尾的最大子数组和，那么该最大子数组和要么是只有`nums[i]`这一个元素，要么是将`nums[i]`接在前一个最大子数组`f[i-1]`所对应的最大子数组的后面。状态转移方程如下：
+$$
+f[i] = max(nums[i], f[i-1]+nums[i])
+$$
+该方法时间复杂度和空间复杂度均为`O(n)`。
+
+【线段树】：
+
+该方法的时间复杂度为`O(n)`，但空间复杂度为`O(log(n))`。
+
+#### 环形最大子数组和
+
+![image-20250113231149386](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250113231149386.png)
+
+【动态规划】：环形子数组可以分成两种情况去求解：
+
+- 第一种情况：计算区间$[i,j]$上的最大子数组和，其中$0 < i < j < n$，这种情况其实就是上一题中的最大子数组和
+- 第二种情况：计算区间[0, i], [j, n]上的最大子数组和，其中$0 < i < j < n$。这种情况是环形数组中的特殊情况。
+
+两种情况如下图所示：
+
+<img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250113232614927.png" alt="image-20250113232614927" style="zoom: 33%;" />
+
+第二种这种情况要在`O(n)`时间复杂度内求解不妨从后往前看：固定一个`j`，计算`nums[j:n]`（这步可以在累加的过程中完成），然后获取`[0,j-1]`区间内的最大前缀和（注意是最大前缀和，所以第一个元素一定是包括在内的），该获取最大前缀和的过程需要在`O(1)`时间内完成，才能实现整体复杂度为`O(n)`。最大前缀和的计算可以使用动态规划的思想进行预计算，动态转移方程为：
+$$
+maxPrefix[i] = max(maxPrefix[i-1], sum(0...i))
+$$
+经过上式的预处理，能够在`O(n)`时间内处理完第二种情况。然后综合第一种情况，得到最终的答案。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int maxSubarraySumCircular(vector<int>& nums) {
+        int maxNum = nums[0], n = nums.size();
+        // 第一种情况：计算 0 < i < j < n, 区间[i,j]上的最大子数组和
+        vector<int> f(n);
+        f[0] = nums[0];
+        for (int i = 1; i < n; i++) {
+            f[i] = max(nums[i], nums[i] + f[i-1]);
+            maxNum = max(maxNum, f[i]);
+        }
+        // 第二种情况：计算 0 < i < j < n，区间[0, i], [j, n]上的最大子数组和
+        // 首先计算区间 0 - i区间上，任意i < n-1 时的最大前缀和
+        vector<int> maxPre(n);  // 多算一个
+        maxPre[0] = nums[0];
+        int preSum = nums[0];
+        for (int i = 1; i < n; i++) {
+            preSum += nums[i];
+            maxPre[i] = max(maxPre[i-1], preSum);
+        }
+        int endSum = 0;
+        for (int j = n-1; j > 0; j--) {
+            endSum += nums[j];
+            maxNum = max(maxPre[j-1] + endSum, maxNum);
+        }
+        return maxNum;
+    }
+};
+```
 
 ## 其他技巧
 

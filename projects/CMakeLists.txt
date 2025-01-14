@@ -3,7 +3,8 @@ project(projects)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(projects main.cpp)
+add_executable(projects main.cpp
+        环形子数组的最大和.cpp)
 
 add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         最大子数组和/test.cpp
@@ -160,6 +161,11 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         蛇形棋/test.cpp
         最小基因变化/test.cpp
         单词接龙/test.cpp
+        括号生成/test.cpp
+        添加与搜索单词-数据结构设计/test.cpp
+        N皇后II/test.cpp
+        建立四叉树/test.cpp
+        回文数/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)

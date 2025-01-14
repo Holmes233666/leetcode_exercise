@@ -18,7 +18,6 @@ public:
                     int nextPos = curr + j;
                     if (nextPos == n * n) return currDepth;
                     int nextI = (n*n - nextPos) / n;
-                    // int nextJ = n * (nextI % 2) + pow(-1, nextI % 2) * (n*n - nextPos - nextI * n);
                     int nextJ = 0;
                     if (nextI % 2 == 0) { // 逆着走
                         nextJ = n*n - nextPos - nextI * n;

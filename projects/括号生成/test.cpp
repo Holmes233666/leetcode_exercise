@@ -3,6 +3,7 @@
 
 using namespace std;
 
+// 法1：压栈时判断是否可以放入该括号
 class Solution {
 public:
     stack<char> currStack;
@@ -52,6 +53,8 @@ public:
     }
 };
 
+
+// 法2：暴力解法，深搜完进行括号正确性判断，高时间复杂度
 class Solution2 {
 public:
     vector<string> res;
@@ -91,6 +94,52 @@ public:
         }
         if (charStack.empty()) return true;
         return false;
+    }
+};
+
+// 法1：第二次刷
+class Solution3 {
+public:
+    vector<string> generateParenthesis(int n) {
+        stack<char> bra_s;
+        vector<string> res;
+        vector<char> brackets = {'(', ')'};
+        string currStr = "";
+        dfs(2*n, currStr, res, brackets, bra_s);
+        return res;
+    }
+
+    void dfs(int n, string& currStr, vector<string>& res, vector<char>& brackets, stack<char>& bra_s) {
+        if (n == currStr.size() && bra_s.empty()) {
+            res.push_back(currStr);
+            return;
+        }else if (n == currStr.size()) {
+            return;
+        }
+        for (int i = 0; i < brackets.size(); i++) {
+            // 尝试放入括号
+            if (judgeSta(brackets[i], bra_s, n/2)) {
+                currStr.push_back(brackets[i]);
+                if (brackets[i] == '(') {
+                    bra_s.push('(');
+                }else{
+                    bra_s.pop();
+                }
+                dfs(n, currStr, res, brackets, bra_s);
+                currStr.pop_back();
+                if (brackets[i] == '(') {
+                    bra_s.pop();
+                }else{
+                    bra_s.push('(');
+                }
+            }
+        }
+    }
+
+    bool judgeSta(char bracket, stack<char>& bra_s, int n) {
+        if (bra_s.size() == n && bracket == '(') return false;
+        if (bra_s.empty() && bracket == ')') return false;
+        return true;
     }
 };
 

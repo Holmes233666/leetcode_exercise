@@ -17,8 +17,8 @@ public:
             if (visited[prerequisites[i][0]] == 0) {    // 没有访问过
                 onpath[prerequisites[i][0]] = 1;
                 bool ifcircle = dfs(prerequisites[i][0], matrix, onpath, visited, res);
-                res.push_back(prerequisites[i][0]);
                 if (ifcircle) return {};
+                res.push_back(prerequisites[i][0]);
                 onpath[prerequisites[i][0]] = 0;
             }
         }
