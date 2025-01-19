@@ -60,6 +60,41 @@ public:
     }
 };
 
+class Solution2 {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        int n = s.size(), m = p.size();
+        vector<int> res;
+        unordered_map<char, int> umap;
+        // 记录p的字典
+        for (int i = 0; i < m; i++) {
+            umap[p[i]]++;
+        }
+        int charNum = umap.size();
+        unordered_map<char, int> currMap;
+        // 滑动窗口
+        for (int left = 0, right = 0; right < n; right++) {
+            // 当前字符
+            char currChar = s[right];
+            while(right-left+1 > m) {  // 扩展左边界
+                currMap[s[left]]--;
+                if (currMap[s[left]] == umap[s[left]]-1) charNum--;
+                left++;
+            }
+            // 扩展右边界
+            currMap[currChar]++;
+            if (currMap[currChar] == umap[currChar]) {
+                charNum--;
+            }
+            if (charNum == 0) {
+                res.push_back(left);
+            }
+        }
+        return res;
+    }
+};
+
+
 int main() {
     string a = "abab", b = "ab";
     Solution solution;

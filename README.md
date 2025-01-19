@@ -74,23 +74,18 @@ public:
 class Solution {
 public:
     vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        unordered_map<string, vector<string>> umap;
+        vector<vector<string>> res;
         int n = strs.size();
-        // 先给字符排序，排序结果应该存储在另一个数组中，因此使用一个数组复制
-        vector<string> ordered = strs;
-        unordered_map<string, vector<string>> resMap;
-        vector<vector<string>> resVec;
         for (int i = 0; i < n; i++) {
-            sort(ordered[i].begin(), ordered[i].end());
+            string temp = strs[i];
+            sort(strs[i].begin(), strs[i].end());
+            umap[strs[i]].push_back(temp);
         }
-        // 依次遍历strs中的所有内容
-        for (int i = 0; i < n; i++) {
-            resMap[ordered[i]].push_back(strs[i]);
+        for (auto it : umap) {
+            res.push_back(it.second);
         }
-        // 将hashmap中的所有结果放进resVec中返回
-        for (auto it : resMap) {
-            resVec.push_back(it.second);
-        }
-        return resVec;
+        return res;
     }
 };
 ```
@@ -471,6 +466,53 @@ public:
 };
 ```
 
+### 三数之和
+
+![image-20250116183040010](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250116183040010.png)
+
+【双指针+排序】：三数之和可以效仿两数之和，首先固定一个数，然后内层执行两数之和，但是由于题目要求不能包含重复的结果，这种解法去重比较复杂（使用set也会引入额外的时间复杂度）；另一种容易想到的方式是先进行排序，然后遍历数组，固定一个数，内循环使用双指针求解，这种方法给去重提供了简化手段。需要注意两个地方的去重：
+
+- 内循环，双指针内部的去重：在满足三数之和时，如果left指针right指针的后一个数与自己相同，那么需要跳过这些数，防止加入重复答案。
+- 外循环：如果nums[i]和nums[left]相同，那么如果在枚举完nums[i]后接着枚举nums[left]，也会产生重复解，因此在每个外部循环要结束时，需要进行一次跳过重复元素的操作
+
+详细代码如下：
+
+```cpp
+class Solution {
+public:
+    vector<vector<int>> threeSum(vector<int>& nums) {
+        int n = nums.size();
+        vector<vector<int>> res;
+        sort(nums.begin(), nums.end());
+        cout << endl;
+        for (int i = 0; i < n; ) {
+            int right = n - 1, left = i + 1;
+            while (left < right) {
+                if (nums[i] + nums[left] + nums[right] == 0) {
+                    res.push_back({nums[i], nums[left], nums[right]});
+                    // 跳过所有相同的数
+                    while (left < right && (nums[left] == nums[left+1])) left++;
+                    if (left == right) break;
+                    while (left < right && nums[right] == nums[right-1]) right--;
+                    if (left == right) break;
+                    left++;
+                  	right--;
+                }else if (nums[i] + nums[left] + nums[right] > 0) {
+                    right--;
+                }else{
+                    left++;
+                }
+            }
+            while (i+1 < n && nums[i] == nums[i+1]) {
+                i++;
+            }
+            i++;
+        }
+        return res;
+    }
+};
+```
+
 
 
 ## 前缀和
@@ -546,6 +588,33 @@ public:
 
 ```
 
+【逆序放入】：第二次刷时利用的是等式`sums[j] - sums[i] == k`转变成的等式`sums[j] == k + sums[i]`，即每次遍历到`sums[i]`时，寻找数`sums[i]+k`在不在哈希表中，此时要保证找到的`j`一定比`i`大，所以可以逆序遍历`sums`数组，检查并放入哈希表，这样找到的`nums[j]`的下标`j`一定是比`i`大的有效子数组。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int subarraySum(vector<int>& nums, int k) {
+        int n = nums.size();
+        unordered_map<int, int> umap;
+        vector<int> preSum(n+1, 0);
+        // umap[nums[0]]++;
+        preSum[0] = 0;
+        // 前缀和放入哈希表
+        for (int i = 0; i < n; i++) {
+            preSum[i+1] = preSum[i] + nums[i];
+        }
+        int res = 0;
+        for (int i = n; i >= 0; i--) {
+            if (umap.find(k+preSum[i]) != umap.end()) {
+                res += umap[k+preSum[i]];
+            }
+            umap[preSum[i]]++;
+        }
+        return res;
+    }
+};
+```
+
 ### 路径总和III
 
 ![image-20240910190149443](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240910190149443.png)
@@ -609,6 +678,69 @@ public:
 ### 无重复字符最长子串
 
 ![image-20241128103923154](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241128103923154.png)
+
+【滑动窗口】：基本的做法就是使用滑动窗口的模板，标准模板如下：
+
+```cpp
+//外层循环扩展右边界，内层循环扩展左边界
+for (int l = 0, r = 0 ; r < n ; r++) {
+	//当前考虑的元素
+	while (l <= r && check()) {//区间[left,right]不符合题意
+        //扩展左边界
+    }
+    //区间[left,right]符合题意，统计相关信息
+}
+```
+
+套用模板，本题写法如下：
+
+```cpp
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+      int n = 
+        set<char> myset;
+    }
+};
+```
+
+
+
+【滑动窗口：右扩+左缩】：
+
+```cpp
+class Solution {
+public:
+    int lengthOfLongestSubstring(string s) {
+        int n = s.size(), maxLen = 0;
+        int left = 0, right = 1;
+        unordered_map<char, int> umap;
+        umap[s[left]] = 1;
+        while(left < n) {
+            // 右边扩张
+            for (; right <= n; right++) {
+                if (right == n || umap.find(s[right]) != umap.end()) {    // 有重复字符
+                    if (right < n) umap[s[right]] = 2;  // 特殊标记
+                    maxLen = max(right-left, maxLen);
+                    break;
+                }
+                umap[s[right]] = 1;
+            }
+            // 左边收缩
+            while(left < right) {
+                if (umap[s[left]] == 1) {
+                    umap.erase(s[left++]);
+                }else{
+                    umap[s[left++]] = 1;
+                    break;
+                }
+            }
+            right++;
+        }
+        return maxLen;
+    }
+};
+```
 
 
 
@@ -4205,6 +4337,75 @@ public:
 };
 ```
 
+### 寻找峰值
+
+![image-20250115153422194](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250115153422194.png)
+
+【扫描】：扫描需要`O(n)`时间复杂度实现。
+
+【二分】：当start < end时，直观地二分需要考虑四种情况，使用线段表示数组趋势，顶点从左到右分别代表`mid-1,mid,mid+1`，下面是四种情况：
+
+- `/\`：那么mid就是峰值，直接返回即可；
+- `\/`：左侧和右侧都有可能出现峰值，左右任意顺序递归；
+- `/`：递增，那么一定存在一个峰值在[mid+1, end]中，向右递归；
+- `\`：递减，那么一定存在一个峰值在[start, mid-1]中，向左递归；
+
+此时，start == end是递归终止条件，此时start一定是峰值。但是需要注意递减的情况中的递归写法，递归的区间应该是[start, mid]，而不是[start, mid-1]，因为mid-1本身可能是峰值，向下取整后永远无法再考虑到mid-1这个峰值了。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int findPeakElement(vector<int>& nums) {
+        return binarySearch(nums, 0, nums.size()-1);
+    }
+
+    int binarySearch(vector<int>& nums, int start, int end) {
+        if (start < end) {
+            int mid = (start + end) / 2;
+            if (mid > 0 && nums[mid] > nums[mid+1] && nums[mid] > nums[mid-1]) return mid;
+            if (mid == 0 && nums[mid] > nums[mid+1]) return mid;
+            if (mid == 0 && nums.size() == 2 && nums[mid+1] > nums[mid]) return mid+1;
+            if (mid > 0 && nums[mid] > nums[mid-1] && nums[mid] < nums[mid+1]) {    // 递增
+                return binarySearch(nums, mid+1, end);
+            }
+            if (mid > 0 && nums[mid] < nums[mid-1] && nums[mid] > nums[mid+1]) {    // 递减
+                return binarySearch(nums, start, mid);
+            }
+            if (mid > 0 && nums[mid] < nums[mid-1] && nums[mid] < nums[mid+1]) {
+                return binarySearch(nums, start, mid);
+            }
+        }
+        return start; 
+    }
+};
+```
+
+【二分简化】：简化来说只要考虑两个数的比较即可：
+
+- 如果`nums[mid] < nums[mid+1]`，那么递归区间[mid+1, end]，因为右区间一定有一个峰值
+- 反之，递归区间[start, mid]，因为mid也可能是峰值
+
+当区间中只有一个数时达到终止条件，此时该数就是峰值。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int findPeakElement(vector<int>& nums) {
+        return binarySearch(nums, 0, nums.size()-1);
+    }
+
+    int binarySearch(vector<int>& nums, int start, int end) {
+        if (start == end) return start;
+        if (start < end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] < nums[mid+1]) return binarySearch(nums, mid+1, end);
+            return binarySearch(nums, start, mid);
+        }
+        return -1;
+    }
+};
+```
+
 ### lowerbound与upperbound的实现
 
 ![image-20240918165540195](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240918165540195.png)
@@ -4406,6 +4607,38 @@ public:
 };
 ```
 
+【二分，不进行是否有序的递归】：第二次刷的时候给出了下面的解法，其实更简单，分类讨论下就行了：
+
+```cpp
+class Solution {
+public:
+    int search(vector<int>& nums, int target) {
+        return binarySearch(0, nums.size()-1, target, nums);
+    }
+
+    int binarySearch(int start, int end, int target, vector<int>& nums) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] == target) return mid;
+            if (nums[mid] > target) {
+                if (nums[mid] < nums[start]) {
+                    return binarySearch(start, mid-1, target, nums);
+                }
+                int idx = binarySearch(start, mid-1, target, nums);
+                if (idx != -1) return idx;
+                return binarySearch(mid+1, end, target, nums);
+            }else { // mid < target
+                if (nums[mid] > nums[start]) return binarySearch(mid+1, end, target, nums);
+                int idx = binarySearch(mid+1, end, target, nums);
+                if (idx != -1) return idx;
+                return binarySearch(start, mid-1, target, nums);
+            }
+        }
+        return -1;
+    }
+};
+```
+
 #### 寻找旋转排序数组中的最小值
 
 ![image-20240918171913574](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240918171913574.png)
@@ -4455,7 +4688,7 @@ void searchPivot(vector<int>& nums, int start, int end, int& pIdx) {
 
 ![image-20240919195326467](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240919195326467.png)
 
-如何从分治的角度思考查找中位数？首先，根据数组长度和为奇数还是偶数划分，中位数是两个数组中的第`(m+n)/2+1`个数或者第`(m+n)/2+1`和第`(m+n)/2`个数的平均数。因此，问题转换为了找到两个数组中的第K大的数，其中$K=(m+n)/2$或$K=(m+n)/2+1$。直接找到目标数并不容易，但是该问题的一个**最小的问题是，找到第1小的数**：直接比较两个数组的首元素，哪个小返回即可。所以分治的目标即是将第K大的元素通过规模减小，逐渐减小到找到第1大的元素。
+如何从分治的角度思考查找中位数？首先，根据数组长度和为奇数还是偶数划分，中位数是两个数组中的第`(m+n)/2+1`个数或者第`(m+n)/2+1`和第`(m+n)/2`个数的平均数。因此，问题转换为了找到两个数组中的第K大的数，其中$K=(m+n)/2$或$K=(m+n)/2+1$。直接找到目标数并不容易，但是该问题的一个**最小的问题是，找到第1小的数**：直接比较两个数组的首元素，哪个小返回即可。所以分治的目标即是将第K大的元素通过规模减小，逐渐减小到找到第1小的元素。
 
 另一方面，`O(log(m+n))`的时间复杂度直接提示该题使用二分：二分能够帮助排除区间的一部分长度，直到K为1为止。由于有两个数组，本题应该选择的`pivot`是`K/2-1`位置上的数，比较两个数组该位置上的数字的大小有三种情况：
 
@@ -4866,9 +5099,110 @@ public:
 
 ## 堆
 
+### 数组中的第K个最大元素
+
+![image-20250117204234437](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250117204234437.png)
+
+【Partition，lomute分区法】：使用快排中的partition操作能够有效选择出数组中的第K个最大元素。其中Lomute分区法是常用且容易理解的方法。需要注意的是该方法执行后最终的i的位置应该是指向最后一个小于等于pivot的位置，即`nums[i+1]>pivot`。代码如下：
+
+```cpp
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        int n = nums.size();
+        return select(nums, 0, n-1, n - k + 1);
+    }
+
+    int select(vector<int>& nums, int start, int end, int k) {
+        if (start < end) {
+            int pivot = nums[end];
+            int i = start-1, j = start;
+            while(j <= end) {
+                if (nums[j] <= pivot) {
+                    i++;
+                    if(i != j) swap(nums[i], nums[j]);
+                }
+                j++;
+            }
+            int sortedNum = i - start + 1;
+            if (k == sortedNum) return nums[i];
+            if (k < sortedNum) return select(nums, start, i-1, k);
+            return select(nums, i+1, end, k - sortedNum);
+        }
+        return 0;
+    }
+};
+```
+
+但是上述的分区方法在重复元素很多时会超时。本题能通过的是下面的分区算法：
+
+【Partition，Hoare分区法】：注意do while的写法以及该分区法的本质：任何一侧都有可能存在等于pivot的元素，划分不会严格区分等于pivot的元素。另外，该方法调用的函数入口是要找的元素在数组中的索引，所以传入的是`n-k`而不是`n-k+1`，且之后的调用也不用改变，因为索引下标始终不变。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int findKthLargest(vector<int>& nums, int k) {
+        int n = nums.size();
+        return select(nums, 0, n-1, n - k);
+    }
+
+    int select(vector<int>& nums, int start, int end, int k) {
+        if (start == end) return nums[start];
+        int pivot = nums[start];
+        int i = start-1, j = end + 1;
+        while(i < j) {
+            do i++; while(nums[i] < pivot);
+            do j--; while(nums[j] > pivot);
+            if (i < j) swap(nums[i], nums[j]);
+        }
+        if (k <= j) return select(nums, start, j, k);
+        return select(nums, j+1, end, k);
+    }
+};
+```
+
+### IPO
+
+![image-20250118210600409](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250118210600409.png)
+
+【大顶堆】：要想获得最大的利润，对于k次项目选择中任意一次项目选择都是在启动资金小于等于w的项目集合中挑选出利润最大的那个。而每次做完一个项目，收获的资本将使w变大，因此资金小于等于w的项目集合将是一个大小变化的集合，这符合“堆”的使用场景：在元素变换频繁的场景中维护最大/小值。
+
+具体设计为：动态维护一个堆，堆中放入所有启动资金小于当前w的项目的利润，等到所有满足条件的项目都被放入后，取出目前利润最大的项目执行。然后重复上述过程，直到选到k个项目或者堆为空（最多k个项目，k可能大于满足条件的项目数）。详细代码入下：
+
+```cpp
+class Solution {
+public:
+    int findMaximizedCapital(int k, int w, vector<int>& profits, vector<int>& capital) {
+        vector<pair<int, int>> arr;
+        priority_queue<int> pq;
+        int n = profits.size();
+        for (int i = 0; i < n; i++) {
+            arr.push_back({capital[i], profits[i]});
+        }
+        sort(arr.begin(), arr.end());   // 升序排列
+        int curr = 0;
+        for (int i = 0; i < k; i++) {
+            while(curr < n && arr[curr].first <= w) {
+                pq.emplace(arr[curr].second);
+                curr++;
+            }
+            if (!pq.empty()) {
+                w += pq.top();
+                pq.pop();
+            }else {
+                break;
+            }
+        }
+        return w;
+    }
+};
+```
+
 ### 数据流的中位数
 
 ![image-20240925183705630](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240925183705630.png)
+
+
 
 ## 贪心算法
 

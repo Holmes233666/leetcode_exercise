@@ -166,6 +166,14 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         N皇后II/test.cpp
         建立四叉树/test.cpp
         回文数/test.cpp
+        寻找峰值/test.cpp
+        IPO/test.cpp
+        查找和最小的K对数字/test.cpp
+        找到字符串中所有字母异位词/test.cpp
+        颠倒二进制位/test.cpp
+        加一/test.cpp
+        阶乘后的零/test.cpp
+        位1个数/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)
