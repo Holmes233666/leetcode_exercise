@@ -76,6 +76,33 @@ public:
     }
 };
 
+
+// 第二次刷：双端队列，滑动窗口模板套用
+class Solution4 {
+public:
+    vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+        int n = nums.size(), maxNum = -INT_MAX;
+        deque<pair<int, int>> dq; // 前一个int放数值，后一个int放idx
+        vector<int> res;
+        for (int left = 0, right = 0; right <= n; right++) {
+            while(right - left + 1 > k) {
+                res.push_back(dq.front().first);
+                if (dq.front().second == left) {
+                    dq.pop_front();
+                }
+                left++;
+            }
+            if (right == n) break;
+            // 新元素的处理
+            while (!dq.empty() && nums[right] > dq.back().first) {
+                dq.pop_back();
+            }
+            dq.push_back({nums[right], right});
+        }
+        return res;
+    }
+};
+
 int main() {
     return 0;
 }

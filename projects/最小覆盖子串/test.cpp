@@ -166,7 +166,7 @@ public:
                 left = q.front().second;
             }
         }
-        return str = minLen == INT_MAX ? "" : s.substr(start, minLen);
+        return minLen == INT_MAX ? "" : s.substr(start, minLen);
     }
 };
 
@@ -250,6 +250,41 @@ public:
             }
         }
         return s.substr(resl, minLen);
+    }
+};
+
+// 第三次刷
+class Solution5 {
+public:
+    string minWindow(string s, string t) {
+        unordered_map<char, int> umap, currMap;
+        int n = s.size(), m = t.size();
+        // 记录t的词典
+        for (int i = 0; i < m; i++) {
+            umap[t[i]]++;
+        }
+        // 记录总共的字母数量
+        int totChars = umap.size();
+        int start = 0, len = s.size()+1;
+        for (int left = 0, right = 0; right <= n; right++) {
+            while(left < right && totChars == 0) {
+                if (right - left < len) {
+                    start = left;
+                    len = right - left;
+                }
+                currMap[s[left]]--;
+                if (umap.find(s[left]) != umap.end() && currMap[s[left]] == umap[s[left]]-1) { // 是目标字母，且达不到要求了
+                    totChars++;
+                }
+                left++;
+            }
+            if (right == n) break;
+            currMap[s[right]]++;
+            if (umap.find(s[right]) != umap.end() && currMap[s[right]] == umap[s[right]]) {
+                totChars--;
+            }
+        }
+        return len == s.size()+1 ? "" : s.substr(start, len);
     }
 };
 

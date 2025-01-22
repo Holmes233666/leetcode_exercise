@@ -673,7 +673,47 @@ public:
 
 ![image-20241128103820137](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20241128103820137.png)
 
+### 找到字符串中所有字母异位词
 
+![image-20250121151008963](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250121151008963.png)
+
+【滑动窗口模板】：使用基础的滑动窗口模板即可，模板参见[无重复字符最长子串](###无重复字符最长子串)
+
+```cpp
+class Solution2 {
+public:
+    vector<int> findAnagrams(string s, string p) {
+        int n = s.size(), m = p.size();
+        vector<int> res;
+        unordered_map<char, int> umap;
+        // 记录p的字典
+        for (int i = 0; i < m; i++) {
+            umap[p[i]]++;
+        }
+        int charNum = umap.size();
+        unordered_map<char, int> currMap;
+        // 滑动窗口
+        for (int left = 0, right = 0; right < n; right++) {
+            // 当前字符
+            char currChar = s[right];
+            while(right-left+1 > m) {  // 扩展左边界
+                currMap[s[left]]--;
+                if (currMap[s[left]] == umap[s[left]]-1) charNum--;
+                left++;
+            }
+            // 扩展右边界
+            currMap[currChar]++;
+            if (currMap[currChar] == umap[currChar]) {
+                charNum--;
+            }
+            if (charNum == 0) {
+                res.push_back(left);
+            }
+        }
+        return res;
+    }
+};
+```
 
 ### 无重复字符最长子串
 
@@ -703,8 +743,6 @@ public:
     }
 };
 ```
-
-
 
 【滑动窗口：右扩+左缩】：
 
@@ -948,10 +986,42 @@ public:
 };
 ```
 
-- 不使用队列的优化
+- 不使用队列的优化：使用滑动窗口的模板
 
 ```cpp
-
+class Solution {
+public:
+    string minWindow(string s, string t) {
+        unordered_map<char, int> umap, currMap;
+        int n = s.size(), m = t.size();
+        // 记录t的词典
+        for (int i = 0; i < m; i++) {
+            umap[t[i]]++;
+        }
+        // 记录总共的字母数量
+        int totChars = umap.size();
+        int start = 0, len = s.size()+1;
+        for (int left = 0, right = 0; right <= n; right++) {
+            while(left < right && totChars == 0) {
+                if (right - left < len) {
+                    start = left;
+                    len = right - left;
+                }
+                currMap[s[left]]--;
+                if (umap.find(s[left]) != umap.end() && currMap[s[left]] == umap[s[left]]-1) { // 是目标字母，且达不到要求了
+                    totChars++;
+                }
+                left++;
+            }
+            if (right == n) break;
+            currMap[s[right]]++;
+            if (umap.find(s[right]) != umap.end() && currMap[s[right]] == umap[s[right]]) {
+                totChars--;
+            }
+        }
+        return len == s.size()+1 ? "" : s.substr(start, len);
+    }
+};
 ```
 
 ## 单调栈/队列
@@ -5202,7 +5272,45 @@ public:
 
 ![image-20240925183705630](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/img/image-20240925183705630.png)
 
+【大顶堆 + 小顶堆】：小顶堆`qMax`中放大于等于中位数的那一半，大顶堆`qMin`中放小于中位数的那一半。那么当数据总数为奇数时，小顶堆堆顶元素即为中位数；否则，为两个堆的堆顶元素的平均值。
 
+为了维护上述的数据结构能够正确返回中位数，关键在于保证“小顶堆`qMax`中放大于等于中位数的那一半，大顶堆`qMin`中放小于中位数的那一半”这个性质成立。因此在加数的时候需要满足：
+
+- 当目前两个堆中元素个数和为偶数时：多的数是一定要放入小顶堆的（因为小顶堆放的元素要多于大顶堆），但是新加的数`num`可能不是大于等于中位数的，所以需要先将`num`放入小顶堆中，取出小顶堆堆顶的元素，钙元素一定是大于等于中位数，将其放入`qMax`中。
+- 当目前两个堆中元素个数和为奇数时：需要加的数放入大顶堆（维持两个堆中数的平衡），但是新加的数`num`可能不是小于中位数的，所以先加入小顶堆，然后从小顶堆中取出最小的数加入大顶堆。
+
+
+满足上述两个条件的`addNum`即可实现中位数的获取。详细代码如下：
+
+```cpp
+class MedianFinder {
+public:
+    priority_queue<int, vector<int>, greater<int>> qMax; // 小顶堆，放大于等于中位数的那一半
+    priority_queue<int> qMin;               // 大顶堆，放小于中位数的那一半
+    MedianFinder() {
+        
+    }
+    
+    void addNum(int num) {
+        if ((qMax.size() + qMin.size()) % 2 == 0) {
+            qMin.emplace(num);
+            int topNum = qMin.top();
+            qMin.pop();
+            qMax.emplace(topNum);
+        }else{
+            qMax.emplace(num);
+            int topNum = qMax.top();
+            qMax.pop();
+            qMin.emplace(topNum);
+        }
+    }
+    
+    double findMedian() {
+        if ((qMax.size() + qMin.size()) % 2 == 0) return (qMax.top() + qMin.top())/2.0;
+        return qMax.top();
+    }
+}
+```
 
 ## 贪心算法
 
@@ -5753,6 +5861,148 @@ public:
 ## 其他技巧
 
 ### 位运算
+
+#### 颠倒二进制位
+
+![image-20250121150128763](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250121150128763.png)
+
+【位运算】：取出每一位后（移位操作 + 与操作）进行对称处理（移位操作），结果拼接（位运算中的按照位拼接使用或运算）即可，详细代码如下：
+
+```cpp
+class Solution {
+public:
+    uint32_t reverseBits(uint32_t n) {
+        uint32_t res = 0;
+        for (int i = 0; i < 32 && n > 0; i++) {
+            res |= (n & 1) << (31 - i);
+            n >>= 1;
+        }
+        return res;
+    }
+};
+```
+
+#### 只出现一次的数字II
+
+![image-20250121145811215](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250121145811215.png)
+
+【哈希表】：使用哈希表记录每个数出现的次数，时间复杂度和空间复杂度均为`O(n)`：
+
+```cpp
+class Solution {
+public:
+    int singleNumber(std::vector<int>& nums) {
+        unordered_map<int, int> umap;
+        int n = nums.size();
+        for (int i = 0; i < n; i++) {
+            umap[nums[i]]++;
+            if (umap[nums[i]] == 3) umap.erase(nums[i]);
+        }
+        auto it = umap.begin();
+        return it->first;
+    }
+};
+```
+
+【利用余数关系】：可以按位获取答案的每一位（0或1）：由于除了答案，其他的数都是出现3次的，因此在不加上答案前，其余数的每一位的和对3取余一定为0。加上答案后，对3取余的结果即为答案的该位的值。因此，获取答案可以按位获取，对所有的数的第`j`位求和，对3取余即得到了答案的第`j`位。所有位拼凑即得到了完整的数。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int singleNumber(std::vector<int>& nums) {
+        int n = nums.size();
+        int res = 0;
+        for (int j = 0; j < 32; j++) {
+            int tot = 0;
+            for (int i = 0; i < n; i++) {
+                // 取出第j位的数
+                tot += (nums[i] >> j) & 1;
+            }
+            res |= tot % 3 == 0 ? (0 << j) : (1 << j);
+        }
+        return res;
+    }
+};
+```
+
+#### 数字范围按位与
+
+![image-20250121172749345](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250121172749345.png)
+
+【最长公共前缀】对于范围内的数字按位与，不难知道除了这些数的最长公共前缀外，后面的数肯定至少有一个零，所以在最长公共前缀后面补0即可。
+
+最长公共前缀可以通过left和right同时右移，直到相等时得到。
+
+详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int rangeBitwiseAnd(int left, int right) {
+        int move = 0;
+        while (left != right) {
+            left >>= 1;
+            right >>= 1;
+            move++;
+        }
+        // 直到找到最长公共前缀，后位补0
+        while (move--) {
+            left <<= 1;
+        }
+        return left;
+    }
+};
+```
+
+### 数学
+
+#### `x`的平方根
+
+![image-20250122173124876](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250122173124876.png)
+
+【二分】：可以使用二分查找的方式确定该根。注意递归终止条件。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int mySqrt(int x) {
+        return binarySearch(0, x, x);
+    }
+
+    int binarySearch(int start, int end, long x) {
+        if (start <= end) {
+            long mid = (start + end) / 2;
+            if (mid * mid == x) return mid;
+            if (mid * mid > x) return binarySearch(start, mid-1, x);
+            return binarySearch(mid+1, end, x);
+        }
+        return end;
+    }
+};
+```
+
+### Pow(x, n)
+
+【快速幂（分治）】：快速幂其实本质是分治，分治时注意奇数、偶数的划分以及递归终止条件即可。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    double myPow(double x, int n) {
+        return myPow(x, n);
+    }
+    double divide(double x, int n) {
+        if (n % 2 == 0) {
+            int half = n / 2;
+            double halfRes = divide(x, half);
+            return halfRes * halfRes;
+        }
+        int half = n / 2;
+        double halfRes = divide(x, half);
+        return halfRes * halfRes * x;
+    }
+};
+```
 
 
 

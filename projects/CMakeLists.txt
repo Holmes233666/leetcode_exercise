@@ -174,6 +174,12 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         加一/test.cpp
         阶乘后的零/test.cpp
         位1个数/test.cpp
+        滑动窗口最大值/test.cpp
+        滑动窗口最大值/test.cpp
+        只出现一次的数字II/test.cpp
+        数字范围按位与/test.cpp
+        x的平方根/test.cpp
+        "Pow(x, n)/test.cpp"
 )
 
 add_executable(test 字母异位词分组/test.cpp)
