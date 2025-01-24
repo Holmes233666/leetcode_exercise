@@ -180,6 +180,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         数字范围按位与/test.cpp
         x的平方根/test.cpp
         "Pow(x, n)/test.cpp"
+        买卖股票的最佳时机III/test.cpp
+        最大正方形/test.cpp
+        串联所有单词的子串/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)
