@@ -1024,6 +1024,79 @@ public:
 };
 ```
 
+### 串联所有单词的子串
+
+![image-20250124202955026](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250124202955026.png)
+
+【滑动窗口】：这题与[找到字符串中所有字母异位单词](####找到字符串中所有字母异位词)相似，只不过本题将字母换为了单词。换为单词后如果还使用滑动窗口+哈希表，带来的主要问题是：按照字母的滑窗会导致整个窗口内的所有词发生变化，导致每移动一个字母，整个窗口的哈希表需要重置；如果按照单词为单词进行滑窗，那么可能会漏掉某个单词内的起始索引。
+
+前者可以实现，但是时间复杂度较高。后者可以进行优化：在按照单词进行滑窗的外层再加一层循环，遍历每个位置，即：
+
+```cpp
+for (int i = 0; i + win_size < slen; i++) {	// 外层套循环，避免漏掉单词内部的位置
+  for (int left = i, right = i; right < slen; right++) {	// 以单词为单位进行滑窗
+    
+  }
+}
+```
+
+但是这样做的时间复杂度相比于第一种做法只是少了重置哈希表的时间，观察到：由于每次都已单词为单位进行滑窗，所以外层的`i`在`[i, word[0].size()-1]`区间的滑窗结果会和`[i-word[o].size(), 2word[0].size()-1]`……区间的滑窗结果重合，即有：
+
+![image-20250124205154283](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250124205154283.png)
+
+因此外层循环不用到`i + win_size < slen`，遍历到`i < word[0].size() && i + win_size() <= slen`即可。这样能够避免大量的重复滑动结果。详细代码如下：
+
+```cpp
+class Solution2 {
+public:
+    vector<int> findSubstring(string s, vector<string>& words) {
+        int n = words.size(), m = words[0].size();
+        int slen = s.size();
+        int win_size = m * n;
+        if (slen < win_size) return {};
+        vector<int> res;
+        unordered_map<string, int> umap;
+        for (int i = 0; i < n; i++) {
+            umap[words[i]]++;
+        }
+        for (int i = 0; i < m && i + win_size <= slen; i++) {
+            unordered_map<string, int> currMap;
+            // 记录新窗口内的单词
+            int wordNum = umap.size();
+            for (int start = i, end = i; end < start + win_size; end += m) {
+                string currStr = s.substr(end, m);
+                currMap[currStr]++;
+                if (umap.find(currStr) != umap.end() && umap[currStr] == currMap[currStr]) {
+                    wordNum--;
+                }
+            }
+            if (wordNum == 0) res.push_back(i);
+            // 滑动窗口
+            for (int right = i, left = i + win_size - 1; left + m < slen; right += m, left += m) {
+                string moveStr = s.substr(right, m);
+                string inStr = s.substr(left + 1, m);
+                currMap[moveStr]--;
+                currMap[inStr]++;
+                if (umap.find(inStr) != umap.end() && currMap[inStr] == umap[inStr] && inStr != moveStr) wordNum--;
+                if (umap.find(moveStr) != umap.end() && currMap[moveStr] == umap[moveStr]-1 && inStr != moveStr) wordNum++;
+                if (wordNum == 0) res.push_back(right + m);
+            }
+            // 上一段的逻辑简化：
+            // for (int right = i, left = right + win_size - 1; left + m < slen; right += m, left += m) {
+            //     string moveStr = s.substr(right, m);
+            //     string inStr = s.substr(left + 1, m);
+            //     currMap[moveStr]--;
+            //     if (umap.find(moveStr) != umap.end() && currMap[moveStr] == umap[moveStr]-1) wordNum++;
+            //     currMap[inStr]++;
+            //     if (umap.find(inStr) != umap.end() && currMap[inStr] == umap[inStr]) wordNum--;
+            //     if (wordNum == 0) res.push_back(right + m);
+            // }
+        }
+        return res;
+    }
+};
+```
+
 ## 单调栈/队列
 
 ### 滑动窗口的最大值
@@ -5310,6 +5383,90 @@ public:
         return qMax.top();
     }
 }
+```
+
+### 查找和最小的K对数字
+
+![image-20250124210921388](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250124210921388.png)
+
+【堆 + 标记】：暴力的方法是将所有的数对放入堆中，然后找出和最小的k对。但当加入元素索引对`[a1, b1]`时，下一个比`[a1, b1]`大的数一定是`[a1+1, b1]`或者是`[a1, b1+1]`。因此其实不需要将所有的数对都放入堆中。
+
+初始化时将`[a0, b0]`放入堆中，并将其作为结果数组的第一个元素。然后每次需要放入时（结果数组中元素数量不足k个），都从堆中找一个最小的索引组`[ai,bi]`，然后将其弹出堆，加入`[a_{i+1}, bi]`和`[a_i, b_{i+1}]`，并标记已经放入堆的元素，避免重复加入，直到结果数组元素满足要求。详细代码如下：
+
+```cpp
+// 法1：堆 + 使用标记数组
+class Solution {
+public:
+    vector<vector<int>> kSmallestPairs(vector<int>& nums1, vector<int>& nums2, int k) {
+        int n = nums1.size(), m = nums2.size();
+        // 使用 lambda 表达式捕获 nums1 和 nums2
+        auto cmp = [&nums1, &nums2](const vector<int>& a1, const vector<int>& a2) {
+            return nums1[a1[0]] + nums2[a1[1]] > nums1[a2[0]] + nums2[a2[1]]; // 小顶堆
+        };
+
+        priority_queue<vector<int>, vector<vector<int>>, decltype(cmp)> pq(cmp);
+        vector<vector<int>> res;
+        set<pair<int, int>> has_pushed;
+
+        pq.emplace(vector<int>{0, 0});
+        has_pushed.insert({0,0});
+        int currNum = 0;
+
+        while (!pq.empty() && currNum < k) {
+            vector<int> currMinIdx = pq.top();
+            pq.pop();
+            res.push_back({nums1[currMinIdx[0]], nums2[currMinIdx[1]]});
+            int nextidx1_1 = currMinIdx[0] + 1, nextidx1_2 = currMinIdx[1];
+            if (nextidx1_1 < n && has_pushed.find({nextidx1_1, nextidx1_2}) == has_pushed.end()) {
+                pq.emplace(vector<int>{nextidx1_1, nextidx1_2});
+                has_pushed.insert({nextidx1_1, nextidx1_2});
+            }
+            int nextidx2_1 = currMinIdx[0], nextidx2_2 = currMinIdx[1] + 1;
+            if (nextidx2_2 < m && has_pushed.find({nextidx2_1, nextidx2_2}) == has_pushed.end()) {
+                pq.emplace(vector<int>{nextidx2_1, nextidx2_2});
+                has_pushed.insert({nextidx2_1, nextidx2_2});
+            }
+            currNum++;
+        }
+        return res;
+    }
+};
+```
+
+【堆 + 免标记】：在上面思路的基础上，避免标记的方式是从一开始就不放入重复元素：首先将(0,0), (0,1), (0,2), ..., (0,m)加入堆中，后续放入元素时，不再放入`[a_{i}, b_{j+1}]`和`[a_{i+1}, b_{j}]`两个元素，而是只放入`[a_{i+1}, b_{j}]`，详细代码如下：
+
+```cpp
+class Solution2 {
+public:
+    struct cmp {
+        bool operator()(vector<int>& a1, vector<int>& a2) {
+            return a1[0] > a2[0];
+        }
+    };
+    vector<vector<int>> kSmallestPairs(vector<int>& nums1, vector<int>& nums2, int k) {
+        int n = nums1.size(), m = nums2.size();
+        priority_queue<vector<int>, vector<vector<int>>, cmp> pq;
+        vector<vector<int>> res;
+        pq.emplace(vector<int>{0, 0, 0});
+        int currNum = 0;
+
+        // 首先将(0,0), (0,1), (0,2), ..., (0,m)加入堆中
+        for (int j = 0; j < m; j++) {
+            pq.emplace(vector<int>{nums1[0]+nums2[j], 0, j});
+        }
+
+        // 弹出pq，每次再选择最小的一个压入
+        while (!pq.empty() && currNum < k) {
+            vector<int> currMin = pq.top();
+            pq.pop();
+            res.push_back({nums1[currMin[1]], nums2[currMin[2]]});
+            int nexti = currMin[1]+1, nextj = currMin[2];
+            pq.emplace(vector<int>{nums1[nexti]+nums2[nextj], nexti, nextj});
+            currNum++;
+        }
+        return res;
+    }
+};
 ```
 
 ## 贪心算法
