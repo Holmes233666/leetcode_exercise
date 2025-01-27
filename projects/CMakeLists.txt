@@ -183,6 +183,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         买卖股票的最佳时机III/test.cpp
         最大正方形/test.cpp
         串联所有单词的子串/test.cpp
+        直线上最多的点数/test.cpp
+        第N个泰波那契数/test.cpp
+        删除并获得点数/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)

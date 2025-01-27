@@ -63,6 +63,40 @@ public:
     }
 };
 
+// 法2： 尝试第二种做法
+class Solution3 {
+public:
+    vector<int> spiralOrder(vector<vector<int>>& matrix) {
+        int n = matrix.size(), m = matrix[0].size();
+        int ub = 0, db = n-1, lb = 0, rb = m-1;
+        vector<int> res;
+        int currNum = 0;
+        while (currNum < n * m) {
+            for (int j = lb; j <= rb && currNum < n * m; j++) {
+                res.push_back(matrix[ub][j]);
+                currNum++;
+            }
+            ub++;
+            for (int i = ub; i <= db && currNum < n * m; i++) {
+                res.push_back(matrix[i][rb]);
+                currNum++;
+            }
+            rb--;
+            for (int j = rb; j >= lb && currNum < n * m; j--) {
+                res.push_back(matrix[db][j]);
+                currNum++;
+            }
+            db--;
+            for (int i = db; i >= ub && currNum < n * m; i--) {
+                res.push_back(matrix[i][lb]);
+                currNum++;
+            }
+            lb++;
+        }
+        return res;
+    }
+};
+
 
 
 int main() {

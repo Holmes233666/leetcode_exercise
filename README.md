@@ -6138,7 +6138,7 @@ public:
 };
 ```
 
-### Pow(x, n)
+#### Pow(x, n)
 
 【快速幂（分治）】：快速幂其实本质是分治，分治时注意奇数、偶数的划分以及递归终止条件即可。详细代码如下：
 
@@ -6157,6 +6157,48 @@ public:
         int half = n / 2;
         double halfRes = divide(x, half);
         return halfRes * halfRes * x;
+    }
+};
+```
+
+#### 阶乘后的零
+
+
+
+#### 直线上最多的点数
+
+![image-20250126115524220](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250126115524220.png)
+
+【哈希表】：对每两个点之间都进行斜率计算（使用嵌套循环`for (int i = 0;...){ for (int j = i + 1; ....)}`），存入哈希表中统计相同斜率的点的数量，记录最大的同斜率的点的数量即可。需要注意下面两点：
+
+- 外层循环每次需要重置哈希表的数量值，因为相同斜率并不一定是一条直线上，可能两点平行
+- 垂直于x轴的线需要额外统计。
+
+详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int maxPoints(vector<vector<int>>& points) {
+        int maxNum = 0, n = points.size();
+        if (n == 1 || n == 2) return n;
+        for (int i = 0; i < n; i++) {
+            int localMax = 0, infty = 0;
+            unordered_map<double, int> umap;
+            for (int j = i+1; j < n; j++) {
+                double deltax = points[i][0] - points[j][0];
+                double deltay = points[i][1] - points[j][1];
+                if (deltax == 0) {
+                    infty++;
+                    localMax = max(localMax, infty);
+                }else{
+                    umap[deltay/deltax]++;
+                    localMax = max(umap[deltay/deltax], localMax);
+                }
+            }
+            maxNum = max(localMax, maxNum);
+        }
+        return maxNum+1;
     }
 };
 ```
