@@ -186,6 +186,8 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         直线上最多的点数/test.cpp
         第N个泰波那契数/test.cpp
         删除并获得点数/test.cpp
+        两个字符串的最小ASCII删除和/test.cpp
+        最长数对链/test.cpp
 )
 
 add_executable(test 字母异位词分组/test.cpp)

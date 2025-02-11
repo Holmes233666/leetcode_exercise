@@ -67,3 +67,34 @@ public:
         return res;
     }
 };
+
+// 三刷
+class Solution3 {
+public:
+    vector<int> rightSideView(TreeNode* root) {
+        vector<int> res;
+        queue<TreeNode*> q;
+        if (root) q.emplace(root);
+        int lastNum = 1;
+        while (!q.empty()) {
+            int currNum = lastNum;
+
+            for (int i = 0; i < currNum; i++) {
+                TreeNode* t = q.front();
+                q.pop();
+                if (i == currNum-1) {
+                    res.push_back(t->val);
+                }
+                if (t->left) {
+                    q.emplace(t->left);
+                    lastNum++;
+                }
+                if (t->right != nullptr) {
+                    q.emplace(t->right);
+                    lastNum++;
+                }
+            }
+        }
+        return res;
+    }
+};

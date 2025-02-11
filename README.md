@@ -5903,6 +5903,41 @@ public:
 
 ![image-20241230153849360](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20241230153849360.png)
 
+#### 两个字符串的最小ASCII删除和
+
+![image-20250209115326546](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250209115326546.png)
+
+【动态规划】：[编辑距离](###编辑距离)的改版
+
+```cpp
+#include<vector>
+
+using namespace std;
+
+class Solution {
+public:
+    int minimumDeleteSum(string s1, string s2) {
+        int n = s1.size(), m = s2.size();
+        vector<vector<int>> f(n+1, vector<int>(m+1));
+        for (int j = 1; j <= m; j++) {
+            f[0][j] = f[0][j-1] + int(s2[j-1]);
+        }
+        for (int i = 1; i <= n; i++) {
+            f[i][0] = f[i-1][0] + int(s1[i-1]);
+        }
+        // 填表
+        for (int i = 1; i <= n; i++) {
+            for (int j = 1; j <= m; j++) {
+                if (s1[i-1] == s2[j-1]) f[i][j] = f[i-1][j-1];
+                if (s1[i-1] != s2[j-1]) f[i][j] = min(f[i][j-1] + int(s2[j-1]), f[i-1][j] + int(s1[i-1]));
+            }
+        }
+        return f[n][m];
+    }
+};
+
+```
+
 #### 交错字符串
 
 ![image-20241230153907077](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20241230153907077.png)
@@ -5948,6 +5983,8 @@ public:
 ```
 
 【其他想法：搜索】上述动态规划的方式本质是进行了广度优先搜索，利用了前序信息。基于深度搜索也可以实现。每个s[i]，尝试使用s1和s2中的字母，遇到不可行情况进行剪枝即可。
+
+
 
 ### 数组处理
 
