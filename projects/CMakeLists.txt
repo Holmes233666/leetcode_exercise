@@ -4,7 +4,8 @@ project(projects)
 set(CMAKE_CXX_STANDARD 11)
 
 add_executable(projects main.cpp
-        环形子数组的最大和.cpp)
+        环形子数组的最大和.cpp
+        乘积最大的三个数.cpp)
 
 add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         最大子数组和/test.cpp
@@ -188,6 +189,9 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         删除并获得点数/test.cpp
         两个字符串的最小ASCII删除和/test.cpp
         最长数对链/test.cpp
+        合并字符串/test.cpp
+        小塔数组/test.cpp
+        根据URL获取相应的key-value/test.cpp
 )
 
-add_executable(test 字母异位词分组/test.cpp)
+add_executable(test 根据URL获取相应的key-value/test.cpp)

@@ -4401,6 +4401,53 @@ public:
 };
 ```
 
+### 电话号码的字母组合
+
+记录本题是想记录下哈希表的初始化方式，即用大括号的方式`{key, value}`进行初始化。详细代码如下：
+
+```cpp
+class Solution {
+public:
+    unordered_map<int, vector<char>> umap = {
+        {'1', {}},
+        {'2', {'a', 'b', 'c'}},
+        {'3', {'d', 'e', 'f'}},
+        {'4', {'g', 'h', 'i'}},
+        {'5', {'j', 'k', 'l'}},
+        {'6', {'m', 'n', 'o'}},
+        {'7', {'p', 'q', 'r', 's'}},
+        {'8', {'t', 'u', 'v'}},
+        {'9', {'w', 'x', 'y', 'z'}}
+    };
+    vector<string> letterCombinations(string digits) {
+        int n = digits.size();
+        if (n == 0) return {};
+        vector<string> res;
+        string currStr = "";
+        dfs(res, currStr, 0, n, digits);
+        return res;
+    }
+    
+    void dfs(vector<string>& res, string& currStr, int currIdx, int n, string& digits) {
+        if (currStr.size() == n) {
+            res.push_back(currStr);
+            return;
+        }
+        vector<char> vec = umap[digits[currIdx]];
+        int m = vec.size();
+        for (int i = 0; i < m; i++) {
+            // 尝试加入
+            currStr.push_back(vec[i]);
+            dfs(res, currStr, currIdx+1, n, digits);
+            // 回溯
+            currStr.pop_back();
+        }
+    }
+};
+```
+
+
+
 ## 二分查找
 
 ### 搜索插入位置
