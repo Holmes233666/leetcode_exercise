@@ -77,6 +77,48 @@ public:
     }
 };
 
+class Solution3 {
+public:
+    int search(vector<int>& nums, int target) {
+        int n = nums.size(), start = 0, end = n-1;
+        return binarySearch(start, end, target, nums);
+    }
+
+    int binaryDivide(int start, int end, int target, vector<int>& nums) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] == target) return mid;
+            if (nums[mid] >= nums[start]) { // 这一段是有序的
+                // 先在有序段中进行二分查找
+                int idx = binarySearch(start, mid-1, target, nums);
+                if (idx != -1) return idx;
+                // 无序的这段接着binaryDivide
+                return binaryDivide(mid+1, end, target, nums);
+            }else{  // 这一段是无序的
+                // 先有序段进行二分查找
+                int idx = binarySearch(mid+1, end, target, nums);
+                if (idx != -1) return idx;
+                // 无序段进行binaryDivide
+                return binaryDivide(start, mid-1, target, nums);
+            }
+        }
+        return -1;
+    }
+
+    int binarySearch(int start, int end, int target, vector<int>& nums) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] == target) return mid;
+            if (nums[mid] > target) return binarySearch(start, mid-1, target, nums);
+            return binarySearch(mid+1, end, target, nums);
+        }
+        return -1;
+    }
+};
+
 int main() {
+    Solution3 s;
+    vector<int> nums = {4,5,6,7,0,1,2};
+    s.search(nums, 0);
     return 0;
 }

@@ -5733,6 +5733,85 @@ public:
 };
 ```
 
+### 最长递增子序列
+
+![image-20250310213735611](https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250310213735611.png)
+
+【dp做法】：如果是递增子数组，那么动态规划非常方便。但是递增子序列中，`dp[i]`：以`nums[i]`结尾的最长子序列的长度，但是可能存在`dp[0....i]`中有更长的元素，所以需要遍历之前的结果，那么时间复杂度为`O(n^2)`，详细代码如下：
+
+```cpp
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> dp(n+1);    // dp[i]表示长度为i的递增子序列的末尾的最小的数
+        int maxLen = 1; 
+        dp[1] = nums[0];
+        // 对每个元素进行遍历，更新dp[i]
+        for (int i = 1; i < n; i++) {
+            if (nums[i] > dp[maxLen]) {
+                maxLen = maxLen + 1;
+                dp[maxLen] = nums[i];
+            }else {
+                int idx = binarySearch(1, maxLen, dp, nums[i]);
+                dp[idx] = nums[i];
+            }
+        }
+        return maxLen;
+    }
+
+    int binarySearch(int start, int end, vector<int>& nums, int target) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] == target) return mid;
+            if (nums[mid] > target) return binarySearch(start, mid-1, nums, target);
+            return binarySearch(mid+1, end, nums, target);
+        }
+        return start;
+    }
+};
+```
+
+【贪心+二分查找】：定义一个数组`dp[i]`表示长度为`i`的子序列的末尾的数。根据贪心的想法，如果我们希望得到最长的递增子序列，那么`dp[i]`应该增长得越慢越好。
+
+```cpp
+class Solution {
+public:
+    int lengthOfLIS(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> dp(n+1);    // dp[i]表示长度为i的递增子序列的末尾的最小的数
+        int maxLen = 1; 
+        dp[1] = nums[0];
+        // 对每个元素进行遍历，更新dp[i]
+        for (int i = 1; i < n; i++) {
+            if (nums[i] > dp[maxLen]) {
+                maxLen = maxLen + 1;
+                dp[maxLen] = nums[i];
+            }else {
+                int idx = binarySearch(1, maxLen, dp, nums[i]);     // idx位置 >= target
+                dp[idx] = nums[i];
+            }
+        }
+        return maxLen;
+    }
+
+    // 找到的是 >= target的index
+    int binarySearch(int start, int end, vector<int>& nums, int target) {
+        if (start <= end) {
+            int mid = (start + end) / 2;
+            if (nums[mid] == target) return mid;
+            if (nums[mid] > target) return binarySearch(start, mid-1, nums, target);
+            return binarySearch(mid+1, end, nums, target);
+        }
+        return start;
+    }
+};
+```
+
+
+
+
+
 ## 动态规划
 
 ### 基本入门
@@ -6098,6 +6177,47 @@ public:
     }
 };
 ```
+
+### 其他
+
+#### 分割等和子集
+
+<img src="https://cdn.jsdelivr.net/gh/Holmes233666/blogImage/images/image-20250321204343321.png" alt="image-20250321204343321" style="zoom:33%;" />
+
+**NP难**：经典的“**子集和问题**”（Subset Sum Problem），问题的本质是：给定一个数组 `nums`，判断是否可以把这个数组分成两个和相等的子集。
+
+根据数值类型，去除总和是奇数的情况。偶数情况如果使用回溯求解，那么时间复杂度是`O(2^n)`，即判断每个数放或者不放。代码最终超时。
+
+【动态规划】：动态规划也针对每个数值选或者不选，但是因为有之前子问题的结果，减少了重复的子问题。主要是设计的`dp[i][j]`数组（`n x (targetSum+1)`），`i`表示`[0-i]`之间的数（都可以选或者不选）是否能构成值`j`。详细代码如下。时间复杂度`O(n * halfSum)`。
+
+```cpp
+class Solution {
+public:
+    bool canPartition(vector<int>& nums) {
+        int n = nums.size();
+        int totSum = 0;
+        for (int i = 0; i < n; i++) {
+            totSum += nums[i];
+        }
+        if (totSum % 2 != 0) return false;
+        int halfNum = totSum / 2;
+        vector<vector<int>> dp(n, vector<int>(halfNum+1, false));
+        dp[0][0] = true;
+        for (int j = 1; j <= halfNum; j++) {
+            dp[0][j] = nums[0] == j ? true : false;
+        }
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j <= halfNum; j++) {
+                if (j >= nums[i]) dp[i][j] = dp[i-1][j-nums[i]] || dp[i-1][j];    // 选或者不选
+                if (j < nums[i]) dp[i][j] = dp[i-1][j]; // 只能不选
+            }
+        }
+        return dp[n-1][halfNum];
+    }
+};
+```
+
+
 
 ## 其他技巧
 

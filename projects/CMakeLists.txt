@@ -2,10 +2,11 @@ cmake_minimum_required(VERSION 3.28)
 project(projects)
 
 set(CMAKE_CXX_STANDARD 11)
-
-add_executable(projects main.cpp
-        环形子数组的最大和.cpp
-        乘积最大的三个数.cpp)
+#
+#add_executable(projects main.cpp
+#        环形子数组的最大和.cpp
+#        乘积最大的三个数.cpp
+#        实现优先队列.cpp)
 
 add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         最大子数组和/test.cpp
@@ -192,6 +193,12 @@ add_executable(maxcontiseq 最长连续序列/maxcontiseq.cpp
         合并字符串/test.cpp
         小塔数组/test.cpp
         根据URL获取相应的key-value/test.cpp
+        小美染色/test.cpp
+        小美贴标签/test.cpp
+        小红的字符串/test.cpp
+        字符串移动/test.cpp
+        小红的好串/test.cpp
+        安排座位/test.cpp
+        积木塔/test.cpp
 )
-
-add_executable(test 根据URL获取相应的key-value/test.cpp)
+add_executable(pqueue pqueue.cpp)
